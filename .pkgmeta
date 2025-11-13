@@ -1,0 +1,9 @@
+package-as: SenseiClassResourceBar
+
+externals:
+  Libs/LibStub: # required dependency
+    url: https://repos.curseforge.com/wow/libstub/trunk
+    tag: 1.0
+  Libs/LibEditMode:
+    url: https://github.com/p3lim-wow/LibEditMode
+    tag: latest
