@@ -14,25 +14,13 @@ local classResources = {
     ["WARLOCK"]     = Enum.PowerType.Mana,
     ["MONK"]        = Enum.PowerType.Energy,
     ["DRUID"]       = Enum.PowerType.Mana,     -- dynamic in code
-    ["DEMONHUNTER"] = Enum.PowerType.Fury,   -- dynamic in code
+    ["DEMONHUNTER"] = Enum.PowerType.Fury,
 }
 
 -- Function to get primary resource for current player
 local function GetPlayerPrimaryResource()
     local playerClass = select(2, UnitClass("player")) -- e.g., "DRUID"
     local specID = GetSpecialization()                 -- current spec index
-
-    -- Demon Hunter: spec-based
-    if playerClass == "DEMONHUNTER" then
-        local spec = GetSpecializationInfo(specID)
-        if spec == "Havoc" then
-            return Enum.PowerType.Fury
-        elseif spec == "Vengeance" then
-            return Enum.PowerType.Pain
-        else
-            return Enum.PowerType.Fury
-        end
-    end
 
     -- Druid: form-based
     if playerClass == "DRUID" then
