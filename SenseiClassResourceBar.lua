@@ -141,6 +141,9 @@ local function CreateResourceBar(parent)
     frame:RegisterEvent("UNIT_MAXPOWER")
     frame:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
     frame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+    -- Fix for combat state detection
+    frame:RegisterEvent("PLAYER_REGEN_DISABLED") 
+    frame:RegisterEvent("PLAYER_REGEN_ENABLED")
 
     frame:SetScript("OnEvent", function(self, event, arg1)
         if event == "PLAYER_ENTERING_WORLD"
@@ -148,6 +151,10 @@ local function CreateResourceBar(parent)
             or event == "PLAYER_SPECIALIZATION_CHANGED" then
             ApplyVisibilitySettings()
             UpdateResource(self)
+        elseif event == "PLAYER_REGEN_DISABLED" then
+            ApplyVisibilitySettings(nil, true)
+        elseif event == "PLAYER_REGEN_ENABLED" then
+            ApplyVisibilitySettings(nil, false)
         elseif (arg1 == "player" and (event == "UNIT_POWER_UPDATE" or event == "UNIT_MAXPOWER")) then
             UpdateResource(self)
         end
@@ -179,7 +186,7 @@ local function ApplyFontSettings(layoutName)
     resourceBar.textValue:SetShadowOffset(1, -1)
 end
 
-ApplyVisibilitySettings = function(layoutName)
+ApplyVisibilitySettings = function(layoutName, isInCombat)
     local layoutName = layout or LEM.GetActiveLayoutName() or "Default"
     local data = ResourceBarDB[layoutName]
     if not data then return end
@@ -192,7 +199,7 @@ ApplyVisibilitySettings = function(layoutName)
     resourceBar.textFrame:SetShown(data.showText ~= false)
 
     if data.hideOutOfCombat then
-        if InCombatLockdown() then
+        if isInCombat then
             resourceBar:Show()
         else
             resourceBar:Hide()
@@ -974,3 +981,4 @@ LEM:AddFrameSettings(secondaryBar, {
         end,
     },
 })
+
