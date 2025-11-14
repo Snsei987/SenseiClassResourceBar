@@ -20,6 +20,7 @@ local commonDefaults = {
     scale = 1,
     width = 200,
     height = 15,
+    widthMode = "Manual",
     smoothProgress = true,
     showText = true,
     showFragmentedPowerBarText = false,
@@ -30,6 +31,21 @@ local commonDefaults = {
     maskAndBorderStyle = "Thin",
     backgroundStyle = "Semi-transparent",
     foregroundStyle = "Fade Left",
+}
+
+-- Available bar visibility options
+local availableBarVisibilityOptions = {
+    { text = "Always Visible", isRadio = true },
+    { text = "In Combat", isRadio = true },
+    { text = "Has Target Selected", isRadio = true },
+    { text = "Has Target Selected OR In Combat", isRadio = true },
+    { text = "Hidden", isRadio = true },
+}
+
+local availableWidthModes = {
+    { text = "Manual", isRadio = true },
+    { text = "Sync With Essential Cooldowns", isRadio = true },
+    { text = "Sync With Utility Cooldowns", isRadio = true },
 }
 
 -- Available font styles
@@ -45,6 +61,13 @@ local outlineStyles = {
     { text = "NONE", isRadio = true },
     { text = "OUTLINE", isRadio = true },
     { text = "THICKOUTLINE", isRadio = true },
+}
+
+-- Available text alignement styles
+local availableTextAlignmentStyles = {
+    { text = "LEFT", isRadio = true },
+    { text = "CENTER", isRadio = true },
+    { text = "RIGHT", isRadio = true },
 }
 
 -- Available mask and border styles
@@ -135,7 +158,7 @@ barConfigs.primary = {
         showManaAsPercent = false,
     },
     getResource = function()
-        local _, playerClass = UnitClass("player")
+        local playerClass = select(2, UnitClass("player"))
         local classResources = {
             ["DEATHKNIGHT"] = Enum.PowerType.RunicPower,
             ["DEMONHUNTER"] = Enum.PowerType.Fury,
@@ -221,39 +244,26 @@ barConfigs.secondary = {
             ["DRUID"]       = nil, -- Through code
             ["EVOKER"]      = Enum.PowerType.Essence,
             ["HUNTER"]      = nil,
-            ["MAGE"]        = nil, -- Through code
-            ["MONK"]        = nil, -- Through code
+            ["MAGE"]        = {
+                [62] = Enum.PowerType.ArcaneCharges, -- Arcane
+            },
+            ["MONK"]        = {
+                [268] = "STAGGER", -- Brewmaster
+                [269] = Enum.PowerType.Chi, -- Windwalker
+            },
             ["PALADIN"]     = Enum.PowerType.HolyPower,
-            ["PRIEST"]      = nil, -- Through code
+            ["PRIEST"]      = {
+                [258] = Enum.PowerType.Insanity, -- Shadow
+            },
             ["ROGUE"]       = Enum.PowerType.ComboPoints,
-            ["SHAMAN"]      = nil, -- Through code
+            ["SHAMAN"]      = {
+                [262] = Enum.PowerType.Maelstrom, -- Elemental
+            },
             ["WARLOCK"]     = Enum.PowerType.SoulShards,
             ["WARRIOR"]     = nil,
         }
 
         local specID = GetSpecialization()
-
-        -- Monk: spec-based
-        if class == "MONK" then
-            local spec = GetSpecializationInfo(specID)
-            if spec == 268 then -- Brewmaster
-                return "STAGGER"
-            elseif spec == 269 then -- Windwalker
-                return Enum.PowerType.Chi
-            else -- Mistweaver
-                return nil
-            end
-        end
-
-        -- Shaman: spec-based
-        if class == "SHAMAN" then
-            local spec = GetSpecializationInfo(specID)
-            if spec == 262 then -- Elemental
-                return Enum.PowerType.Maelstrom
-            else -- Enhancement / Restoration
-                return nil
-            end
-        end
 
         -- Druid: form-based
         if class == "DRUID" then
@@ -265,27 +275,7 @@ barConfigs.secondary = {
             end
         end
 
-        -- Priest: spec-based
-        if class == "PRIEST" then
-            local spec = GetSpecializationInfo(specID)
-            if spec == 258 then -- Shadow
-                return Enum.PowerType.Insanity
-            else -- Discipline / Holy
-                return nil
-            end
-        end
-
-        -- Mage: spec-based
-        if class == "MAGE" then
-            local spec = GetSpecializationInfo(specID)
-            if spec == 62 then -- Arcane
-                return Enum.PowerType.ArcaneCharges
-            else -- Fire / Frost
-                return nil
-            end
-        end
-
-        return secondaryResources[class]
+        return type(secondaryResources[class]) == "table" and secondaryResources[class][specID] or secondaryResources[class]
     end,
     getValue = function(resource, config, data)
         if not resource then return nil, nil, nil, nil end
@@ -852,6 +842,19 @@ local function CreateBarInstance(config, parent)
             else
                 self:Hide()
             end
+        elseif data.barVisible == "Has Target Selected" then
+            if UnitExists("target") then
+                self:Show()
+            else
+                self:Hide()
+            end
+        elseif data.barVisible == "Has Target Selected OR In Combat" then
+            inCombat = inCombat or InCombatLockdown()
+            if UnitExists("target") or inCombat then
+                self:Show()
+            else
+                self:Hide()
+            end
         else
             self:Show()
         end
@@ -871,7 +874,7 @@ local function CreateBarInstance(config, parent)
 
     function frame:EnableSmoothProgress()
         self.smoothEnabled = true
-        self:SetScript("OnUpdate", function(self, delta)
+        self:SetScript("OnUpdate", function(_, delta)
             if not self.smoothEnabled then return end
             self.elapsed = self.elapsed + delta
             if self.elapsed >= self.updateInterval then
@@ -884,6 +887,72 @@ local function CreateBarInstance(config, parent)
     function frame:DisableSmoothProgress()
         self.smoothEnabled = false
         self:SetScript("OnUpdate", nil)
+    end
+
+    function frame:InitCooldownManagerWidthHook(layoutName)
+        layoutName = layoutName or LEM.GetActiveLayoutName() or "Default"
+        local data = SenseiClassResourceBarDB[self.config.dbName][layoutName]
+
+        local v = _G["EssentialCooldownViewer"]
+        if v and not v._SCRB_Essential_hooked then
+            v:HookScript("OnSizeChanged", function()
+                if data.widthMode == "Sync With Essential Cooldowns" then
+                    self:ApplyLayout(layoutName)
+                end
+            end)
+            v:HookScript("OnShow", function()
+                if data.widthMode == "Sync With Essential Cooldowns" then
+                    self:ApplyLayout(layoutName)
+                end
+            end)
+            v:HookScript("OnHide", function()
+                if data.widthMode == "Sync With Essential Cooldowns" then
+                    self:ApplyLayout(layoutName)
+                end
+            end)
+            v._SCRB_Essential_hooked = true
+        end
+
+        v = _G["UtilityCooldownViewer"]
+        if v and not v._SCRB_Utility_hooked then
+            v:HookScript("OnSizeChanged", function(_, width)
+                if data.widthMode == "Sync With Utility Cooldowns" then
+                    self:ApplyLayout(layoutName)
+                end
+            end)
+            v:HookScript("OnShow", function()
+                if data.widthMode == "Sync With Utility Cooldowns" then
+                    self:ApplyLayout(layoutName)
+                end
+            end)
+            v:HookScript("OnHide", function()
+                print("essential show")
+                if data.widthMode == "Sync With Utility Cooldowns" then
+                    self:ApplyLayout(layoutName)
+                end
+            end)
+            v._SCRB_Utility_hooked = true
+        end
+    end
+
+    function frame:GetCooldownManagerWidth(layoutName)
+        layoutName = LEM.GetActiveLayoutName() or "Default"
+        local data = SenseiClassResourceBarDB[self.config.dbName][layoutName]
+        if not data then return nil end
+
+        if data.widthMode == "Sync With Essential Cooldowns" then
+            local v = _G["EssentialCooldownViewer"]
+            if v then
+                return v:IsShown() and v:GetWidth() or nil
+            end
+        elseif data.widthMode == "Sync With Utility Cooldowns" then
+            local v = _G["UtilityCooldownViewer"]
+            if v then
+                return v:IsShown() and v:GetWidth() or nil
+            end
+        end
+
+        return nil
     end
 
     function frame:ApplyLayout(layoutName)
@@ -900,7 +969,13 @@ local function CreateBarInstance(config, parent)
         local point = data.point or defaults.point
         local x = data.x or defaults.x
         local y = data.y or defaults.y
-        local width = data.width or defaults.width
+
+        local width = nil
+        if data.widthMode == "Sync With Essential Cooldowns" or data.widthMode == "Sync With Utility Cooldowns" then
+            width = self:GetCooldownManagerWidth(layoutName) or defaults.width
+        else -- Use manual width
+            width = data.width or defaults.width
+        end
         local height = data.height or defaults.height
 
         self:SetSize(width * scale, height * scale)
@@ -930,17 +1005,29 @@ local function CreateBarInstance(config, parent)
     end
 
     -- EVENTS
+    local playerClass = select(2, UnitClass("player"))
+    
+    frame:RegisterEvent("PLAYER_LOGIN")
     frame:RegisterEvent("PLAYER_ENTERING_WORLD")
     frame:RegisterEvent("UNIT_POWER_UPDATE")
-    frame:RegisterEvent("RUNE_POWER_UPDATE")
     frame:RegisterEvent("UNIT_MAXPOWER")
-    frame:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
     frame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
     frame:RegisterEvent("PLAYER_REGEN_ENABLED")
     frame:RegisterEvent("PLAYER_REGEN_DISABLED")
+    frame:RegisterEvent("PLAYER_TARGET_CHANGED")
+
+    if playerClass == "DEATHKNIGHT" then
+        frame:RegisterEvent("RUNE_POWER_UPDATE")
+    elseif playerClass == "DRUID" then
+        frame:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
+    end
 
     frame:SetScript("OnEvent", function(self, event, arg1)
-        if event == "PLAYER_ENTERING_WORLD"
+        if event == "PLAYER_LOGIN" then
+            
+            self:InitCooldownManagerWidthHook()
+
+        elseif event == "PLAYER_ENTERING_WORLD"
             or event == "UPDATE_SHAPESHIFT_FORM"
             or event == "PLAYER_SPECIALIZATION_CHANGED" then
 
@@ -948,7 +1035,7 @@ local function CreateBarInstance(config, parent)
             self:ApplyVisibilitySettings()
             self:UpdateDisplay()
          
-            elseif (event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED") then
+        elseif event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_TARGET_CHANGED" then
                 
                 self:ApplyVisibilitySettings(nil, event == "PLAYER_REGEN_DISABLED")
                 self:UpdateDisplay()
@@ -986,11 +1073,7 @@ local function BuildLemSettings(config, frame)
             name = "Bar Visible",
             kind = LEM.SettingType.Dropdown,
             default = defaults.barVisible,
-            values = {
-                { text = "Always Visible", isRadio = true },
-                { text = "In Combat", isRadio = true },
-                { text = "Hidden", isRadio = true },
-            },
+            values = availableBarVisibilityOptions,
             get = function(layoutName)
                 return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].barVisible) or defaults.barVisible
             end,
@@ -1017,6 +1100,21 @@ local function BuildLemSettings(config, frame)
             set = function(layoutName, value)
                 SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName].scale = value
+                frame:ApplyLayout(layoutName)
+            end,
+        },
+        {
+            order = 11,
+            name = "Width Mode",
+            kind = LEM.SettingType.Dropdown,
+            default = defaults.widthMode,
+            values = availableWidthModes,
+            get = function(layoutName)
+                return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].widthMode) or defaults.widthMode
+            end,
+            set = function(layoutName, value)
+                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+                SenseiClassResourceBarDB[config.dbName][layoutName].widthMode = value
                 frame:ApplyLayout(layoutName)
             end,
         },
@@ -1143,11 +1241,7 @@ local function BuildLemSettings(config, frame)
             name = "Text Alignment",
             kind = LEM.SettingType.Dropdown,
             default = defaults.textAlign,
-            values = {
-                { text = "LEFT", isRadio = true },
-                { text = "CENTER", isRadio = true },
-                { text = "RIGHT", isRadio = true },
-            },
+            values = availableTextAlignmentStyles,
             get = function(layoutName)
                 return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].textAlign) or defaults.textAlign
             end,
