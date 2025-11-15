@@ -32,6 +32,7 @@ Mana, Rage, Energy, Focus, Fury, Runic Power, Astral Power, and more.
 *   **Mage** → Arcane Charges
 *   **Priest** → Insanity (Shadow)
 *   **Druid** → Combo Points (Cat Form)
+*   **Demon Hunter** → Soul (Devourer)
 
 **Druid Form Adaptive Support:**  
 Automatically switches to Mana, Energy, Rage, or Lunar Power depending on current shapeshift form.
