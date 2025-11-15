@@ -289,7 +289,9 @@ barConfigs.secondary = {
         local playerClass = select(2, UnitClass("player"))
         local secondaryResources = {
             ["DEATHKNIGHT"] = Enum.PowerType.Runes,
-            ["DEMONHUNTER"] = nil,
+            ["DEMONHUNTER"] = {
+                [1480] = "SOUL", -- Devourer
+            },
             ["DRUID"]       = nil, -- Through code
             ["EVOKER"]      = Enum.PowerType.Essence,
             ["HUNTER"]      = nil,
@@ -334,27 +336,32 @@ barConfigs.secondary = {
     getValue = function(resource, config, data)
         if not resource then return nil, nil, nil, nil end
 
-        -- Handle Brewmaster Stagger separately
         if resource == "STAGGER" then
             local stagger = UnitStagger("player") or 0
             local maxHealth = UnitHealthMax("player") or 1
             return maxHealth, stagger, stagger, "number"
         end
 
-        -- Handle Death Knight Runes with independent reload times
+        if resource == "SOUL" then
+            local current = DemonHunterSoulFragmentsBar:GetValue() 
+            local _, max = DemonHunterSoulFragmentsBar:GetMinMaxValues() -- Secret values
+
+            return max, current, current, "number"
+        end
+
         if resource == Enum.PowerType.Runes then
-            local readyCount = 0
-            local totalRunes = UnitPowerMax("player", resource)
-            if totalRunes <= 0 then return nil, nil, nil, nil end
+            local current = 0
+            local max = UnitPowerMax("player", resource)
+            if max <= 0 then return nil, nil, nil, nil end
             
-            for i = 1, totalRunes do
+            for i = 1, max do
                 local runeReady = select(3, GetRuneCooldown(i))
                 if runeReady then
-                    readyCount = readyCount + 1
+                    current = current + 1
                 end
             end
             
-            return totalRunes, readyCount, readyCount, "number"
+            return max, current, current, "number"
         end
 
         if resource == Enum.PowerType.SoulShards then
@@ -709,6 +716,13 @@ local function CreateBarInstance(config, parent)
 
         if resource == "STAGGER" then
             color = { r = 0.5216, g = 1.0, b = 0.5216 }
+        elseif resource == "SOUL" then
+            -- Different color during Void Metamorphosis
+            if DemonHunterSoulFragmentsBar and DemonHunterSoulFragmentsBar.CollapsingStarBackground:IsShown() then
+                color = { r = 0.037, g = 0.220, b = 0.566 }
+            else 
+                color = { r = 0.278, g = 0.125, b = 0.796 }
+            end
         elseif resource == Enum.PowerType.Runes then
             local spec = GetSpecialization()
             local specID = GetSpecializationInfo(spec)
