@@ -47,11 +47,8 @@ local function InitLSM()
     LSM:Register(LSM.MediaType.STATUSBAR, "SCRB FG Fade Bottom", [[Interface\AddOns\SenseiClassResourceBar\Textures\BarForegrounds\fade-bottom.png]])
     LSM:Register(LSM.MediaType.STATUSBAR, "SCRB FG Fade Top", [[Interface\AddOns\SenseiClassResourceBar\Textures\BarForegrounds\fade-top.png]])
     LSM:Register(LSM.MediaType.STATUSBAR, "SCRB FG Solid", [[Interface\AddOns\SenseiClassResourceBar\Textures\BarForegrounds\solid.png]])
-    LSM:Register(LSM.MediaType.STATUSBAR, "None", [[Interface\AddOns\SenseiClassResourceBar\Textures\BarForegrounds\transparent.png]])
+    LSM:Register(LSM.MediaType.STATUSBAR, "None", [[Interface\AddOns\SenseiClassResourceBar\Textures\Specials\transparent.png]])
 
-    LSM:Register(LSM.MediaType.BORDER, "SCRB Border Thin", [[Interface\AddOns\SenseiClassResourceBar\Textures\BarBorders\thin.png]])
-    LSM:Register(LSM.MediaType.BORDER, "SCRB Border Bold", [[Interface\AddOns\SenseiClassResourceBar\Textures\BarBorders\bold.png]])
-    LSM:Register(LSM.MediaType.BORDER, "SCRB Border Slight", [[Interface\AddOns\SenseiClassResourceBar\Textures\BarBorders\slight.png]])
     LSM:Register(LSM.MediaType.BORDER, "SCRB Border Blizzard Classic", [[Interface\AddOns\SenseiClassResourceBar\Textures\BarBorders\blizzard-classic.png]])
 
     LSM:Register(LSM.MediaType.FONT, "Friz Quadrata TT", [[Fonts\FRIZQT___CYR.TTF]])
@@ -602,7 +599,7 @@ local function CreateBarInstance(config, parent)
     -- MASK
     frame.mask = frame.statusBar:CreateMaskTexture()
     frame.mask:SetAllPoints()
-    frame.mask:SetTexture([[Interface\AddOns\SenseiClassResourceBar\Textures\BarBorders\thin-mask.png]])
+    frame.mask:SetTexture([[Interface\AddOns\SenseiClassResourceBar\Textures\Specials\white.png]])
 
     frame.statusBar:GetStatusBarTexture():AddMaskTexture(frame.mask)
     frame.background:AddMaskTexture(frame.mask)
@@ -610,9 +607,9 @@ local function CreateBarInstance(config, parent)
     -- BORDER
     frame.border = frame:CreateTexture(nil, "OVERLAY")
     frame.border:SetAllPoints()
-    frame.border:SetTexture(LSM:Fetch(LSM.MediaType.BORDER, "SCRB Border Thin"))
     frame.border:SetBlendMode("BLEND")
     frame.border:SetVertexColor(0, 0, 0)
+    frame.border:Hide()
 
     -- TEXT FRAME
     frame.textFrame = CreateFrame("Frame", nil, frame)
@@ -977,7 +974,7 @@ local function CreateBarInstance(config, parent)
             self.mask = self.statusBar:CreateMaskTexture()
         end
 
-        self.mask:SetTexture(style.mask or [[Interface\AddOns\SenseiClassResourceBar\Textures\white.png]])
+        self.mask:SetTexture(style.mask or [[Interface\AddOns\SenseiClassResourceBar\Textures\Specials\white.png]])
         self.mask:SetPoint("CENTER", self.statusBar, "CENTER")
         self.mask:SetSize(verticalOrientation and height or width, verticalOrientation and width or height)
         self.mask:SetRotation(verticalOrientation and math.rad(90) or 0)
@@ -1086,7 +1083,6 @@ local function CreateBarInstance(config, parent)
                 t:SetColorTexture(0, 0, 0, 1)
                 self.ticks[i] = t
             end
-            local x = (i / max) * width
             t:ClearAllPoints()
             if self.statusBar:GetOrientation() == "VERTICAL" then
                 local y = (i / max) * height
