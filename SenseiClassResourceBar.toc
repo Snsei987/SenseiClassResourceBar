@@ -1,4 +1,4 @@
-## Interface: 120000
+## Interface: 110207, 120000
 ## Title: Sensei Class Resource Bar
 ## Notes: Separate resource bar for some classes
 ## Author: Sensei
