@@ -1101,7 +1101,6 @@ local function CreateBarInstance(config, parent)
         }
 
         for class, f in pairs(blizzardResourceFrames) do
-            print(playerClass, f)
             if f and playerClass == class then
                 if data.hideBlizzardSecondaryResourceUi then
                     if LEM:IsInEditMode() then
