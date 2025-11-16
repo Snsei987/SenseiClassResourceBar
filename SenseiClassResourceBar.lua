@@ -1887,7 +1887,7 @@ local function InitializeBar(config, frameLevel)
         defaults[k] = v
     end
 
-    local frame = CreateBarInstance(config, UIParent, math.max(0, (frameLevel or 0)) * 10)
+    local frame = CreateBarInstance(config, UIParent, math.max(0, frameLevel or 0))
     barInstances[config.name] = frame
 
     local function OnPositionChanged(frame, layoutName, point, x, y)
@@ -1950,7 +1950,7 @@ SCRB:SetScript("OnEvent", function(_, event, arg1)
         end
 
         for _, config in pairs(barConfigs) do
-            InitializeBar(config, (config.frameLevel or 0) + 501) -- 501 so it is above the action bars
+            InitializeBar(config, ((config.frameLevel or 0) * 10) + 501) -- 501 so it is above the action bars
         end
     end
 end)
