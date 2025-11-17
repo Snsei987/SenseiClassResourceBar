@@ -613,7 +613,7 @@ barConfigs.healthBar = {
                 set = function(layoutName, value)
                     SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
                     SenseiClassResourceBarDB[dbName][layoutName].useClassColor = value
-                    frame:UpdateDisplay(layoutName)
+                    frame:ApplyLayout(layoutName)
                 end,
             }
         }
