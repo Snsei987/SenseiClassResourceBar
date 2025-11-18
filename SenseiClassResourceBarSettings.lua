@@ -23,21 +23,6 @@ local function Register()
 		local metadata = addonTable.FeaturesMetadata[feature] or {}
 		local data = Mixin(metadata.data or {}, { categoryID = category:GetID() })
 
-		if metadata.allowNewTagDisplay ~= false then
-			local predicate = (type(metadata.showNewTagPredicate) == "function" and metadata.showNewTagPredicate)
-			or function () return not SenseiClassResourceBarDB["_Settings"]["NewFeaturesShown"][feature] end
-			local shouldNewTagShow = predicate()
-			
-			if shouldNewTagShow then
-				data.newTagID = feature
-				table.insert(NewSettings[version], feature)
-
-				if NewSettingsPredicates then
-					NewSettingsPredicates[feature] = predicate
-				end
-			end
-		end
-
 		local initializer = Settings.CreatePanelInitializer(metadata.panel, data)
 		initializer:AddSearchTags(unpack(metadata.searchTags or {}))
 		layout:AddInitializer(initializer)

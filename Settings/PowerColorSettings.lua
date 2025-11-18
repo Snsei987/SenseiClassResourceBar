@@ -99,11 +99,7 @@ function SCRBPowerColorSettingsMixin:Init(initializer)
 		initializer:AddSearchTags(data.text);
 	end
 
-	local newTagShown = initializer:IsNewTagShown()
-	self.NewFeature:SetShown(newTagShown)
-	if newTagShown then
-		initializer:MarkSettingAsSeen(featureId)
-	end
+	self.NewFeature:SetShown(not SenseiClassResourceBarDB["_Settings"]["NewFeaturesShown"][featureId])
 
 	SenseiClassResourceBarDB["_Settings"]["NewFeaturesShown"][featureId] = true
 end
