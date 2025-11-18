@@ -2153,22 +2153,22 @@ local function InitializeBar(config, frameLevel)
         frame:UpdateDisplay(layoutName, true)
     end)
 
-    -- LEM:RegisterCallback("rename", function(oldLayoutName, newLayoutName)
-    --     SenseiClassResourceBarDB[config.dbName][newLayoutName] = CopyTable(SenseiClassResourceBarDB[config.dbName][oldLayoutName])
-    --     SenseiClassResourceBarDB[config.dbName] = SenseiClassResourceBarDB[config.dbName] or {}
-    --     SenseiClassResourceBarDB[config.dbName][oldLayoutName] = nil
-    --     frame:ApplyVisibilitySettings()
-    --     frame:ApplyLayout()
-    --     frame:UpdateDisplay()
-    -- end)
+    LEM:RegisterCallback("rename", function(oldLayoutName, newLayoutName)
+        SenseiClassResourceBarDB[config.dbName][newLayoutName] = CopyTable(SenseiClassResourceBarDB[config.dbName][oldLayoutName])
+        SenseiClassResourceBarDB[config.dbName] = SenseiClassResourceBarDB[config.dbName] or {}
+        SenseiClassResourceBarDB[config.dbName][oldLayoutName] = nil
+        frame:ApplyVisibilitySettings()
+        frame:ApplyLayout()
+        frame:UpdateDisplay()
+    end)
 
-    -- LEM:RegisterCallback("delete", function(layoutName)
-    --     SenseiClassResourceBarDB[config.dbName] = SenseiClassResourceBarDB[config.dbName] or {}
-    --     SenseiClassResourceBarDB[config.dbName][layoutName] = nil
-    --     frame:ApplyVisibilitySettings()
-    --     frame:ApplyLayout()
-    --     frame:UpdateDisplay()
-    -- end)
+    LEM:RegisterCallback("delete", function(layoutName)
+        SenseiClassResourceBarDB[config.dbName] = SenseiClassResourceBarDB[config.dbName] or {}
+        SenseiClassResourceBarDB[config.dbName][layoutName] = nil
+        frame:ApplyVisibilitySettings()
+        frame:ApplyLayout()
+        frame:UpdateDisplay()
+    end)
 
     LEM:AddFrame(frame, OnPositionChanged, defaults)
     LEM:AddFrameSettings(frame, BuildLemSettings(config, frame))
