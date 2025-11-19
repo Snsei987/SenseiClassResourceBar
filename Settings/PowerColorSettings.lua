@@ -50,8 +50,16 @@ SCRBPowerColorSettingsMixin = {
 			power = Enum.PowerType.Fury,
 		},
 		{
-			text = "Runes",
-			power = Enum.PowerType.Runes
+			text = "Blood Runes",
+			power = Enum.PowerType.RuneBlood,
+		},
+		{
+			text = "Frost Runes",
+			power = Enum.PowerType.RuneFrost,
+		},
+		{
+			text = "Unholy Runes",
+			power = Enum.PowerType.RuneUnholy,
 		},
 		{
 			text = "Combo Points",
