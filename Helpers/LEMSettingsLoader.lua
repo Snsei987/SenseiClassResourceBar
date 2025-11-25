@@ -135,7 +135,7 @@ local function BuildLemSettings(bar, defaults)
         },
         {
             order = 21,
-            name = "Text Only Mode",
+            name = "Remove Background and Border",
             kind = LEM.SettingType.Checkbox,
             default = defaults.textOnlyMode,
             get = function(layoutName)
