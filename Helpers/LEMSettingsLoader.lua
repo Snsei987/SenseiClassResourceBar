@@ -134,6 +134,25 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
+            order = 21,
+            name = "Text Only Mode",
+            kind = LEM.SettingType.Checkbox,
+            default = defaults.textOnlyMode,
+            get = function(layoutName)
+                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
+                if data and data.textOnlyMode ~= nil then
+                    return data.textOnlyMode
+                else
+                    return defaults.textOnlyMode
+                end
+            end,
+            set = function(layoutName, value)
+                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+                SenseiClassResourceBarDB[config.dbName][layoutName].textOnlyMode = value
+                bar:ApplyLayout(layoutName)
+            end,
+        },
+        {
             order = 40,
             name = "Show Resource Number",
             kind = LEM.SettingType.Checkbox,

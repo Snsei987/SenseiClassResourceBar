@@ -535,6 +535,17 @@ function BarMixin:ApplyMaskAndBorderSettings(layoutName)
     local data = self:GetData(layoutName)
     if not data then return end
 
+    -- Hide borders in text-only mode
+    if data.textOnlyMode then
+        self.Border:Hide()
+        if self.FixedThicknessBorders then
+            for _, t in pairs(self.FixedThicknessBorders) do
+                t:Hide()
+            end
+        end
+        return
+    end
+
     local defaults = self.defaults or {}
 
     local styleName = data.maskAndBorderStyle or defaults.maskAndBorderStyle
@@ -643,6 +654,14 @@ function BarMixin:ApplyBackgroundSettings(layoutName)
     local data = self:GetData(layoutName)
     if not data then return end
 
+    -- Hide background in text-only mode
+    if data.textOnlyMode then
+        self.Background:SetAlpha(0)
+        return
+    end
+
+    self.Background:SetAlpha(1)
+
     local defaults = self.defaults or {}
 
     local bgStyleName = data.backgroundStyle or defaults.backgroundStyle
@@ -663,6 +682,20 @@ end
 function BarMixin:ApplyForegroundSettings(layoutName)
     local data = self:GetData(layoutName)
     if not data then return end
+
+    -- Hide foreground in text-only mode
+    if data.textOnlyMode then
+        self.StatusBar:SetAlpha(0)
+        for _, fragmentedPowerBar in ipairs(self.FragmentedPowerBars) do
+            fragmentedPowerBar:SetAlpha(0)
+        end
+        return
+    end
+
+    self.StatusBar:SetAlpha(1)
+    for _, fragmentedPowerBar in ipairs(self.FragmentedPowerBars) do
+        fragmentedPowerBar:SetAlpha(1)
+    end
 
     local defaults = self.defaults or {}
 
@@ -701,6 +734,15 @@ end
 function BarMixin:UpdateTicksLayout(layoutName)
     local data = self:GetData(layoutName)
     if not data then return end
+
+    -- Hide ticks in text-only mode
+    if data.textOnlyMode then
+        self.Ticks = self.Ticks or {}
+        for _, t in ipairs(self.Ticks) do
+            t:Hide()
+        end
+        return
+    end
 
     local resource = self:GetResource()
     local max = (type(resource) ~= "number") and 0 or UnitPowerMax("player", resource)
