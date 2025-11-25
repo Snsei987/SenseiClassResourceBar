@@ -134,6 +134,25 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
+            order = 21,
+            name = "Remove Background and Border",
+            kind = LEM.SettingType.Checkbox,
+            default = defaults.noBorderBGMode,
+            get = function(layoutName)
+                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
+                if data and data.noBorderBGMode ~= nil then
+                    return data.noBorderBGMode
+                else
+                    return defaults.noBorderBGMode
+                end
+            end,
+            set = function(layoutName, value)
+                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+                SenseiClassResourceBarDB[config.dbName][layoutName].noBorderBGMode = value
+                bar:ApplyLayout(layoutName)
+            end,
+        },
+        {
             order = 40,
             name = "Show Resource Number",
             kind = LEM.SettingType.Checkbox,

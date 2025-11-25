@@ -1,5 +1,79 @@
 local _, addonTable = ...
 
+-- Elemental Shaman Dynamic Text Color
+function addonTable:GetElementalShamanTextColor(opacity)
+    -- Spell IDs
+    local EARTHQUAKE_SPELL_ID = 61882
+    local ELEMENTAL_BLAST_SPELL_ID = 117014
+
+    -- Use provided opacity or default to 0.5
+    local outOfCombatOpacity = opacity or 0.5
+
+    -- Check if out of combat (priority 1 - lowest, with opacity)
+    if not InCombatLockdown() then
+        return { r = 0x21 / 255, g = 0xD1 / 255, b = 0xFF / 255, a = outOfCombatOpacity } -- #21D1FF with opacity
+    end
+
+    -- Check if power is at 100% (priority 2 - highest in combat)
+    local currentPower = UnitPower("player", Enum.PowerType.Maelstrom)
+    local maxPower = UnitPowerMax("player", Enum.PowerType.Maelstrom)
+    if maxPower > 0 and currentPower >= maxPower then
+        return { r = 0xFF / 255, g = 0x00 / 255, b = 0x00 / 255 } -- #FF0000
+    end
+
+    -- Check if Elemental Blast is usable (priority 3)
+    local elementalBlastUsable = C_Spell and C_Spell.IsSpellUsable(ELEMENTAL_BLAST_SPELL_ID)
+    if elementalBlastUsable then
+        return { r = 0xD4 / 255, g = 0x68 / 255, b = 0xFF / 255 } -- #D468FF
+    end
+
+    -- Check if Earthquake is usable (priority 4)
+    local earthquakeUsable = C_Spell and C_Spell.IsSpellUsable(EARTHQUAKE_SPELL_ID)
+    if earthquakeUsable then
+        return { r = 0xFF / 255, g = 0xC9 / 255, b = 0x00 / 255 } -- #FFC900
+    end
+
+    -- Default to primary resource color (user's selected color)
+    return addonTable:GetOverrideResourceColor(Enum.PowerType.Maelstrom)
+end
+
+-- Elemental Shaman Dynamic Bar Color (same logic as text but with opacity)
+function addonTable:GetElementalShamanBarColor(opacity)
+    -- Spell IDs
+    local EARTHQUAKE_SPELL_ID = 61882
+    local ELEMENTAL_BLAST_SPELL_ID = 117014
+
+    -- Use provided opacity or default to 0.5
+    local outOfCombatOpacity = opacity or 0.5
+
+    -- Check if out of combat (priority 1 - lowest, with opacity)
+    if not InCombatLockdown() then
+        return { r = 0x21 / 255, g = 0xD1 / 255, b = 0xFF / 255, a = outOfCombatOpacity } -- #21D1FF with opacity
+    end
+
+    -- Check if power is at 100% (priority 2 - highest in combat)
+    local currentPower = UnitPower("player", Enum.PowerType.Maelstrom)
+    local maxPower = UnitPowerMax("player", Enum.PowerType.Maelstrom)
+    if maxPower > 0 and currentPower >= maxPower then
+        return { r = 0xFF / 255, g = 0x00 / 255, b = 0x00 / 255 } -- #FF0000
+    end
+
+    -- Check if Elemental Blast is usable (priority 3)
+    local elementalBlastUsable = C_Spell and C_Spell.IsSpellUsable(ELEMENTAL_BLAST_SPELL_ID)
+    if elementalBlastUsable then
+        return { r = 0xD4 / 255, g = 0x68 / 255, b = 0xFF / 255 } -- #D468FF
+    end
+
+    -- Check if Earthquake is usable (priority 4)
+    local earthquakeUsable = C_Spell and C_Spell.IsSpellUsable(EARTHQUAKE_SPELL_ID)
+    if earthquakeUsable then
+        return { r = 0xFF / 255, g = 0xC9 / 255, b = 0x00 / 255 } -- #FFC900
+    end
+
+    -- Default to primary resource color (user's selected color)
+    return addonTable:GetOverrideResourceColor(Enum.PowerType.Maelstrom)
+end
+
 function addonTable:GetOverrideTextColor(frameName, textId)
     local color = self:GetTextColor()
 
@@ -19,7 +93,7 @@ function addonTable:GetOverrideTextColor(frameName, textId)
 end
 
 function addonTable:GetTextColor()
-    return { r = 1, b = 1, g = 1}
+    return { r = 1, b = 1, g = 1 }
 end
 
 function addonTable:GetOverrideHealthBarColor(frameName, settingKey)
@@ -80,7 +154,7 @@ function addonTable:GetResourceColor(resource)
         -- Different color during Void Metamorphosis
         if DemonHunterSoulFragmentsBar and DemonHunterSoulFragmentsBar.CollapsingStarBackground:IsShown() then
             color = { r = 0.037, g = 0.220, b = 0.566, atlas = "UF-DDH-CollapsingStar-Bar-Ready" }
-        else 
+        else
             color = { r = 0.278, g = 0.125, b = 0.796, atlas = "UF-DDH-VoidMeta-Bar-Ready" }
         end
     elseif resource == Enum.PowerType.Runes or resource == Enum.PowerType.RuneBlood or resource == Enum.PowerType.RuneUnholy or resource == Enum.PowerType.RuneFrost then
@@ -88,7 +162,7 @@ function addonTable:GetResourceColor(resource)
         local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
 
         local runeColors = {
-            [Enum.PowerType.RuneBlood]  = { r = 1,   g = 0.2, b = 0.3 },
+            [Enum.PowerType.RuneBlood]  = { r = 1, g = 0.2, b = 0.3 },
             [Enum.PowerType.RuneFrost]  = { r = 0.0, g = 0.6, b = 1.0 },
             [Enum.PowerType.RuneUnholy] = { r = 0.1, g = 1.0, b = 0.1 },
         }
@@ -113,5 +187,6 @@ function addonTable:GetResourceColor(resource)
     end
 
     -- If not custom, try with power name or id
-    return CopyTable(color or GetPowerBarColor(powerName) or GetPowerBarColor(resource) or { r = 1, g = 1, b = 1 }), settingKey
+    return CopyTable(color or GetPowerBarColor(powerName) or GetPowerBarColor(resource) or { r = 1, g = 1, b = 1 }),
+        settingKey
 end
