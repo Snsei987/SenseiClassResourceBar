@@ -32,6 +32,21 @@ Mana, Rage, Energy, Focus, Fury, Runic Power, Astral Power, and more.
 *   **Druid** → Combo Points (Cat Form)
 *   **Demon Hunter** → Soul (Devourer) ⚠️ It needs to have the Player Frame visible
 
+**Elemental Shaman Dynamic Resource Coloring:**  
+The Primary Resource Bar can automatically change text and bar colors based on combat state and spell availability (priority order, highest first):
+*   🔴 Maelstrom at 100% → Red (#FF0000) - Highest priority
+*   🟣 Elemental Blast Castable → Pink/Purple (#D468FF)
+*   🟡 Earthquake Castable → Yellow (#FFC900)
+*   🔵 Out of Combat → Light Blue (#21D1FF) with adjustable opacity
+*   Default: Uses your selected primary resource color
+
+**Configuration:** *(Only visible for Elemental Shaman)*
+*   ✅ **Enable Elemental Shaman Specific Text Color** - Toggle dynamic text coloring (enabled by default)
+*   ⚪ **Enable Elemental Shaman Specific Bar Color** - Toggle dynamic bar coloring (disabled by default)
+*   🎚️ **Out of Combat Opacity** - Slider to adjust transparency when out of combat (0-100%, default 50%)
+*   All options can be configured independently in Edit Mode settings
+*   Settings are only shown when playing as Elemental Shaman
+
 **Ebon Might as a standalone bar** ⚠️ It needs to have the Player Frame visible
 
 **Druid Form Adaptive Support:**  
@@ -75,6 +90,7 @@ Each bar (Primary & Secondary) has its own configuration:
 *   ✔️ Tick marks for segmented resources (Combo Points, Chi, Holy Power, Essence, etc.)
 *   💧 Optional **Mana as percentage**
 *   ⏱ Rune-specific cooldown text for Death Knights
+*   🎨 Class/Spec specific dynamic coloring with opacity control (Elemental Shaman)
 
 ### **Hide default Blizzard UI**
 

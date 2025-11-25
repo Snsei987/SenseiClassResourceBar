@@ -165,12 +165,12 @@ end
 
 ---@return table { r = int, g = int, b = int }
 function BarMixin:GetResourceNumberColor()
-    return { r = 1, b = 1, g = 1}
+    return { r = 1, b = 1, g = 1 }
 end
 
 ---@return table { r = int, g = int, b = int }
 function BarMixin:GetResourceChargeTimerColor()
-    return { r = 1, b = 1, g = 1}
+    return { r = 1, b = 1, g = 1 }
 end
 
 ---@return string|number|nil The resource, can be anything as long as you handle it in BarMixin:GetResourceValue
@@ -234,7 +234,7 @@ function BarMixin:UpdateDisplay(layoutName, force)
     if not resource then
         if not LEM:IsInEditMode() then
             self:Hide()
-        else 
+        else
             -- "4" text for edit mode is resource does not exist (e.g. Secondary resource for warrior)
             self.StatusBar:SetMinMaxValues(0, 5)
             self.TextValue:SetText("4")
@@ -354,7 +354,7 @@ function BarMixin:HideBlizzardPlayerContainer(layoutName)
         if data.hideBlizzardPlayerContainerUi then
             if LEM:IsInEditMode() then
                 PlayerFrame:Show()
-            else 
+            else
                 PlayerFrame:Hide()
             end
         else
@@ -370,7 +370,7 @@ function BarMixin:HideBlizzardSecondaryResource(layoutName)
 
     -- InCombatLockdown() means protected frames so we cannot touch it
     if data.hideBlizzardSecondaryResourceUi == nil or InCombatLockdown() then return end
-    
+
     local playerClass = select(2, UnitClass("player"))
     local blizzardResourceFrames = {
         ["DEATHKNIGHT"] = RuneFrame,
@@ -390,7 +390,7 @@ function BarMixin:HideBlizzardSecondaryResource(layoutName)
                     if class ~= "DRUID" or (class == "DRUID" and GetShapeshiftFormID() == DRUID_CAT_FORM) then
                         f:Show()
                     end
-                else 
+                else
                     f:Hide()
                 end
             elseif class ~= "DRUID" or (class == "DRUID" and GetShapeshiftFormID() == DRUID_CAT_FORM) then
@@ -466,7 +466,7 @@ function BarMixin:ApplyFontSettings(layoutName)
     self.TextValue:SetShadowOffset(1, -1)
 
     local color = self:GetResourceNumberColor()
-    self.TextValue:SetTextColor(color.r, color.g, color.b)
+    self.TextValue:SetTextColor(color.r, color.g, color.b, color.a or 1)
 
     color = self:GetResourceChargeTimerColor()
     for _, fragmentedPowerBarText in ipairs(self.FragmentedPowerBarTexts) do
@@ -666,7 +666,8 @@ function BarMixin:ApplyBackgroundSettings(layoutName)
 
     local bgStyleName = data.backgroundStyle or defaults.backgroundStyle
     local bgConfig = addonTable.backgroundStyles[bgStyleName]
-        or (LSM:IsValid(LSM.MediaType.BACKGROUND, bgStyleName) and { type = "texture", value = LSM:Fetch(LSM.MediaType.BACKGROUND, bgStyleName) })
+        or
+        (LSM:IsValid(LSM.MediaType.BACKGROUND, bgStyleName) and { type = "texture", value = LSM:Fetch(LSM.MediaType.BACKGROUND, bgStyleName) })
         or nil
 
     if not bgConfig then return end
@@ -692,30 +693,32 @@ function BarMixin:ApplyForegroundSettings(layoutName)
         return
     end
 
-    self.StatusBar:SetAlpha(1)
+    local resource = self:GetResource()
+    local color = self:GetBarColor(resource)
+
+    -- Apply alpha from color if present
+    local alpha = color.a or 1
+    self.StatusBar:SetAlpha(alpha)
     for _, fragmentedPowerBar in ipairs(self.FragmentedPowerBars) do
-        fragmentedPowerBar:SetAlpha(1)
+        fragmentedPowerBar:SetAlpha(alpha)
     end
 
     local defaults = self.defaults or {}
 
     local fgStyleName = data.foregroundStyle or defaults.foregroundStyle
     local fgTexture = LSM:Fetch(LSM.MediaType.STATUSBAR, fgStyleName)
-    
-    local resource = self:GetResource()
-    local color = self:GetBarColor(resource)
     if data.useResourceAtlas == true and (color.atlasElementName or color.atlas) then
         if color.atlasElementName then
             if color.hasClassResourceVariant then
-                fgTexture = "UI-HUD-UnitFrame-Player-PortraitOn-ClassResource-Bar-"..color.atlasElementName
+                fgTexture = "UI-HUD-UnitFrame-Player-PortraitOn-ClassResource-Bar-" .. color.atlasElementName
             else
-                fgTexture = "UI-HUD-UnitFrame-Player-PortraitOn-Bar-"..color.atlasElementName
+                fgTexture = "UI-HUD-UnitFrame-Player-PortraitOn-Bar-" .. color.atlasElementName
             end
         elseif color.atlas then
             fgTexture = color.atlas
         end
     end
-    
+
     if fgTexture then
         self.StatusBar:SetStatusBarTexture(fgTexture)
 
@@ -894,7 +897,8 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
 
         if data.fillDirection == "Right to Left" or data.fillDirection == "Bottom to Top" then
             for i = 1, math.floor(#displayOrder / 2) do
-                displayOrder[i], displayOrder[#displayOrder - i + 1] = displayOrder[#displayOrder - i + 1], displayOrder[i]
+                displayOrder[i], displayOrder[#displayOrder - i + 1] = displayOrder[#displayOrder - i + 1],
+                    displayOrder[i]
             end
         end
 
