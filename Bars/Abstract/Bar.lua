@@ -536,7 +536,7 @@ function BarMixin:ApplyMaskAndBorderSettings(layoutName)
     if not data then return end
 
     -- Hide borders in text-only mode
-    if data.textOnlyMode then
+    if data.noBorderBGMode then
         self.Border:Hide()
         if self.FixedThicknessBorders then
             for _, t in pairs(self.FixedThicknessBorders) do
@@ -655,7 +655,7 @@ function BarMixin:ApplyBackgroundSettings(layoutName)
     if not data then return end
 
     -- Hide background in text-only mode
-    if data.textOnlyMode then
+    if data.noBorderBGMode then
         self.Background:SetAlpha(0)
         return
     end
@@ -684,7 +684,7 @@ function BarMixin:ApplyForegroundSettings(layoutName)
     if not data then return end
 
     -- Hide foreground in text-only mode
-    if data.textOnlyMode then
+    if data.noBorderBGMode then
         self.StatusBar:SetAlpha(0)
         for _, fragmentedPowerBar in ipairs(self.FragmentedPowerBars) do
             fragmentedPowerBar:SetAlpha(0)
@@ -736,7 +736,7 @@ function BarMixin:UpdateTicksLayout(layoutName)
     if not data then return end
 
     -- Hide ticks in text-only mode
-    if data.textOnlyMode then
+    if data.noBorderBGMode then
         self.Ticks = self.Ticks or {}
         for _, t in ipairs(self.Ticks) do
             t:Hide()

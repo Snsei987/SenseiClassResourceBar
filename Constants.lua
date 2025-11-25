@@ -59,7 +59,7 @@ addonTable.commonDefaults = {
     maskAndBorderStyle = "Thin",
     backgroundStyle = "SCRB Semi-transparent",
     foregroundStyle = "SCRB FG Fade Left",
-    textOnlyMode = false,
+    noBorderBGMode = false,
 }
 
 addonTable.availableBarVisibilityOptions = {
