@@ -135,17 +135,18 @@ addonTable.SettingsPanelInitializers[featureId] = function(category)
 
     SettingsLib:CreateColorOverrides(category, {
         entries = PowerData,
+        hasOpacity = true,
         getColor = function(key)
             local color = addonTable:GetOverrideResourceColor(key)
-            return color.r, color.g, color.b
+            return color.r, color.g, color.b, color.a or 1
         end,
-        setColor = function(key, r, g, b)
-            SenseiClassResourceBarDB["_Settings"]["PowerColors"][key] = { r = r, g = g, b = b }
+        setColor = function(key, r, g, b, a)
+            SenseiClassResourceBarDB["_Settings"]["PowerColors"][key] = { r = r, g = g, b = b, a = a or 1 }
             addonTable.updateBars()
         end,
         getDefaultColor = function(key)
             local color = addonTable:GetResourceColor(key)
-            return color.r, color.g, color.b
+            return color.r, color.g, color.b, color.a or 1
         end,
         colorizeLabel = true,
     })
@@ -154,17 +155,18 @@ addonTable.SettingsPanelInitializers[featureId] = function(category)
 
     SettingsLib:CreateColorOverrides(category, {
         entries = HealthData,
+        hasOpacity = true,
         getColor = function(key)
             local color = addonTable:GetOverrideHealthBarColor(key)
-            return color.r, color.g, color.b
+            return color.r, color.g, color.b, color.a or 1
         end,
-        setColor = function(key, r, g, b)
-            SenseiClassResourceBarDB["_Settings"]["HealthColors"][key] = { r = r, g = g, b = b }
+        setColor = function(key, r, g, b, a)
+            SenseiClassResourceBarDB["_Settings"]["HealthColors"][key] = { r = r, g = g, b = b, a = a or 1 }
             addonTable.updateBars()
         end,
         getDefaultColor = function(key)
             local color = addonTable:GetHealthBarColor(key)
-            return color.r, color.g, color.b
+            return color.r, color.g, color.b, color.a or 1
         end,
         colorizeLabel = true,
     })

@@ -166,7 +166,7 @@ end
 ---@return table { r = int, g = int, b = int, atlasElementName = string|nil, atlas = string|nil, hasClassResourceVariant = bool|nil }
 ---https://github.com/Gethe/wow-ui-source/blob/live/Interface/AddOns/Blizzard_UnitFrame/Mainline/PowerBarColorUtil.lua
 function BarMixin:GetBarColor(_)
-    return { r = 1, g = 1, b = 1 }
+    return { r = 1, g = 1, b = 1, a = 1 }
 end
 
 ---@return string|number|nil The resource, can be anything as long as you handle it in BarMixin:GetResourceValue
@@ -727,9 +727,9 @@ function BarMixin:ApplyForegroundSettings(layoutName)
     end
 
     if data.useResourceAtlas == true and (color.atlasElementName or color.atlas) then
-        self.StatusBar:SetStatusBarColor(1, 1, 1);
+        self.StatusBar:SetStatusBarColor(1, 1, 1, color.a or 1);
     else
-        self.StatusBar:SetStatusBarColor(color.r or 1, color.g or 1, color.b or 1);
+        self.StatusBar:SetStatusBarColor(color.r or 1, color.g or 1, color.b or 1, color.a or 1);
     end
 end
 
@@ -841,8 +841,8 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
     local fragmentedBarWidth = barWidth / maxPower
     local fragmentedBarHeight = barHeight / maxPower
 
-    local r, g, b = self.StatusBar:GetStatusBarColor()
-    local color = { r = r, g = g, b = b }
+    local r, g, b, a = self.StatusBar:GetStatusBarColor()
+    local color = { r = r, g = g, b = b, a = a or 1 }
 
     if resource == Enum.PowerType.ComboPoints then
         local current = UnitPower("player", resource)
@@ -887,17 +887,17 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
                 if chargedLookup[idx] then
                     cpFrame:SetValue(1, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                     if idx <= current then
-                        cpFrame:SetStatusBarColor(overchargedCpColor.r, overchargedCpColor.g, overchargedCpColor.b)
+                        cpFrame:SetStatusBarColor(overchargedCpColor.r, overchargedCpColor.g, overchargedCpColor.b, overchargedCpColor.a or 1)
                     else
-                        cpFrame:SetStatusBarColor(overchargedCpColor.r * 0.5, overchargedCpColor.g * 0.5, overchargedCpColor.b * 0.5)
+                        cpFrame:SetStatusBarColor(overchargedCpColor.r * 0.5, overchargedCpColor.g * 0.5, overchargedCpColor.b * 0.5, overchargedCpColor.a or 1)
                     end
                 else
                     if idx <= current then
                         cpFrame:SetValue(1, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                        cpFrame:SetStatusBarColor(color.r, color.g, color.b)
+                        cpFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
                     else
                         cpFrame:SetValue(0, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                        cpFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5)
+                        cpFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
                     end
                 end
                 cpText:SetText("")
@@ -970,17 +970,17 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
 
                 if state == "full" then
                     essFrame:SetValue(1, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                    essFrame:SetStatusBarColor(color.r, color.g, color.b)
+                    essFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
                     essText:SetText("")
                 elseif state == "partial" then
                     local remaining = math.max(0, self._NextEssenceTick - now)
                     local value = 1 - (remaining / tickDuration)
                     essFrame:SetValue(value, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                    essFrame:SetStatusBarColor(color.r, color.g, color.b)
+                    essFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
                     essText:SetText(string.format("%." .. (precision or 1) .. "f", remaining))
                 else
                     essFrame:SetValue(0, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                    essFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5)
+                    essFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
                     essText:SetText("")
                 end
 
@@ -1053,10 +1053,10 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
                 if readyLookup[runeIndex] then
                     runeFrame:SetValue(1, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                     runeText:SetText("")
-                    runeFrame:SetStatusBarColor(color.r, color.g, color.b)
+                    runeFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
                 else
                     local cdInfo = cdLookup[runeIndex]
-                    runeFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5)
+                    runeFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
                     if cdInfo then
                         runeFrame:SetValue(cdInfo.frac, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                         runeText:SetText(string.format("%." .. (precision or 1) .. "f", math.max(0, cdInfo.remaining)))

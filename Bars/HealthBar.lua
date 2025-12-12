@@ -10,11 +10,13 @@ function HealthBarMixin:GetBarColor()
 
     local data = self:GetData()
 
+    local color = addonTable:GetOverrideHealthBarColor()
+
     if data and data.useClassColor == true then
-        local r,g, b = GetClassColor(playerClass)
-        return { r = r, g = g, b = b }
+        local r, g, b = GetClassColor(playerClass)
+        return { r = r, g = g, b = b, a = color.a }
     else
-        return addonTable:GetOverrideHealthBarColor()
+        return color
     end
 end
 
