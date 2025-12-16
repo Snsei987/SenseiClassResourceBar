@@ -249,7 +249,15 @@ function BarMixin:UpdateDisplay(layoutName, force)
     self.StatusBar:SetMinMaxValues(0, max, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
     self.StatusBar:SetValue(current, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
 
-    if data.textFormat == nil or data.textFormat == "Current" then
+    if (data.showManaAsPercent and resource == Enum.PowerType.Mana) or data.textFormat == "Percent" or data.textFormat == "Percent%" then
+        local precision = data.textPrecision and math.max(0, string.len(data.textPrecision) - 3) or 0
+
+        if valueType == "custom" then
+            self.TextValue:SetText(displayValue)
+        else
+            self.TextValue:SetText(string.format("%." .. (precision or 0) .. "f" .. (data.textFormat == "Percent%" and "%%" or ""), displayValue))
+        end
+    elseif data.textFormat == nil or data.textFormat == "Current" then
         if valueType == "custom" then
             self.TextValue:SetText(displayValue)
         else
@@ -260,14 +268,6 @@ function BarMixin:UpdateDisplay(layoutName, force)
             self.TextValue:SetText(displayValue .. ' / ' .. maxDisplayValue)
         else
             self.TextValue:SetText(AbbreviateNumbers(displayValue) .. ' / ' .. AbbreviateNumbers(maxDisplayValue))
-        end
-    elseif data.textFormat == "Percent" or data.textFormat == "Percent%" then
-        local precision = data.textPrecision and math.max(0, string.len(data.textPrecision) - 3) or 0
-
-        if valueType == "custom" then
-            self.TextValue:SetText(displayValue)
-        else
-            self.TextValue:SetText(string.format("%." .. (precision or 0) .. "f" .. (data.textFormat == "Percent%" and "%%" or ""), displayValue))
         end
     end
 
