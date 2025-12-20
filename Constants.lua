@@ -200,6 +200,7 @@ addonTable.tickedPowerTypes = {
     [Enum.PowerType.HolyPower] = true,
     [Enum.PowerType.Runes] = true,
     [Enum.PowerType.SoulShards] = true,
+    ["MAELSTROM_WEAPON"] = true, -- Enhancement Shaman's like segments
 }
 
 -- Power types that are fragmented (multiple independent segments)
@@ -207,6 +208,7 @@ addonTable.fragmentedPowerTypes = {
     [Enum.PowerType.ComboPoints] = true,
     [Enum.PowerType.Essence] = true,
     [Enum.PowerType.Runes] = true,
+    ["MAELSTROM_WEAPON"] = true, -- Enhancement Shaman's like segments
 }
 
 addonTable.clamp = function(x, min, max)

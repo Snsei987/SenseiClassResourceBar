@@ -112,6 +112,8 @@ function addonTable:GetResourceColor(resource)
         color = { r = 0.169, g = 0.733, b = 0.992 }
     elseif resource == Enum.PowerType.Chi then
         color = { r = 0.024, g = 0.741, b = 0.784 }
+	elseif resource == "MAELSTROM_WEAPON" then
+        color = { r = 0.00, g = 0.50, b = 1.00 }
     end
 
     -- If not custom, try with power name or id

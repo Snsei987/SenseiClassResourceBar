@@ -16,6 +16,7 @@ function PowerBarMixin:OnLoad()
     self.Frame:RegisterUnitEvent("UNIT_EXITED_VEHICLE", "player")
     self.Frame:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
     self.Frame:RegisterUnitEvent("UNIT_MAXPOWER", "player")
+    self.Frame:RegisterUnitEvent("UNIT_AURA", "player") -- For auras that modify or define max power (i.e. Enhancement Shaman Maelstrom Weapon)
 
     local playerClass = select(2, UnitClass("player"))
 
@@ -41,6 +42,8 @@ function PowerBarMixin:OnEvent(event, ...)
 
     elseif event == "UNIT_MAXPOWER" and unit == "player" then
         self:UpdateTicksLayout()
+    elseif event == "UNIT_AURA" and unit == "player" then
+        self:UpdateDisplay()
     end
 end
 

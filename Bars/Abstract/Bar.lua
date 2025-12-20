@@ -814,7 +814,11 @@ function BarMixin:CreateFragmentedPowerBars(layoutName)
 
     local resource = self:GetResource()
     if not resource then return end
-    for i = 1, UnitPowerMax("player", resource) or 0 do
+	
+	local maxPower = resource == "MAELSTROM_WEAPON" and 10 or UnitPowerMax("player", resource) -- Handling MAELSTROM_WEAPON as a string and not ENUM.
+    if not maxPower or maxPower <= 0 then return end
+    
+    for i = 1, maxPower do
         if not self.FragmentedPowerBars[i] then
             -- Create a small status bar for each resource (behind main bar, in front of background)
             local bar = CreateFrame("StatusBar", nil, self.Frame)
@@ -846,7 +850,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
 
     local resource = self:GetResource()
     if not resource then return end
-    local maxPower = UnitPowerMax("player", resource)
+    local maxPower = resource == "MAELSTROM_WEAPON" and 10 or UnitPowerMax("player", resource) -- handling MAELSTROM_WEAPON as a string and not an ENUM.
     if maxPower <= 0 then return end
 
     local barWidth = self.Frame:GetWidth()
@@ -857,7 +861,53 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
     local r, g, b, a = self.StatusBar:GetStatusBarColor()
     local color = { r = r, g = g, b = b, a = a or 1 }
 
-    if resource == Enum.PowerType.ComboPoints then
+    if resource == "MAELSTROM_WEAPON" then
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179)
+        local current = auraData and auraData.applications or 0
+        local max = 10
+
+        local displayOrder = {}
+        for i = 1, max do
+            table.insert(displayOrder, i)
+        end
+
+        if data.fillDirection == "Right to Left" or data.fillDirection == "Bottom to Top" then
+            for i = 1, math.floor(#displayOrder / 2) do
+                displayOrder[i], displayOrder[#displayOrder - i + 1] = displayOrder[#displayOrder - i + 1], displayOrder[i]
+            end
+        end
+
+        self.StatusBar:SetAlpha(0)
+        for pos = 1, #displayOrder do
+            local idx = displayOrder[pos]
+            local mwFrame = self.FragmentedPowerBars[idx]
+            local mwText = self.FragmentedPowerBarTexts[idx]
+
+            if mwFrame then
+                mwFrame:ClearAllPoints()
+                if self.StatusBar:GetOrientation() == "VERTICAL" then
+                    mwFrame:SetSize(barWidth, fragmentedBarHeight)
+                    mwFrame:SetPoint("BOTTOM", self.Frame, "BOTTOM", 0, (pos - 1) * fragmentedBarHeight)
+                else
+                    mwFrame:SetSize(fragmentedBarWidth, barHeight)
+                    mwFrame:SetPoint("LEFT", self.Frame, "LEFT", (pos - 1) * fragmentedBarWidth, 0)
+                end
+
+                mwFrame:SetMinMaxValues(0, 1)
+
+                if idx <= current then
+                    mwFrame:SetValue(1, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    mwFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+                else
+                    mwFrame:SetValue(0, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    mwFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
+                end
+                mwText:SetText("")
+
+                mwFrame:Show()
+            end
+        end
+    elseif resource == Enum.PowerType.ComboPoints then
         local current = UnitPower("player", resource)
         local maxCP = UnitPowerMax("player", resource)
 

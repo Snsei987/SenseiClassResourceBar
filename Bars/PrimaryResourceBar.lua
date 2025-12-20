@@ -38,7 +38,7 @@ function PrimaryResourceBarMixin:GetResource()
         ["ROGUE"]       = Enum.PowerType.Energy,
         ["SHAMAN"]      = {
             [262] = Enum.PowerType.Maelstrom, -- Elemental
-            [263] = nil, -- Enhancement
+            [263] = "MAELSTROM_WEAPON", -- Enhancement
             [264] = Enum.PowerType.Mana, -- Restoration
         },
         ["WARLOCK"]     = Enum.PowerType.Mana,
@@ -64,7 +64,20 @@ end
 function PrimaryResourceBarMixin:GetResourceValue(resource)
         if not resource then return nil, nil, nil, nil, nil end
 
+        -- Enhancement Shaman Maelstrom Weapon special case
         local data = self:GetData()
+        if resource == "MAELSTROM_WEAPON" then
+            local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179)
+            local current = auraData and auraData.applications or 0
+            local max = 10
+
+            if data and (data.textFormat == "Percent" or data.textFormat == "Percent%") then
+                return max, max, current, math.floor((current / max) * 100 + 0.5), "percent"
+            else
+                return max, max, current, current, "number"
+            end
+        end
+
         local current = UnitPower("player", resource)
         local max = UnitPowerMax("player", resource)
         if max <= 0 then return nil, nil, nil, nil, nil end
