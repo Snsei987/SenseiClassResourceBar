@@ -66,9 +66,10 @@ function PrimaryResourceBarMixin:GetResourceValue(resource)
 
         -- Enhancement Shaman Maelstrom Weapon special case
         local data = self:GetData()
+
         if resource == "MAELSTROM_WEAPON" then
-            local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179)
-            local current = auraData and auraData.applications or 0
+            self._maelstromWeaponStacks = self._maelstromWeaponStacks or 0
+            local current = self._maelstromWeaponStacks
             local max = 10
 
             if data and (data.textFormat == "Percent" or data.textFormat == "Percent%") then

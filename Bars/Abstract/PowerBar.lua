@@ -43,6 +43,11 @@ function PowerBarMixin:OnEvent(event, ...)
     elseif event == "UNIT_MAXPOWER" and unit == "player" then
         self:UpdateTicksLayout()
     elseif event == "UNIT_AURA" and unit == "player" then
+        local resource = self:GetResource()
+        if resource == "MAELSTROM_WEAPON" then
+            local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179)
+            self._maelstromWeaponStacks = auraData and auraData.applications or 0
+        end
         self:UpdateDisplay()
     end
 end
