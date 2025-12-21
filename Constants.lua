@@ -74,6 +74,9 @@ addonTable.commonDefaults = {
     backgroundStyle = "SCRB Semi-transparent",
     backgroundColor = {r = 1, g = 1, b = 1, a = 1},
     foregroundStyle = "SCRB FG Fade Left",
+    showTicks = true,
+    tickThickness = 1,
+    tickColor = {r = 0, g = 0, b = 0, a = 1},
 }
 
 addonTable.availableBarVisibilityOptions = {
