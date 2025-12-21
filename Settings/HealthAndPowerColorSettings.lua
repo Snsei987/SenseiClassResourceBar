@@ -48,6 +48,10 @@ local PowerData = {
         key = Enum.PowerType.Maelstrom,
     },
     {
+        label = "Maelstrom Weapon",
+        key = "MAELSTROM_WEAPON",
+    },
+    {
         label = "Insanity",
         key = Enum.PowerType.Insanity,
     },

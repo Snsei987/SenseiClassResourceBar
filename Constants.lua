@@ -74,6 +74,9 @@ addonTable.commonDefaults = {
     backgroundStyle = "SCRB Semi-transparent",
     backgroundColor = {r = 1, g = 1, b = 1, a = 1},
     foregroundStyle = "SCRB FG Fade Left",
+    showTicks = true,
+    tickThickness = 1,
+    tickColor = {r = 0, g = 0, b = 0, a = 1},
 }
 
 addonTable.availableBarVisibilityOptions = {
@@ -200,6 +203,7 @@ addonTable.tickedPowerTypes = {
     [Enum.PowerType.HolyPower] = true,
     [Enum.PowerType.Runes] = true,
     [Enum.PowerType.SoulShards] = true,
+    ["MAELSTROM_WEAPON"] = true, -- Enhancement Shaman's like segments
 }
 
 -- Power types that are fragmented (multiple independent segments)
@@ -207,6 +211,7 @@ addonTable.fragmentedPowerTypes = {
     [Enum.PowerType.ComboPoints] = true,
     [Enum.PowerType.Essence] = true,
     [Enum.PowerType.Runes] = true,
+    ["MAELSTROM_WEAPON"] = true, -- Enhancement Shaman's like segments
 }
 
 addonTable.clamp = function(x, min, max)
