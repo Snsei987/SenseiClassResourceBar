@@ -877,7 +877,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
         end
 
         -- Reverse if needed
-        if data.fillDirection == "Right to Left" or data.fillDirection == "Bottom to Top" then
+        if data.fillDirection == "Right to Left" or data.fillDirection == "Top to Bottom" then
             for i = 1, math.floor(#displayOrder / 2) do
                 displayOrder[i], displayOrder[#displayOrder - i + 1] = displayOrder[#displayOrder - i + 1], displayOrder[i]
             end
@@ -1046,7 +1046,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
             cdLookup[v.index] = v
         end
 
-        if data.fillDirection == "Right to Left" or data.fillDirection == "Bottom to Top" then
+        if data.fillDirection == "Right to Left" or data.fillDirection == "Top to Bottom" then
             for i = 1, math.floor(#displayOrder / 2) do
                 displayOrder[i], displayOrder[#displayOrder - i + 1] = displayOrder[#displayOrder - i + 1], displayOrder[i]
             end
