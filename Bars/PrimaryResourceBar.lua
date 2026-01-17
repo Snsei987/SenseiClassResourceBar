@@ -38,7 +38,7 @@ function PrimaryResourceBarMixin:GetResource()
         ["ROGUE"]       = Enum.PowerType.Energy,
         ["SHAMAN"]      = {
             [262] = Enum.PowerType.Maelstrom, -- Elemental
-            [263] = nil, -- Enhancement
+            [263] = "MAELSTROM_WEAPON", -- Enhancement
             [264] = Enum.PowerType.Mana, -- Restoration
         },
         ["WARLOCK"]     = Enum.PowerType.Mana,
@@ -62,23 +62,39 @@ function PrimaryResourceBarMixin:GetResource()
 end
 
 function PrimaryResourceBarMixin:GetResourceValue(resource)
-        if not resource then return nil, nil, nil, nil, nil end
+    if not resource then return nil, nil, nil, nil, nil end
 
-        local data = self:GetData()
-        local current = UnitPower("player", resource)
-        local max = UnitPowerMax("player", resource)
-        if max <= 0 then return nil, nil, nil, nil, nil end
+    local data = self:GetData()
+    if not data then return nil, nil, nil, nil, nil end
 
-        if data and ((data.showManaAsPercent and resource == Enum.PowerType.Mana) or data.textFormat == "Percent" or data.textFormat == "Percent%") then
-            -- UnitPowerPercent does not exist prior to Midnight
-            if (buildVersion or 0) < 120000 then
-                return max, max, current, math.floor((current / max) * 100 + 0.5), "percent"
-            else
-                return max, max, current, UnitPowerPercent("player", resource, false, CurveConstants.ScaleTo100), "percent"
-            end
+    if resource == "MAELSTROM_WEAPON" then
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179)
+        local current = auraData and auraData.applications or 0
+        local max = 10
+
+        -- The Maelstrom Weapon bar should be capped at 5, if it goes beyond that it's just a visual effect
+        if data.textFormat == "Percent" or data.textFormat == "Percent%" then
+            return max/2, max, current, math.floor((current / max) * 100 + 0.5), "percent"
         else
-            return max, max, current, current, "number"
+            return max/2, max, current, current, "number"
         end
+    end
+
+    -- Regular primary resource types
+    local current = UnitPower("player", resource)
+    local max = UnitPowerMax("player", resource)
+    if max <= 0 then return nil, nil, nil, nil, nil end
+
+    if data and ((data.showManaAsPercent and resource == Enum.PowerType.Mana) or data.textFormat == "Percent" or data.textFormat == "Percent%") then
+        -- UnitPowerPercent does not exist prior to Midnight
+        if (buildVersion or 0) < 120000 then
+            return max, max, current, math.floor((current / max) * 100 + 0.5), "percent"
+        else
+            return max, max, current, UnitPowerPercent("player", resource, false, CurveConstants.ScaleTo100), "percent"
+        end
+    else
+        return max, max, current, current, "number"
+    end
 end
 
 addonTable.PrimaryResourceBarMixin = PrimaryResourceBarMixin
@@ -96,6 +112,9 @@ addonTable.RegistereredBar.PrimaryResourceBar = {
         y = 0,
         hideManaOnRole = {},
         showManaAsPercent = false,
+        showTicks = true,
+        tickColor = {r = 0, g = 0, b = 0, a = 1},
+        tickThickness = 1,
         useResourceAtlas = false,
     },
     lemSettings = function(bar, defaults)
@@ -119,6 +138,64 @@ addonTable.RegistereredBar.PrimaryResourceBar = {
                     SenseiClassResourceBarDB[dbName][layoutName].hideManaOnRole = value
                 end,
                 tooltip = "Not effective on Arcane Mage",
+            },
+            {
+                parentId = "Bar Settings",
+                order = 304,
+                kind = LEM.SettingType.Divider,
+            },
+            {
+                parentId = "Bar Settings",
+                order = 305,
+                name = "Show Ticks When Available",
+                kind = LEM.SettingType.CheckboxColor,
+                default = defaults.showTicks,
+                colorDefault = defaults.tickColor,
+                get = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    if data and data.showTicks ~= nil then
+                        return data.showTicks
+                    else
+                        return defaults.showTicks
+                    end
+                end,
+                colorGet = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    return data and data.tickColor or defaults.tickColor
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].showTicks = value
+                    bar:UpdateTicksLayout(layoutName)
+                end,
+                colorSet = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].tickColor = value
+                    bar:UpdateTicksLayout(layoutName)
+                end,
+            },
+            {
+                parentId = "Bar Settings",
+                order = 306,
+                name = "Tick Thickness",
+                kind = LEM.SettingType.Slider,
+                default = defaults.tickThickness,
+                minValue = 1,
+                maxValue = 5,
+                valueStep = 1,
+                get = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    return data and data.tickThickness or defaults.tickThickness
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].tickThickness = value
+                    bar:UpdateTicksLayout(layoutName)
+                end,
+                isEnabled = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    return data.showTicks
+                end,
             },
             {
                 parentId = "Text Settings",

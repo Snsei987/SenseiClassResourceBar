@@ -751,7 +751,7 @@ function BarMixin:UpdateTicksLayout(layoutName)
     if not data then return end
 
     local resource = self:GetResource()
-    local max = (type(resource) ~= "number") and 0 or UnitPowerMax("player", resource)
+    local max = resource == "MAELSTROM_WEAPON" and 5 or (type(resource) ~= "number") and 0 or UnitPowerMax("player", resource)
 
     local defaults = self.defaults or {}
 
@@ -814,7 +814,10 @@ function BarMixin:CreateFragmentedPowerBars(layoutName)
 
     local resource = self:GetResource()
     if not resource then return end
-    for i = 1, UnitPowerMax("player", resource) or 0 do
+
+    local maxPower = resource == "MAELSTROM_WEAPON" and 5 or UnitPowerMax("player", resource) or 0
+
+    for i = 1, maxPower or 0 do
         if not self.FragmentedPowerBars[i] then
             -- Create a small status bar for each resource (behind main bar, in front of background)
             local bar = CreateFrame("StatusBar", nil, self.Frame)
@@ -846,7 +849,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
 
     local resource = self:GetResource()
     if not resource then return end
-    local maxPower = UnitPowerMax("player", resource)
+    local maxPower = resource == "MAELSTROM_WEAPON" and 5 or UnitPowerMax("player", resource)
     if maxPower <= 0 then return end
 
     local barWidth = self.Frame:GetWidth()
@@ -1086,6 +1089,56 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
                         runeText:SetText("")
                     end
                 end
+            end
+        end
+    elseif resource == "MAELSTROM_WEAPON" then
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179)
+        local current = auraData and auraData.applications or 0
+        local above5MwColor = addonTable:GetOverrideResourceColor("MAELSTROM_WEAPON_ABOVE_5") or color
+
+        local displayOrder = {}
+        for i = 1, maxPower do
+            table.insert(displayOrder, i)
+        end
+
+        if data.fillDirection == "Right to Left" or data.fillDirection == "Top to Bottom" then
+            for i = 1, math.floor(#displayOrder / 2) do
+                displayOrder[i], displayOrder[#displayOrder - i + 1] = displayOrder[#displayOrder - i + 1], displayOrder[i]
+            end
+        end
+
+        self.StatusBar:SetAlpha(0)
+        for pos = 1, #displayOrder do
+            local idx = displayOrder[pos]
+            local mwFrame = self.FragmentedPowerBars[idx]
+            local mwText = self.FragmentedPowerBarTexts[idx]
+
+            if mwFrame then
+                mwFrame:ClearAllPoints()
+                if self.StatusBar:GetOrientation() == "VERTICAL" then
+                    mwFrame:SetSize(barWidth, fragmentedBarHeight)
+                    mwFrame:SetPoint("BOTTOM", self.Frame, "BOTTOM", 0, (pos - 1) * fragmentedBarHeight)
+                else
+                    mwFrame:SetSize(fragmentedBarWidth, barHeight)
+                    mwFrame:SetPoint("LEFT", self.Frame, "LEFT", (pos - 1) * fragmentedBarWidth, 0)
+                end
+
+                mwFrame:SetMinMaxValues(0, 1)
+
+                if idx <= current then
+                    mwFrame:SetValue(1, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    if current > 5 and idx <= math.fmod(current - 1, 5) + 1 then
+                        mwFrame:SetStatusBarColor(above5MwColor.r, above5MwColor.g, above5MwColor.b, above5MwColor.a or 1)
+                    else
+                        mwFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+                    end
+                else
+                    mwFrame:SetValue(0, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    mwFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
+                end
+                mwText:SetText("")
+
+                mwFrame:Show()
             end
         end
     end
