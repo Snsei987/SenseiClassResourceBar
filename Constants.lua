@@ -60,6 +60,7 @@ addonTable.commonDefaults = {
     widthMode = "Manual",
     height = 15,
     fillDirection = "Left to Right",
+    fragmentedResourceLayout = "Auto",
     smoothProgress = true,
     fasterUpdates = true,
     showText = true,
@@ -231,6 +232,12 @@ addonTable.availableFillDirections = {
     { text = "Bottom to Top" },
 }
 
+addonTable.availableFragmentedResourceLayouts = {
+    { text = "Auto"},
+    { text = "Vertical"},
+    { text = "Horizontal"},
+}
+
 addonTable.availableOutlineStyles = {
     { text = "NONE" },
     { text = "OUTLINE" },
@@ -336,8 +343,12 @@ addonTable.tickedPowerTypes = {
 
 -- Power types that are fragmented (multiple independent segments)
 addonTable.fragmentedPowerTypes = {
+    [Enum.PowerType.ArcaneCharges] = true,
+    [Enum.PowerType.Chi] = true,
     [Enum.PowerType.ComboPoints] = true,
     [Enum.PowerType.Essence] = true,
+    [Enum.PowerType.HolyPower] = true,
     [Enum.PowerType.Runes] = true,
+    [Enum.PowerType.SoulShards] = true,
     ["MAELSTROM_WEAPON"] = true,
 }

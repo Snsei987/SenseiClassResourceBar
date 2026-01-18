@@ -694,10 +694,17 @@ function BarMixin:ApplyFillDirectionSettings(layoutName, data)
     data = data or self:GetData(layoutName)
     if not data then return end
 
-    if data.fillDirection == "Top to Bottom" or data.fillDirection == "Bottom to Top" then
-        self.StatusBar:SetOrientation("VERTICAL")
+    local defaults = self.defaults or {}
+    local fragmentedResourceLayout = data.fragmentedResourceLayout or defaults.fragmentedResourceLayout
+
+    if fragmentedResourceLayout == "Auto" then
+        if data.fillDirection == "Top to Bottom" or data.fillDirection == "Bottom to Top" then
+            self.StatusBar:SetOrientation("VERTICAL")
+        else
+            self.StatusBar:SetOrientation("HORIZONTAL")
+        end
     else
-        self.StatusBar:SetOrientation("HORIZONTAL")
+        self.StatusBar:SetOrientation(string.upper(fragmentedResourceLayout))
     end
 
     if data.fillDirection == "Right to Left" or data.fillDirection == "Top to Bottom" then
@@ -707,6 +714,7 @@ function BarMixin:ApplyFillDirectionSettings(layoutName, data)
     end
 
     for _, fragmentedPowerBar in ipairs(self.FragmentedPowerBars) do
+        -- Fragment orientation is always based on fillDirection (how each fragment fills)
         if data.fillDirection == "Top to Bottom" or data.fillDirection == "Bottom to Top" then
             fragmentedPowerBar:SetOrientation("VERTICAL")
         else
@@ -1363,6 +1371,50 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
                 mwText:SetFormattedText("")
 
                 mwFrame:Show()
+            end
+        end
+    elseif resource == Enum.PowerType.ArcaneCharges or resource == Enum.PowerType.Chi or resource == Enum.PowerType.HolyPower or resource == Enum.PowerType.SoulShards then
+        local current = UnitPower("player", resource)
+
+        local displayOrder = {}
+        for i = 1, maxPower do
+            table.insert(displayOrder, i)
+        end
+
+        if data.fillDirection == "Right to Left" or data.fillDirection == "Top to Bottom" then
+            for i = 1, math.floor(#displayOrder / 2) do
+                displayOrder[i], displayOrder[#displayOrder - i + 1] = displayOrder[#displayOrder - i + 1], displayOrder[i]
+            end
+        end
+
+        self.StatusBar:SetAlpha(0)
+        for pos = 1, #displayOrder do
+            local idx = displayOrder[pos]
+            local frame = self.FragmentedPowerBars[idx]
+            local text = self.FragmentedPowerBarTexts[idx]
+
+            if frame then
+                frame:ClearAllPoints()
+                if self.StatusBar:GetOrientation() == "VERTICAL" then
+                    frame:SetSize(barWidth, fragmentedBarHeight)
+                    frame:SetPoint("BOTTOM", self.Frame, "BOTTOM", 0, (pos - 1) * fragmentedBarHeight)
+                else
+                    frame:SetSize(fragmentedBarWidth, barHeight)
+                    frame:SetPoint("LEFT", self.Frame, "LEFT", (pos - 1) * fragmentedBarWidth, 0)
+                end
+
+                frame:SetMinMaxValues(0, 1)
+
+                if idx <= current then
+                    frame:SetValue(1, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    frame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+                else
+                    frame:SetValue(0, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    frame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
+                end
+                text:SetText("")
+
+                frame:Show()
             end
         end
     end
