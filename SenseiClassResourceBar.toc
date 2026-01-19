@@ -6,8 +6,10 @@
 ## IconTexture: Interface\AddOns\SenseiClassResourceBar\Textures\icon-texture.png
 ## SavedVariables: SenseiClassResourceBarDB
 
+## X-Wago-ID: ANzk0V64
 ## X-Curse-Project-ID: 1383623
 
 # Lib
 embeds.xml
+
 SenseiClassResourceBar.xml
