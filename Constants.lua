@@ -1,4 +1,6 @@
 local _, addonTable = ...
+-- Global variables available to other addons, only some functions are exposed
+SCRB = SCRB or {}
 
 addonTable.LSM = LibStub("LibSharedMedia-3.0")
 local LSM = addonTable.LSM

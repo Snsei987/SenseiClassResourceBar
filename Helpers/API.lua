@@ -135,6 +135,7 @@ addonTable.exportProfileAsString = function(includeBarSettings, includeAddonSett
 
     return addonTable.encodeDataAsString(data)
 end
+SCRB.exportProfileAsString = addonTable.exportProfileAsString
 
 --- Can work with individual export string
 addonTable.importProfileFromString = function(importString)
@@ -166,6 +167,7 @@ addonTable.importProfileFromString = function(importString)
 
     return data
 end
+SCRB.importProfileFromString = addonTable.importProfileFromString
 
 addonTable.prettyPrint = function(...)
   print("|cffb5a707"..addonName..":|r", ...)
