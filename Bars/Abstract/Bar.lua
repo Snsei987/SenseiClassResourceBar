@@ -1149,7 +1149,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
                     elseif current >= 9 then
                         mwFrame:SetStatusBarColor(above9MwColor.r, above9MwColor.g, above9MwColor.b, above9MwColor.a or 1)
 
-                        if not AuraUtil.FindAuraByName("Ascendance", "player") then
+                        if not AuraUtil.FindAuraByName("Ascendance", "player") and UnitAffectingCombat("player") then
                            PlaySoundFile("Interface\\AddOns\\SenseiClassResourceBar\\media\\ring_song.wav", "SFX")
                         end
                     else
