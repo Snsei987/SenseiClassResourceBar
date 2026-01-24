@@ -3,4 +3,5 @@
 	<Script file="API.lua"/>
 	<Script file="Color.lua"/>
 	<Script file="LEMSettingsLoader.lua"/>
+	<Script file="TipOfTheSpear.lua"/>
 </Ui>
