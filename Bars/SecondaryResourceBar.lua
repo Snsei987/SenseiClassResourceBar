@@ -161,12 +161,12 @@ end
 function SecondaryResourceBarMixin:GetPoint(layoutName)
     local data = self:GetData(layoutName)
 
-    if data and data.positionMode ~= "Never" then
+    if data and data.positionMode == "Use Primary Resource Bar Position If Hidden" then
         local primaryResource = addonTable.barInstances and addonTable.barInstances["PrimaryResourceBar"]
 
         if primaryResource then
-                -- This works because visibility settings are applied before layout, so the secondary can know whether the primary is shown or not
-            if data.positionMode == "Use Primary Resource Bar Position If Hidden" and not primaryResource:IsShown() then
+            -- This works because visibility settings are applied before layout, so the secondary can know whether the primary is shown or not
+            if not primaryResource:IsShown() then
                 return primaryResource:GetPoint(layoutName)
             end
         end
@@ -207,6 +207,7 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
         positionMode = "Self",
         hideBlizzardSecondaryResourceUi = false,
         hideManaOnRole = {},
+        showManaAsPercent = false,
         showTicks = true,
         tickColor = {r = 0, g = 0, b = 0, a = 1},
         tickThickness = 1,

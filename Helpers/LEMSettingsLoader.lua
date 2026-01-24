@@ -134,8 +134,8 @@ local function BuildLemSettings(bar, defaults)
             set = function(layoutName, value)
                 SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName].relativeFrame = value
-                SenseiClassResourceBarDB[config.dbName][layoutName].x = 0
-                SenseiClassResourceBarDB[config.dbName][layoutName].y = 0
+                SenseiClassResourceBarDB[config.dbName][layoutName].x = defaults.x
+                SenseiClassResourceBarDB[config.dbName][layoutName].y = defaults.y
                 bar:ApplyLayout(layoutName)
                 LEM.internal:RefreshSettingValues({"X Position", "Y Position"})
             end,
