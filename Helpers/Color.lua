@@ -118,6 +118,8 @@ function addonTable:GetResourceColor(resource)
         color = { r = 0, g = 0.5, b = 1 }
     elseif resource == "MAELSTROM_WEAPON_ABOVE_5" then
         color = { r = 1, g = 0.5, b = 0 }
+    elseif resource == "TIP_OF_THE_SPEAR" then
+        color = { r = 0.6, g = 0.8, b = 0.2 }
     end
 
     -- If not custom, try with power name or id
