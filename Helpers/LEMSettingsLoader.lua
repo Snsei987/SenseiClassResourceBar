@@ -315,6 +315,24 @@ local function BuildLemSettings(bar, defaults)
         {
             parentId = "Bar Settings",
             order = 302,
+            name = "Fragmented Resource Layout",
+            kind = LEM.SettingType.Dropdown,
+            default = defaults.fragmentedResourceLayout,
+            useOldStyle = true,
+            values = addonTable.availableFragmentedResourceLayouts,
+            get = function(layoutName)
+                return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].fragmentedResourceLayout) or defaults.fragmentedResourceLayout
+            end,
+            set = function(layoutName, value)
+                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+                SenseiClassResourceBarDB[config.dbName][layoutName].fragmentedResourceLayout = value
+                bar:ApplyLayout(layoutName)
+            end,
+            tooltip = "Applies to most secondary resources.",
+        },
+        {
+            parentId = "Bar Settings",
+            order = 303,
             name = "Faster Updates (Higher CPU Usage)",
             kind = LEM.SettingType.Checkbox,
             default = defaults.fasterUpdates,
@@ -338,7 +356,7 @@ local function BuildLemSettings(bar, defaults)
         },
         {
             parentId = "Bar Settings",
-            order = 303,
+            order = 304,
             name = "Smooth Progress",
             kind = LEM.SettingType.Checkbox,
             default = defaults.smoothProgress,
