@@ -10,7 +10,12 @@ function PrimaryResourceBarMixin:GetResource()
         ["DEATHKNIGHT"] = Enum.PowerType.RunicPower,
         ["DEMONHUNTER"] = Enum.PowerType.Fury,
         ["DRUID"]       = {
-            [0]   = Enum.PowerType.Mana, -- Human
+            [0]                     = {
+                [102] = Enum.PowerType.LunarPower, -- Balance
+                [103] = Enum.PowerType.Mana, -- Feral
+                [104] = Enum.PowerType.Mana, -- Guardian
+                [105] = Enum.PowerType.Mana, -- Restoration
+            },
             [DRUID_BEAR_FORM]       = Enum.PowerType.Rage,
             [DRUID_TREE_FORM]       = Enum.PowerType.Mana,
             [36]                    = Enum.PowerType.Mana, -- Tome of the Wilds: Treant Form
@@ -48,16 +53,18 @@ function PrimaryResourceBarMixin:GetResource()
     local spec = C_SpecializationInfo.GetSpecialization()
     local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
 
+    local resource = primaryResources[playerClass]
+
     -- Druid: form-based
     if playerClass == "DRUID" then
         local formID = GetShapeshiftFormID()
-        return primaryResources[playerClass] and primaryResources[playerClass][formID or 0]
+        resource = resource and resource[formID or 0]
     end
 
-    if type(primaryResources[playerClass]) == "table" then
-        return primaryResources[playerClass][specID]
+    if type(resource) == "table" then
+        return resource[specID]
     else 
-        return primaryResources[playerClass]
+        return resource
     end
 end
 

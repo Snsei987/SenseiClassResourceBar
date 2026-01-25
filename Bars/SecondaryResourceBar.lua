@@ -12,6 +12,9 @@ function SecondaryResourceBarMixin:GetResource()
             [1480] = "SOUL_FRAGMENTS", -- Devourer
         },
         ["DRUID"]       = {
+            [0]                     = {
+                [102] = Enum.PowerType.Mana, -- Balance
+            },
             [DRUID_CAT_FORM]        = Enum.PowerType.ComboPoints,
             [DRUID_MOONKIN_FORM_1]  = Enum.PowerType.Mana,
             [DRUID_MOONKIN_FORM_2]  = Enum.PowerType.Mana,
@@ -32,7 +35,7 @@ function SecondaryResourceBarMixin:GetResource()
         ["ROGUE"]       = Enum.PowerType.ComboPoints,
         ["SHAMAN"]      = {
             [262]  = Enum.PowerType.Mana, -- Elemental
-            [263] = "MAELSTROM_WEAPON", -- Enhancement
+            [263]  = "MAELSTROM_WEAPON", -- Enhancement
         },
         ["WARLOCK"]     = Enum.PowerType.SoulShards,
         ["WARRIOR"]     = nil,
@@ -41,16 +44,18 @@ function SecondaryResourceBarMixin:GetResource()
     local spec = C_SpecializationInfo.GetSpecialization()
     local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
 
+    local resource = secondaryResources[playerClass]
+
     -- Druid: form-based
     if playerClass == "DRUID" then
         local formID = GetShapeshiftFormID()
-        return secondaryResources[playerClass] and secondaryResources[playerClass][formID or 0]
+        resource = resource and resource[formID or 0]
     end
 
-    if type(secondaryResources[playerClass]) == "table" then
-        return secondaryResources[playerClass][specID]
+    if type(resource) == "table" then
+        return resource[specID]
     else
-        return secondaryResources[playerClass]
+        return resource
     end
 end
 

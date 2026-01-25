@@ -27,16 +27,18 @@ function TertiaryResourceBarMixin:GetResource()
     local spec = C_SpecializationInfo.GetSpecialization()
     local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
 
+    local resource = tertiaryResources[playerClass]
+
     -- Druid: form-based
     if playerClass == "DRUID" then
         local formID = GetShapeshiftFormID()
-        return tertiaryResources[playerClass] and tertiaryResources[playerClass][formID or 0]
+        resource = resource and resource[formID or 0]
     end
 
-    if type(tertiaryResources[playerClass]) == "table" then
-        return tertiaryResources[playerClass][specID]
-    else 
-        return tertiaryResources[playerClass]
+    if type(resource) == "table" then
+        return resource[specID]
+    else
+        return resource
     end
 end
 
