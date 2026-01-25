@@ -8,7 +8,6 @@ local LEM = addonTable.LEM or LibStub("LibEQOLEditMode-1.0")
 ------------------------------------------------------------
 
 local BarMixin = {}
-local buildVersion = select(4, GetBuildInfo())
 
 ------------------------------------------------------------
 -- BAR FACTORY
@@ -62,7 +61,7 @@ function BarMixin:Init(config, parent, frameLevel)
     self.TextValue = self.TextFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     self.TextValue:SetPoint("CENTER", self.TextFrame, "CENTER", 0, 0)
     self.TextValue:SetJustifyH("CENTER")
-    self.TextValue:SetText("0")
+    self.TextValue:SetFormattedText("")
 
     -- STATE
     self.smoothEnabled = false
@@ -126,10 +125,12 @@ end
 ------------------------------------------------------------
 
 function BarMixin:Show()
+    self:OnShow()
     self.Frame:Show()
 end
 
 function BarMixin:Hide()
+    self:OnHide()
     self.Frame:Hide()
 end
 
@@ -175,17 +176,28 @@ function BarMixin:GetResource()
 end
 
 --- @param _ string|number|nil The value returned by BarMixin:GetResource()
---- @return number|nil Max used for the status bar
---- @return number|nil MaxDisplayValue Value to display as text
---- @return number|nil Value used for the status bar progression
---- @return number|nil DisplayValue Value to display as text
---- @return string|nil ValueType Type for the display, "percent", "number", "custom"
---- @return number|nil precision If needed by the format
+--- @return number|nil Max Used for the status bar
+--- @return number|nil Value Used for the status bar progression
 function BarMixin:GetResourceValue(_)
-    return nil, nil, nil, nil, nil, nil
+    return nil, nil
+end
+
+--- @param resource string|number The value returned by BarMixin:GetResource()
+--- @param max number The max returned by BarMixin:GetResourceValue()
+--- @param current number The current returned by BarMixin:GetResourceValue()
+--- @param precision number The precision if needed by the tag
+--- @return table<string, fun(): string> values A table where keys are the tag (e.g "[current]") and values are functions returning the corresponding value as string
+function BarMixin:GetTagValues(resource, max, current, precision)
+    return {}
 end
 
 function BarMixin:OnLoad()
+end
+
+function BarMixin:OnShow()
+end
+
+function BarMixin:OnHide()
 end
 
 ---@param event string
@@ -198,7 +210,7 @@ function BarMixin:EnableFasterUpdates()
     self.fasterUpdates = true
     self.Frame:SetScript("OnUpdate", function(_, delta)
         self.Frame.elapsed = (self.Frame.elapsed or 0) + delta
-        if self.Frame.elapsed >= 0.01 then
+        if self.Frame.elapsed >= 0.1 then
             self.Frame.elapsed = 0
             self:UpdateDisplay()
         end
@@ -210,7 +222,7 @@ function BarMixin:DisableFasterUpdates()
     self.fasterUpdates = false
     self.Frame:SetScript("OnUpdate", function(_, delta)
         self.Frame.elapsed = (self.Frame.elapsed or 0) + delta
-        if self.Frame.elapsed >= 0.1 then
+        if self.Frame.elapsed >= 0.25 then
             self.Frame.elapsed = 0
             self:UpdateDisplay()
         end
@@ -232,13 +244,13 @@ function BarMixin:UpdateDisplay(layoutName, force)
         if LEM:IsInEditMode() then
             -- "4" text for edit mode is resource does not exist (e.g. Secondary resource for warrior)
             self.StatusBar:SetMinMaxValues(0, 5)
-            self.TextValue:SetText("4")
+            self.TextValue:SetFormattedText("4")
             self.StatusBar:SetValue(4)
         end
         return
     end
 
-    local max, maxDisplayValue, current, displayValue, valueType = self:GetResourceValue(resource)
+    local max, current = self:GetResourceValue(resource)
     if not max then
         if not LEM:IsInEditMode() then
             self:Hide()
@@ -246,30 +258,37 @@ function BarMixin:UpdateDisplay(layoutName, force)
         return
     end
 
-    self.StatusBar:SetMinMaxValues(0, max, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-    self.StatusBar:SetValue(current, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+    self.StatusBar:SetMinMaxValues(0, max, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+    self.StatusBar:SetValue(current, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
 
+    -----------
+
+    local precision = data.textPrecision and math.max(0, string.len(data.textPrecision) - 3) or 0
+    local tagValues = self:GetTagValues(resource, max, current, precision)
+
+    local textFormat = ""
     if (data.showManaAsPercent and resource == Enum.PowerType.Mana) or data.textFormat == "Percent" or data.textFormat == "Percent%" then
-        local precision = data.textPrecision and math.max(0, string.len(data.textPrecision) - 3) or 0
-
-        if valueType == "custom" then
-            self.TextValue:SetText(displayValue)
-        else
-            self.TextValue:SetText(string.format("%." .. (precision or 0) .. "f" .. (data.textFormat == "Percent%" and "%%" or ""), displayValue))
-        end
+        textFormat = "[percent]" .. (data.textFormat == "Percent%" and "%" or "")
     elseif data.textFormat == nil or data.textFormat == "Current" then
-        if valueType == "custom" then
-            self.TextValue:SetText(displayValue)
-        else
-            self.TextValue:SetText(AbbreviateNumbers(displayValue))
-        end
+        textFormat = "[current]"
     elseif data.textFormat == "Current / Maximum" then
-        if valueType == "custom" then
-            self.TextValue:SetText(displayValue .. ' / ' .. maxDisplayValue)
+        textFormat = "[current] / [max]"
+    elseif data.textFormat == "Current - Percent" or data.textFormat == "Current - Percent%" then
+        textFormat = "[current] - [percent]" .. (data.textFormat == "Current - Percent%" and "%" or "")
+    end
+
+    -- Thanks oUF
+    local valuesToDisplay = {}
+    for tag in textFormat:gmatch('%[..-%]+') do
+        if tagValues and tagValues[tag] then
+            table.insert(valuesToDisplay, tagValues[tag]())
         else
-            self.TextValue:SetText(AbbreviateNumbers(displayValue) .. ' / ' .. AbbreviateNumbers(maxDisplayValue))
+            table.insert(valuesToDisplay, '')
         end
     end
+    local format, num = textFormat:gsub('%%', '%%%%'):gsub('%[..-%]+', '%%s')
+
+    self.TextValue:SetFormattedText(format, unpack(valuesToDisplay, 1, num))
 
     if addonTable.fragmentedPowerTypes[resource] then
         self:UpdateFragmentedPowerDisplay(layoutName)
@@ -436,6 +455,60 @@ end
 -- LAYOUT related methods
 ------------------------------------------------------------
 
+function BarMixin:GetPoint(layoutName)
+    local defaults = self.defaults or {}
+
+    local data = self:GetData(layoutName)
+    if not data then
+        return defaults.point or "CENTER",
+            addonTable.resolveRelativeFrames(defaults.relativeFrame or "UIParent"),
+            defaults.relativePoint or "CENTER",
+            defaults.x or 0,
+            defaults.y or 0
+    end
+
+    local x = data.x or defaults.x
+    local y = data.y or defaults.y
+
+    local point = data.point or defaults.point
+    local relativePoint = data.relativePoint or defaults.relativePoint
+    local relativeFrame = data.relativeFrame or defaults.relativeFrame
+    local resolvedRelativeFrame = addonTable.resolveRelativeFrames(relativeFrame) or UIParent
+    -- Cannot anchor to itself or to a frame already anchored to this frame
+    if self.Frame == resolvedRelativeFrame or self.Frame == select(2, resolvedRelativeFrame:GetPoint(1)) then
+        resolvedRelativeFrame = UIParent
+        data.relativeFrame = "UIParent"
+        LEM.internal:RefreshSettingValues({"Relative Frame"})
+        addonTable.prettyPrint("Cannot change Relative Frame as the selected Frame is already relative to this Frame.")
+    end
+
+    local uiWidth, uiHeight = UIParent:GetWidth() / 2, UIParent:GetHeight() / 2
+    return point, resolvedRelativeFrame, relativePoint, addonTable.clamp(x, uiWidth * -1, uiWidth), addonTable.clamp(y, uiHeight * -1, uiHeight)
+end
+
+function BarMixin:GetSize(layoutName)
+    local defaults = self.defaults or {}
+
+    local data = self:GetData(layoutName)
+    if not data then return defaults.width or 200, defaults.height or 15 end
+
+    local width = nil
+    if data.widthMode == "Sync With Essential Cooldowns" or data.widthMode == "Sync With Utility Cooldowns" then
+        width = self:GetCooldownManagerWidth(layoutName) or data.width or defaults.width
+        if data.minWidth and data.minWidth > 0 then
+            width = max(width, data.minWidth)
+        end
+    else -- Use manual width
+        width = data.width or defaults.width
+    end
+
+    local height = data.height or defaults.height
+
+    local scale = addonTable.rounded(data.scale or defaults.scale or 1)
+
+    return width * scale, height * scale
+end
+
 function BarMixin:ApplyLayout(layoutName, force)
     if not self:IsShown() and not force then return end
 
@@ -450,32 +523,22 @@ function BarMixin:ApplyLayout(layoutName, force)
 
     local defaults = self.defaults or {}
 
-    local scale = data.scale or defaults.scale
-    local point = data.point or defaults.point
-    local x = data.x or defaults.x
-    local y = data.y or defaults.y
+    local width, height = self:GetSize(layoutName)
+    self.Frame:SetSize(max(LEM:IsInEditMode() and 2 or 1, width), max(LEM:IsInEditMode() and 2 or 1, height))
 
-    local width = nil
-    if data.widthMode == "Sync With Essential Cooldowns" or data.widthMode == "Sync With Utility Cooldowns" then
-        width = self:GetCooldownManagerWidth(layoutName) or data.width or defaults.width
-        if data.minWidth and data.minWidth > 0 then
-            width = max(width, data.minWidth)
-        end
-    else -- Use manual width
-        width = data.width or defaults.width
-    end
-    local height = data.height or defaults.height
-    self.Frame:SetSize(max(LEM:IsInEditMode() and 2 or 1, width * scale), max(LEM:IsInEditMode() and 2 or 1, height * scale))
+    local point, relativeTo, relativePoint, x, y = self:GetPoint(layoutName)
     self.Frame:ClearAllPoints()
-    local uiWidth, uiHeight = UIParent:GetWidth() / 2, UIParent:GetHeight() / 2
-    self.Frame:SetPoint(point, UIParent, point, addonTable.clamp(x, uiWidth * -1, uiWidth), addonTable.clamp(y, uiHeight * -1, uiHeight))
+    self.Frame:SetPoint(point, relativeTo, relativePoint, x, y)
+
+    -- Disable drag & drop if the relative frame is not UIParent, due to LEM limitation making x and y position incorrect when dragging
+    LEM:SetFrameDragEnabled(self.Frame, relativeTo == UIParent)
 
     self:SetFrameStrata(data.barStrata or defaults.barStrata)
     self:ApplyFontSettings(layoutName)
     self:ApplyFillDirectionSettings(layoutName)
     self:ApplyMaskAndBorderSettings(layoutName)
-    self:ApplyBackgroundSettings(layoutName)
     self:ApplyForegroundSettings(layoutName)
+    self:ApplyBackgroundSettings(layoutName)
 
     self:UpdateTicksLayout(layoutName)
 
@@ -493,7 +556,7 @@ function BarMixin:ApplyLayout(layoutName, force)
             if self.FragmentedPowerBars[i] then
                 self.FragmentedPowerBars[i]:Hide()
                 if self.FragmentedPowerBarTexts[i] then
-                    self.FragmentedPowerBarTexts[i]:SetText("")
+                    self.FragmentedPowerBarTexts[i]:SetFormattedText("")
                 end
             end
         end
@@ -709,6 +772,10 @@ function BarMixin:ApplyBackgroundSettings(layoutName)
     if not bgConfig then return end
 
     local bgColor = data.backgroundColor or defaults.backgroundColor
+    if data.useStatusBarColorForBackgroundColor then
+        local r, g, b, a = self.StatusBar:GetStatusBarColor()
+        bgColor = { r = r * 0.25, g = g * 0.25, b = b * 0.25, a = a or 1 }
+    end
 
     if bgConfig.type == "color" then
         -- Blend bgColor with bgConfig color based on how close bgColor is to white
@@ -853,7 +920,7 @@ function BarMixin:CreateFragmentedPowerBars(layoutName)
             local text = bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
             text:SetPoint("CENTER", bar, "CENTER", 0, 0)
             text:SetJustifyH("CENTER")
-            text:SetText("")
+            text:SetFormattedText("")
             self.FragmentedPowerBarTexts[i] = text
         end
     end
@@ -918,7 +985,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
                 cpFrame:SetMinMaxValues(0, 1)
 
                 if chargedLookup[idx] then
-                    cpFrame:SetValue(1, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    cpFrame:SetValue(1, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                     if idx <= current then
                         cpFrame:SetStatusBarColor(overchargedCpColor.r, overchargedCpColor.g, overchargedCpColor.b, overchargedCpColor.a or 1)
                     else
@@ -926,14 +993,14 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
                     end
                 else
                     if idx <= current then
-                        cpFrame:SetValue(1, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                        cpFrame:SetValue(1, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                         cpFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
                     else
-                        cpFrame:SetValue(0, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                        cpFrame:SetValue(0, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                         cpFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
                     end
                 end
-                cpText:SetText("")
+                cpText:SetFormattedText("")
 
                 cpFrame:Show()
             end
@@ -1005,21 +1072,21 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
 
                 if state == "full" then
                     essFrame:Hide()
-                    essFrame:SetValue(1, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    essFrame:SetValue(1, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                     essFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
-                    essText:SetText("")
+                    essText:SetFormattedText("")
                 elseif state == "partial" then
                     essFrame:Show()
                     local remaining = math.max(0, self._NextEssenceTick - now)
                     local value = 1 - (remaining / tickDuration)
-                    essFrame:SetValue(value, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    essFrame:SetValue(value, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                     essFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
-                    essText:SetText(string.format("%." .. (precision or 1) .. "f", remaining))
+                    essText:SetFormattedText(string.format("%." .. (precision or 1) .. "f", remaining))
                 else
                     essFrame:Show()
-                    essFrame:SetValue(0, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    essFrame:SetValue(0, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                     essFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
-                    essText:SetText("")
+                    essText:SetFormattedText("")
                 end
             end
         end
@@ -1090,19 +1157,19 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
                 runeFrame:SetMinMaxValues(0, 1)
                 if readyLookup[runeIndex] then
                     runeFrame:Hide()
-                    runeFrame:SetValue(1, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                    runeText:SetText("")
+                    runeFrame:SetValue(1, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    runeText:SetFormattedText("")
                     runeFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
                 else
                     runeFrame:Show()
                     local cdInfo = cdLookup[runeIndex]
                     runeFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
                     if cdInfo then
-                        runeFrame:SetValue(cdInfo.frac, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                        runeText:SetText(string.format("%." .. (precision or 1) .. "f", math.max(0, cdInfo.remaining)))
+                        runeFrame:SetValue(cdInfo.frac, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                        runeText:SetFormattedText(string.format("%." .. (precision or 1) .. "f", math.max(0, cdInfo.remaining)))
                     else
-                        runeFrame:SetValue(0, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                        runeText:SetText("")
+                        runeFrame:SetValue(0, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                        runeText:SetFormattedText("")
                     end
                 end
             end
@@ -1143,8 +1210,8 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
                 mwFrame:SetMinMaxValues(0, 1)
 
                 if idx <= current then
-                    mwFrame:SetValue(1, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                    if (current > 4 and current < 9) and idx <= math.fmod(current - 1, 5) + 1 then
+                    mwFrame:SetValue(1, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    if current > 5 and idx <= math.fmod(current - 1, 5) + 1 then
                         mwFrame:SetStatusBarColor(above5MwColor.r, above5MwColor.g, above5MwColor.b, above5MwColor.a or 1)
                     elseif current >= 9 then
                         mwFrame:SetStatusBarColor(above9MwColor.r, above9MwColor.g, above9MwColor.b, above9MwColor.a or 1)
@@ -1156,10 +1223,10 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
                         mwFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
                     end
                 else
-                    mwFrame:SetValue(0, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    mwFrame:SetValue(0, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                     mwFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
                 end
-                mwText:SetText("")
+                mwText:SetFormattedText("")
 
                 mwFrame:Show()
             end
@@ -1172,7 +1239,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
         if self.FragmentedPowerBars[i] then
             self.FragmentedPowerBars[i]:Hide()
             if self.FragmentedPowerBarTexts[i] then
-                self.FragmentedPowerBarTexts[i]:SetText("")
+                self.FragmentedPowerBarTexts[i]:SetFormattedText("")
             end
         end
     end

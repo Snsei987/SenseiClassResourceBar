@@ -3,7 +3,6 @@ local _, addonTable = ...
 local LEM = addonTable.LEM or LibStub("LibEQOLEditMode-1.0")
 
 local HealthBarMixin = Mixin({}, addonTable.BarMixin)
-local buildVersion = select(4, GetBuildInfo())
 
 function HealthBarMixin:GetBarColor()
     local playerClass = select(2, UnitClass("player"))
@@ -27,19 +26,19 @@ end
 function HealthBarMixin:GetResourceValue()
     local current = UnitHealth("player")
     local max = UnitHealthMax("player")
-    if max <= 0 then return nil, nil, nil, nil, nil end
+    if max <= 0 then return nil, nil end
 
-    local data = self:GetData()
-    if data and (data.textFormat == "Percent" or data.textFormat == "Percent%") then
-        -- UnitHealthPercent does not exist prior to Midnight
-        if (buildVersion or 0) < 120000 then
-            return max, max, current, math.floor((current / max) * 100 + 0.5), "percent"
-        else
-            return max, max, current, UnitHealthPercent("player", true, CurveConstants.ScaleTo100), "percent"
-        end
-    else
-        return max, max, current, current, "number"
-    end
+    return max, current
+end
+
+function HealthBarMixin:GetTagValues(_, max, current, precision)
+    local pFormat = "%." .. (precision or 0) .. "f"
+
+    return {
+        ["[current]"] = function() return string.format("%s", AbbreviateNumbers(current)) end,
+        ["[percent]"] = function() return string.format(pFormat, UnitHealthPercent("player", true, CurveConstants.ScaleTo100)) end,
+        ["[max]"] = function() return string.format("%s", AbbreviateNumbers(max)) end,
+    }
 end
 
 function HealthBarMixin:OnLoad()
@@ -79,8 +78,8 @@ end
 
 addonTable.HealthBarMixin = HealthBarMixin
 
-addonTable.RegistereredBar = addonTable.RegistereredBar or {}
-addonTable.RegistereredBar.HealthBar = {
+addonTable.RegisteredBar = addonTable.RegisteredBar or {}
+addonTable.RegisteredBar.HealthBar = {
     mixin = addonTable.HealthBarMixin,
     dbName = "healthBarDB",
     editModeName = "Health Bar",
@@ -139,7 +138,7 @@ addonTable.RegistereredBar.HealthBar = {
             },
             {
                 parentId = "Bar Style",
-                order = 606,
+                order = 401,
                 name = "Use Class Color",
                 kind = LEM.SettingType.Checkbox,
                 default = defaults.useClassColor,
@@ -156,7 +155,7 @@ addonTable.RegistereredBar.HealthBar = {
                     SenseiClassResourceBarDB[dbName][layoutName].useClassColor = value
                     bar:ApplyLayout(layoutName)
                 end,
-            }
+            },
         }
     end,
 }

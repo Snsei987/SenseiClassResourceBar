@@ -52,4 +52,20 @@ function PowerBarMixin:OnEvent(event, ...)
     end
 end
 
+function PowerBarMixin:GetTagValues(resource, max, current, precision)
+    local pFormat = "%." .. (precision or 0) .. "f"
+
+    return {
+        ["[current]"] = function() return string.format("%s", AbbreviateNumbers(current)) end,
+        ["[percent]"] = function()
+            if issecretvalue(max) or issecretvalue(current) then
+                return string.format(pFormat, UnitPowerPercent("player", resource, true, CurveConstants.ScaleTo100))
+            else
+                return string.format(pFormat, (current / max) * 100)
+            end
+        end,
+        ["[max]"] = function() return string.format("%s", AbbreviateNumbers(max)) end,
+    }
+end
+
 addonTable.PowerBarMixin = PowerBarMixin

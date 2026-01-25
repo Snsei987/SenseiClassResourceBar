@@ -59,7 +59,7 @@ SCRB:SetScript("OnEvent", function(_, event, arg1)
 
         addonTable.barInstances = addonTable.barInstances or {}
 
-        for _, config in pairs(addonTable.RegistereredBar or {}) do
+        for _, config in pairs(addonTable.RegisteredBar or {}) do
             if config.loadPredicate == nil or (type(config.loadPredicate) == "function" and config.loadPredicate(config) == true) then
                 local frame = InitializeBar(config, config.frameLevel or 1)
                 addonTable.barInstances[config.frameName] = frame

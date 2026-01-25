@@ -108,15 +108,15 @@ addonTable.importBarAsString = function(importString, dbName)
     return data
 end
 
-addonTable.exportProfileAsString = function(includeBarSettings, includeAddonSettings)
+addonTable.exportProfileAsString = function(includeBarSettings, includeAddonSettings, layoutNameToExport)
     local data = {
         BARS = {},
         GLOBAL = nil,
     }
 
     if includeBarSettings then
-        local layoutName = LEM.GetActiveLayoutName() or "Default"
-        for _, barSettings in pairs(addonTable.RegistereredBar or {}) do
+        local layoutName = layoutNameToExport or LEM.GetActiveLayoutName() or "Default"
+        for _, barSettings in pairs(addonTable.RegisteredBar or {}) do
             if barSettings
             and barSettings.dbName
             and SenseiClassResourceBarDB
@@ -169,6 +169,55 @@ addonTable.importProfileFromString = function(importString)
 end
 SCRB.importProfileFromString = addonTable.importProfileFromString
 
+addonTable.getAvailableProfiles = function()
+    local profiles = {}
+
+    if not SenseiClassResourceBarDB then
+        return profiles
+    end
+
+    for _, barSettings in pairs(addonTable.RegisteredBar or {}) do
+        if barSettings and barSettings.dbName then
+            local dbName = barSettings.dbName
+            if SenseiClassResourceBarDB[dbName] then
+                for layoutName, _ in pairs(SenseiClassResourceBarDB[dbName]) do
+                    profiles[layoutName] = true
+                end
+            end
+        end
+    end
+
+    local keyset = {}
+    for k, _ in pairs(profiles) do
+        keyset[#keyset + 1] = k
+    end
+
+    return keyset
+end
+SCRB.getAvailableProfiles = addonTable.getAvailableProfiles
+
+addonTable.getCurrentProfileName = function()
+    return LEM.GetActiveLayoutName() or "Default"
+end
+SCRB.getCurrentProfileName = addonTable.getCurrentProfileName
+
 addonTable.prettyPrint = function(...)
   print("|cffb5a707"..addonName..":|r", ...)
+end
+
+addonTable.clamp = function(x, min, max)
+    if x < min then
+        return min
+    elseif x > max then
+        return max
+    else
+        return x
+    end
+end
+
+addonTable.rounded = function(num, idp)
+    if not num then return num end
+
+    local mult = 10^(idp or 0)
+    return math.floor(num * mult + 0.5) / mult
 end

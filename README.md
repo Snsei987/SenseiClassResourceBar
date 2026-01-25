@@ -57,7 +57,7 @@ Each bar (Primary & Secondary) has its own configuration:
 
 *   📏 Adjustable **width**, **height**, and **overall scale**
 *   ✏️ Customizable **font**, **size**, and **outline**
-*   🖼 Multiple **foreground textures**, **backgrounds**, and **border styles**
+*   🖼 Multiple **bar textures**, **backgrounds**, and **border styles**
 *   🎯 Text alignment (Left / Center / Right), Font, Size
 *   🎨 All the resources color are editable
 *   ⭐ Support for LibSharedMedia-3.0

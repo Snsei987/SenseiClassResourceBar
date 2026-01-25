@@ -15,7 +15,7 @@ addonTable.FeaturesMetadata[featureId] = {
 addonTable.SettingsPanelInitializers = addonTable.SettingsPanelInitializers or {}
 addonTable.SettingsPanelInitializers[featureId] = function(category)
     SettingsLib:CreateText(category, "Export strings generated here encompass all bars of your current Edit Mode Layout.\nIf you wish to only export one bar in particular, please check the Export button in the Bar Settings panel in\nEdit Mode.")
-    SettingsLib:CreateText(category, "The Import button bellow supports global and individual bar export strings. The one in each Bar Settings in\nEdit Mode is restricted to this particular bar.\nFor example, if you exported all your bars but wish to only import the Primary Resource Bar, then use the\nImport button of the Primary Resource bar in Edit Mode.")
+    SettingsLib:CreateText(category, "The Import button below supports global and individual bar export strings. The one in each Bar Settings in\nEdit Mode is restricted to this particular bar.\nFor example, if you exported all your bars but wish to only import the Primary Resource Bar, then use the\nImport button of the Primary Resource bar in Edit Mode.")
 
     SettingsLib:CreateButton(category, {
 		text = "Export Only Power Colors",
