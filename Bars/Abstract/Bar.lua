@@ -1178,6 +1178,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
         local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179) -- Maelstrom Weapon
         local current = auraData and auraData.applications or 0
         local above5MwColor = addonTable:GetOverrideResourceColor("MAELSTROM_WEAPON_ABOVE_5") or color
+        local above9MwColor = addonTable:GetOverrideResourceColor("MAELSTROM_WEAPON_ABOVE_9") or color
 
         local displayOrder = {}
         for i = 1, maxPower do
@@ -1212,6 +1213,12 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
                     mwFrame:SetValue(1, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                     if current > 5 and idx <= math.fmod(current - 1, 5) + 1 then
                         mwFrame:SetStatusBarColor(above5MwColor.r, above5MwColor.g, above5MwColor.b, above5MwColor.a or 1)
+                    elseif current >= 9 then
+                        mwFrame:SetStatusBarColor(above9MwColor.r, above9MwColor.g, above9MwColor.b, above9MwColor.a or 1)
+
+                        if not AuraUtil.FindAuraByName("Ascendance", "player") and UnitAffectingCombat("player") then
+                           PlaySoundFile("Interface\\AddOns\\SenseiClassResourceBar\\media\\ring_song.wav", "SFX")
+                        end
                     else
                         mwFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
                     end

@@ -52,8 +52,12 @@ local PowerData = {
         key = "MAELSTROM_WEAPON",
     },
     {
-        label = "Maelstrom Weapon > 5",
+        label = "Maelstrom Weapon >= 5",
         key = "MAELSTROM_WEAPON_ABOVE_5",
+    },
+    {
+        label = "Maelstrom Weapon >= 9",
+        key = "MAELSTROM_WEAPON_ABOVE_9",
     },
     {
         label = "Insanity",
