@@ -27,19 +27,19 @@ end
 function HealthBarMixin:GetResourceValue()
     local current = UnitHealth("player")
     local max = UnitHealthMax("player")
-    if max <= 0 then return nil, nil, nil, nil, nil end
+    if max <= 0 then return nil, nil end
 
-    local data = self:GetData()
-    if data and (data.textFormat == "Percent" or data.textFormat == "Percent%") then
-        -- UnitHealthPercent does not exist prior to Midnight
-        if (buildVersion or 0) < 120000 then
-            return max, max, current, math.floor((current / max) * 100 + 0.5), "percent"
-        else
-            return max, max, current, UnitHealthPercent("player", true, CurveConstants.ScaleTo100), "percent"
-        end
-    else
-        return max, max, current, current, "number"
-    end
+    return max, current
+end
+
+function HealthBarMixin:GetTagValues(_, max, current, precision)
+    local pFormat = "%." .. (precision or 0) .. "f"
+
+    return {
+        ["[current]"] = function() return string.format("%s", AbbreviateNumbers(current)) end,
+        ["[percent]"] = function() return string.format(pFormat, UnitHealthPercent("player", true, CurveConstants.ScaleTo100)) end,
+        ["[max]"] = function() return string.format("%s", AbbreviateNumbers(max)) end,
+    }
 end
 
 function HealthBarMixin:OnLoad()

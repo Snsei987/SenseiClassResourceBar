@@ -63,26 +63,16 @@ function PrimaryResourceBarMixin:GetResource()
 end
 
 function PrimaryResourceBarMixin:GetResourceValue(resource)
-    if not resource then return nil, nil, nil, nil, nil end
+    if not resource then return nil, nil end
 
     local data = self:GetData()
-    if not data then return nil, nil, nil, nil, nil end
+    if not data then return nil, nil end
 
-    -- Regular primary resource types
     local current = UnitPower("player", resource)
     local max = UnitPowerMax("player", resource)
-    if max <= 0 then return nil, nil, nil, nil, nil end
+    if max <= 0 then return nil end
 
-    if data and ((data.showManaAsPercent and resource == Enum.PowerType.Mana) or data.textFormat == "Percent" or data.textFormat == "Percent%") then
-        -- UnitPowerPercent does not exist prior to Midnight
-        if (buildVersion or 0) < 120000 then
-            return max, max, current, math.floor((current / max) * 100 + 0.5), "percent"
-        else
-            return max, max, current, UnitPowerPercent("player", resource, false, CurveConstants.ScaleTo100), "percent"
-        end
-    else
-        return max, max, current, current, "number"
-    end
+    return max, current
 end
 
 addonTable.PrimaryResourceBarMixin = PrimaryResourceBarMixin

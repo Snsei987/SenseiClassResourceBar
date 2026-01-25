@@ -217,6 +217,15 @@ addonTable.availableTextFormats = {
     { text = "Current / Maximum" },
     { text = "Percent" },
     { text = "Percent%" },
+    { text = "Current - Percent" },
+    { text = "Current - Percent%"},
+}
+
+addonTable.textPrecisionAllowedForType = {
+    ["Percent"] = true,
+    ["Percent%"] = true,
+    ["Current - Percent"] = true,
+    ["Current - Percent%"] = true,
 }
 
 addonTable.availableTextPrecisions = {

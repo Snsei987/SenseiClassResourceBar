@@ -42,37 +42,33 @@ function TertiaryResourceBarMixin:GetResource()
 end
 
 function TertiaryResourceBarMixin:GetResourceValue(resource)
-    if not resource then return nil, nil, nil, nil, nil end
+    if not resource then return nil, nil end
     local data = self:GetData()
-    if not data then return nil, nil, nil, nil, nil end
+    if not data then return nil, nil end
 
     if resource == "EBON_MIGHT" then
         local auraData = C_UnitAuras.GetPlayerAuraBySpellID(395296) -- Ebon Might
-        local current = auraData and math.ceil((auraData.expirationTime - GetTime()) * 10) / 10 or 0
+        local current = auraData and (auraData.expirationTime - GetTime()) or 0
         local max = 20
 
-        if data.textFormat == "Percent" or data.textFormat == "Percent%" then
-            return max, max, current, (current / max) * 100, "percent"
-        else
-            return max, max, current, current, "number"
-        end
+        return max, current
     end
 
-    -- Regular secondary resource types
     local current = UnitPower("player", resource)
     local max = UnitPowerMax("player", resource)
     if max <= 0 then return nil, nil, nil, nil end
 
-    if data.textFormat == "Percent" or data.textFormat == "Percent%" then
-        -- UnitPowerPercent does not exist prior to Midnight
-        if (buildVersion or 0) < 120000 then
-            return max, max, current, math.floor((current / max) * 100 + 0.5), "percent"
-        else
-            return max, max, current, UnitPowerPercent("player", resource, false, CurveConstants.ScaleTo100), "percent"
-        end
-    else
-        return max, max, current, current, "number"
+    return max, current
+end
+
+function TertiaryResourceBarMixin:GetTagValues(resource, max, current, precision)
+    local tagValues = addonTable.PowerBarMixin:GetTagValues(resource, max, current, precision)
+
+    if resource == "EBON_MIGHT" then
+        tagValues["[current]"] = function() return string.format("%.1f", AbbreviateNumbers(current)) end
     end
+
+    return tagValues
 end
 
 addonTable.TertiaryResourceBarMixin = TertiaryResourceBarMixin

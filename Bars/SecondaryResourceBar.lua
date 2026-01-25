@@ -55,22 +55,10 @@ function SecondaryResourceBarMixin:GetResource()
     end
 end
 
-local abbrevDataWarlockSoulShards = {
-  breakpointData = {
-    {
-      breakpoint = 0,
-      abbreviation = "",
-      significandDivisor = 1,
-      fractionDivisor = 10,
-      abbreviationIsGlobal = false,
-    },
-  },
-}
-
 function SecondaryResourceBarMixin:GetResourceValue(resource)
-    if not resource then return nil, nil, nil, nil, nil end
+    if not resource then return nil, nil end
     local data = self:GetData()
-    if not data then return nil, nil, nil, nil, nil end
+    if not data then return nil, nil end
 
     if resource == "STAGGER" then
         local stagger = UnitStagger("player") or 0
@@ -86,11 +74,7 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
         end
         self._lastStaggerPercent = staggerPercent
 
-        if data.textFormat == "Percent" or data.textFormat == "Percent%" then
-            return maxHealth, maxHealth, stagger, staggerPercent, "percent"
-        else
-            return maxHealth, maxHealth, stagger, stagger, "number"
-        end
+        return maxHealth, stagger
     end
 
     if resource == "SOUL_FRAGMENTS" then
@@ -103,11 +87,7 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
             self:ApplyForegroundSettings()
         end
 
-        if data.textFormat == "Percent" or data.textFormat == "Percent%" then
-            return max, max, current, math.floor((current / max) * 100 + 0.5), "percent"
-        else
-            return max, max, current, current, "number"
-        end
+        return max, current
     end
 
     if resource == Enum.PowerType.Runes then
@@ -122,53 +102,56 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
             end
         end
 
-        if data.textFormat == "Percent" or data.textFormat == "Percent%" then
-            return max, max, current, math.floor((current / max) * 100 + 0.5), "percent"
-        else
-            return max, max, current, current, "number"
-        end
+        return max, current
     end
 
     if resource == Enum.PowerType.SoulShards then
         local current = UnitPower("player", resource, true)
         local max = UnitPowerMax("player", resource, true)
-        if max <= 0 then return nil, nil, nil, nil, nil end
+        if max <= 0 then return nil, nil end
 
-        if data.textFormat == "Percent" or data.textFormat == "Percent%" then
-            return max, max, current, math.floor((current / max) * 100 + 0.5), "percent"
-        else
-            return max, max / 10, current, current / 10, "number"
-        end
+        return max, current
     end
 
     if resource == "MAELSTROM_WEAPON" then
-        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(405189) -- Maelstrom Weapon
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179) -- Maelstrom Weapon
         local current = auraData and auraData.applications or 0
         local max = 10
 
-        -- The Maelstrom Weapon bar should be capped at 5, if it goes beyond that it's just a visual effect
-        if data.textFormat == "Percent" or data.textFormat == "Percent%" then
-            return max/2, max, current, math.floor((current / max) * 100 + 0.5), "percent"
-        else
-            return max/2, max, current, current, "number"
-        end
+        return max / 2, current
     end
 
     -- Regular secondary resource types
     local current = UnitPower("player", resource)
     local max = UnitPowerMax("player", resource)
-    if max <= 0 then return nil, nil, nil, nil, nil end
+    if max <= 0 then return nil, nil end
 
-    if (data.showManaAsPercent and resource == Enum.PowerType.Mana) or data.textFormat == "Percent" or data.textFormat == "Percent%" then
-        -- UnitPowerPercent does not exist prior to Midnight
-        if (buildVersion or 0) < 120000 then
-            return max, max, current, math.floor((current / max) * 100 + 0.5), "percent"
-        else
-            return max, max, current, UnitPowerPercent("player", resource, false, CurveConstants.ScaleTo100), "percent"
-        end
-    else
-        return max, max, current, current, "number"
+    return max, current
+end
+
+function SecondaryResourceBarMixin:GetTagValues(resource, max, current, precision)
+    local pFormat = "%." .. (precision or 0) .. "f"
+
+    local tagValues = addonTable.PowerBarMixin:GetTagValues(resource, max, current, precision)
+
+    if resource == "STAGGER" then
+        tagValues["[percent]"] = function() return string.format(pFormat, self._lastStaggerPercent) end
     end
+
+    if resource == Enum.PowerType.SoulShards then
+        tagValues = {
+            ["[current]"] = function() return string.format("%s", AbbreviateNumbers(current / 10)) end,
+            ["[percent]"] = function() return string.format(pFormat, UnitPowerPercent("player", resource, true, CurveConstants.ScaleTo100)) end,
+            ["[max]"] = function() return string.format("%s", AbbreviateNumbers(max / 10)) end,
+        }
+    end
+
+    if resource == "MAELSTROM_WEAPON" then
+        tagValues["[percent]"] = function() return string.format(pFormat, (current / (max * 2)) * 100) end
+        tagValues["[max]"] = function() return string.format("%s", AbbreviateNumbers(max * 2)) end
+    end
+
+    return tagValues
 end
 
 function SecondaryResourceBarMixin:GetPoint(layoutName)

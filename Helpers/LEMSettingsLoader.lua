@@ -636,7 +636,7 @@ local function BuildLemSettings(bar, defaults)
             end,
             isEnabled = function(layoutName)
                 local data = SenseiClassResourceBarDB[config.dbName][layoutName]
-                return data.showText and (data.textFormat == "Percent" or data.textFormat == "Percent%")
+                return data.showText and addonTable.textPrecisionAllowedForType[data.textFormat] ~= nil
             end,
         },
         {
