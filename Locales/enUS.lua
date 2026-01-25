@@ -37,6 +37,7 @@ local baseLocale = {
     ["MANA"] = POWER_TYPE_MANA,
     ["RAGE"]= POWER_TYPE_RED_POWER,
     ["FOCUS"]= POWER_TYPE_FOCUS,
+    ["TIP_OF_THE_SPEAR"] = "Tip of the Spear",
     ["ENERGY"]= POWER_TYPE_ENERGY,
     ["RUNIC_POWER"]= POWER_TYPE_RUNIC_POWER,
     ["LUNAR_POWER"]= POWER_TYPE_LUNAR_POWER,

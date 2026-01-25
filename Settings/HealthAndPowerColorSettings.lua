@@ -33,6 +33,10 @@ local PowerData = {
         key = Enum.PowerType.Focus,
     },
     {
+        label = L["TIP_OF_THE_SPEAR"],
+        key = "TIP_OF_THE_SPEAR",
+    },
+    {
         label = L["ENERGY"],
         key = Enum.PowerType.Energy,
     },
