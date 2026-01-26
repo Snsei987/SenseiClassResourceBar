@@ -250,6 +250,8 @@ function BarMixin:UpdateDisplay(layoutName, force)
 
     local data = self:GetData(layoutName)
     if not data then return end
+    
+    -- Cache data to avoid redundant GetData() calls
 
     local resource = self:GetResource()
     if not resource then
@@ -315,7 +317,7 @@ function BarMixin:UpdateDisplay(layoutName, force)
     end
 
     if addonTable.fragmentedPowerTypes[resource] then
-        self:UpdateFragmentedPowerDisplay(layoutName)
+        self:UpdateFragmentedPowerDisplay(layoutName, data)
     end
 end
 
@@ -327,8 +329,8 @@ function BarMixin:ApplyVisibilitySettings(layoutName, inCombat)
     local data = self:GetData(layoutName)
     if not data then return end
 
-    self:HideBlizzardPlayerContainer(layoutName)
-    self:HideBlizzardSecondaryResource(layoutName)
+    self:HideBlizzardPlayerContainer(layoutName, data)
+    self:HideBlizzardSecondaryResource(layoutName, data)
 
     -- Don't hide while in edit mode...
     if LEM:IsInEditMode() then
@@ -405,11 +407,11 @@ function BarMixin:ApplyVisibilitySettings(layoutName, inCombat)
         self:Show()
     end
 
-    self:ApplyTextVisibilitySettings(layoutName)
+    self:ApplyTextVisibilitySettings(layoutName, data)
 end
 
-function BarMixin:ApplyTextVisibilitySettings(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:ApplyTextVisibilitySettings(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     self.TextFrame:SetShown(data.showText ~= false)
@@ -419,8 +421,8 @@ function BarMixin:ApplyTextVisibilitySettings(layoutName)
     end
 end
 
-function BarMixin:HideBlizzardPlayerContainer(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:HideBlizzardPlayerContainer(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     -- InCombatLockdown() means protected frames so we cannot touch it
@@ -439,8 +441,8 @@ function BarMixin:HideBlizzardPlayerContainer(layoutName)
     end
 end
 
-function BarMixin:HideBlizzardSecondaryResource(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:HideBlizzardSecondaryResource(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     -- InCombatLockdown() means protected frames so we cannot touch it
@@ -510,10 +512,10 @@ function BarMixin:GetPoint(layoutName)
     return point, resolvedRelativeFrame, relativePoint, addonTable.clamp(x, uiWidth * -1, uiWidth), addonTable.clamp(y, uiHeight * -1, uiHeight)
 end
 
-function BarMixin:GetSize(layoutName)
+function BarMixin:GetSize(layoutName, data)
     local defaults = self.defaults or {}
 
-    local data = self:GetData(layoutName)
+    data = data or self:GetData(layoutName)
     if not data then return defaults.width or 200, defaults.height or 15 end
 
     local width = nil
@@ -542,12 +544,12 @@ function BarMixin:ApplyLayout(layoutName, force)
     -- Init Fragmented Power Bars if needed
     local resource = self:GetResource()
     if addonTable.fragmentedPowerTypes[resource] then
-        self:CreateFragmentedPowerBars(layoutName)
+        self:CreateFragmentedPowerBars(layoutName, data)
     end
 
     local defaults = self.defaults or {}
 
-    local width, height = self:GetSize(layoutName)
+    local width, height = self:GetSize(layoutName, data)
     self.Frame:SetSize(max(LEM:IsInEditMode() and 2 or 1, width), max(LEM:IsInEditMode() and 2 or 1, height))
 
     local point, relativeTo, relativePoint, x, y = self:GetPoint(layoutName)
@@ -558,13 +560,13 @@ function BarMixin:ApplyLayout(layoutName, force)
     LEM:SetFrameDragEnabled(self.Frame, relativeTo == UIParent)
 
     self:SetFrameStrata(data.barStrata or defaults.barStrata)
-    self:ApplyFontSettings(layoutName)
-    self:ApplyFillDirectionSettings(layoutName)
-    self:ApplyMaskAndBorderSettings(layoutName)
-    self:ApplyForegroundSettings(layoutName)
-    self:ApplyBackgroundSettings(layoutName)
+    self:ApplyFontSettings(layoutName, data)
+    self:ApplyFillDirectionSettings(layoutName, data)
+    self:ApplyMaskAndBorderSettings(layoutName, data)
+    self:ApplyForegroundSettings(layoutName, data)
+    self:ApplyBackgroundSettings(layoutName, data)
 
-    self:UpdateTicksLayout(layoutName)
+    self:UpdateTicksLayout(layoutName, data)
 
     if data.fasterUpdates then
         self:EnableFasterUpdates()
@@ -573,7 +575,7 @@ function BarMixin:ApplyLayout(layoutName, force)
     end
 
     if addonTable.fragmentedPowerTypes[resource] then
-        self:UpdateFragmentedPowerDisplay(layoutName)
+        self:UpdateFragmentedPowerDisplay(layoutName, data)
     else
         self.StatusBar:SetAlpha(1)
         for i, _ in pairs(self.FragmentedPowerBars or {}) do
@@ -587,8 +589,8 @@ function BarMixin:ApplyLayout(layoutName, force)
     end
 end
 
-function BarMixin:ApplyFontSettings(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:ApplyFontSettings(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     local defaults = self.defaults or {}
@@ -637,8 +639,8 @@ function BarMixin:ApplyFontSettings(layoutName)
     end
 end
 
-function BarMixin:ApplyFillDirectionSettings(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:ApplyFillDirectionSettings(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     if data.fillDirection == "Top to Bottom" or data.fillDirection == "Bottom to Top" then
@@ -668,8 +670,8 @@ function BarMixin:ApplyFillDirectionSettings(layoutName)
     end
 end
 
-function BarMixin:ApplyMaskAndBorderSettings(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:ApplyMaskAndBorderSettings(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     local defaults = self.defaults or {}
@@ -782,8 +784,8 @@ function BarMixin:GetCooldownManagerWidth(layoutName)
     return nil
 end
 
-function BarMixin:ApplyBackgroundSettings(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:ApplyBackgroundSettings(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     local defaults = self.defaults or {}
@@ -815,8 +817,8 @@ function BarMixin:ApplyBackgroundSettings(layoutName)
     end
 end
 
-function BarMixin:ApplyForegroundSettings(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:ApplyForegroundSettings(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     local defaults = self.defaults or {}
@@ -853,8 +855,8 @@ function BarMixin:ApplyForegroundSettings(layoutName)
     end
 end
 
-function BarMixin:UpdateTicksLayout(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:UpdateTicksLayout(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     local resource = self:GetResource()
@@ -922,8 +924,8 @@ function BarMixin:UpdateTicksLayout(layoutName)
     end
 end
 
-function BarMixin:CreateFragmentedPowerBars(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:CreateFragmentedPowerBars(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     local defaults = self.defaults or {}
@@ -959,8 +961,8 @@ function BarMixin:CreateFragmentedPowerBars(layoutName)
     end
 end
 
-function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     local resource = self:GetResource()
