@@ -49,7 +49,7 @@ local PowerData = {
         key = Enum.PowerType.LunarPower,
     },
     {
-        label = L["MAELSTORM"],
+        label = L["MAELSTROM"],
         key = Enum.PowerType.Maelstrom,
     },
     {
@@ -125,7 +125,7 @@ local PowerData = {
         key = "SOUL_FRAGMENTS",
     },
     {
-        label = L["SOUL_FRAGMENTS_VOIC_META"],
+        label = L["SOUL_FRAGMENTS_VOID_META"],
         key = "SOUL_FRAGMENTS_VOID_META",
     },
     {

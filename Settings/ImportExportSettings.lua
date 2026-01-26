@@ -16,7 +16,7 @@ addonTable.FeaturesMetadata[featureId] = {
 addonTable.SettingsPanelInitializers = addonTable.SettingsPanelInitializers or {}
 addonTable.SettingsPanelInitializers[featureId] = function(category)
     SettingsLib:CreateText(category, L["SETTINGS_IMPORT_EXPORT_TEXT_1"])
-    SettingsLib:CreateText(category, L["SETTINGS_IMPORT_EXPORT_TEXT_1"])
+    SettingsLib:CreateText(category, L["SETTINGS_IMPORT_EXPORT_TEXT_2"])
 
     SettingsLib:CreateButton(category, {
 		text = L["SETTINGS_BUTTON_EXPORT_ONLY_POWER_COLORS"],
