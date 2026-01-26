@@ -124,8 +124,14 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
         local max = UnitPowerMax("player", resource)
         if max <= 0 then return nil, nil, nil, nil, nil end
 
+        -- Cache rune cooldown data to avoid redundant GetRuneCooldown calls in UpdateFragmentedPowerDisplay
+        if not self._runeCooldownCache then
+            self._runeCooldownCache = {}
+        end
+        
         for i = 1, max do
-            local runeReady = select(3, GetRuneCooldown(i))
+            local start, duration, runeReady = GetRuneCooldown(i)
+            self._runeCooldownCache[i] = { start = start, duration = duration, runeReady = runeReady }
             if runeReady then
                 current = current + 1
             end
@@ -168,7 +174,8 @@ function SecondaryResourceBarMixin:GetTagValues(resource, max, current, precisio
     local tagValues = addonTable.PowerBarMixin.GetTagValues(self, resource, max, current, precision)
 
     if resource == "STAGGER" then
-        tagValues["[percent]"] = function() return string.format(pFormat, self._lastStaggerPercent) end
+        local staggerPercentStr = string.format(pFormat, self._lastStaggerPercent)
+        tagValues["[percent]"] = function() return staggerPercentStr end
     end
 
     if resource == "SOUL_FRAGMENTS_VENGEANCE" then
@@ -176,16 +183,21 @@ function SecondaryResourceBarMixin:GetTagValues(resource, max, current, precisio
     end
 
     if resource == Enum.PowerType.SoulShards then
+        local currentStr = string.format("%s", AbbreviateNumbers(current / 10))
+        local percentStr = string.format(pFormat, UnitPowerPercent("player", resource, true, CurveConstants.ScaleTo100))
+        local maxStr = string.format("%s", AbbreviateNumbers(max / 10))
         tagValues = {
-            ["[current]"] = function() return string.format("%s", AbbreviateNumbers(current / 10)) end,
-            ["[percent]"] = function() return string.format(pFormat, UnitPowerPercent("player", resource, true, CurveConstants.ScaleTo100)) end,
-            ["[max]"] = function() return string.format("%s", AbbreviateNumbers(max / 10)) end,
+            ["[current]"] = function() return currentStr end,
+            ["[percent]"] = function() return percentStr end,
+            ["[max]"] = function() return maxStr end,
         }
     end
 
     if resource == "MAELSTROM_WEAPON" then
-        tagValues["[percent]"] = function() return string.format(pFormat, (current / (max * 2)) * 100) end
-        tagValues["[max]"] = function() return string.format("%s", AbbreviateNumbers(max * 2)) end
+        local percentStr = string.format(pFormat, (current / (max * 2)) * 100)
+        local maxStr = string.format("%s", AbbreviateNumbers(max * 2))
+        tagValues["[percent]"] = function() return percentStr end
+        tagValues["[max]"] = function() return maxStr end
     end
 
     return tagValues

@@ -76,6 +76,14 @@ function BarMixin:Init(config, parent, frameLevel)
     self._displayOrder = {}
     self._cachedTextFormat = nil
     self._cachedTextPattern = nil
+    -- Pre-allocate rune tracking tables (for Death Knights)
+    self._runeReadyList = {}
+    self._runeCdList = {}
+    -- Pre-allocate rune info structs to avoid per-rune allocations
+    self._runeInfoPool = {}
+    for i = 1, 6 do
+        self._runeInfoPool[i] = { index = 0, remaining = 0, frac = 0 }
+    end
 
     self.Frame = Frame
 end
@@ -317,7 +325,7 @@ function BarMixin:UpdateDisplay(layoutName, force)
     end
 
     if addonTable.fragmentedPowerTypes[resource] then
-        self:UpdateFragmentedPowerDisplay(layoutName, data)
+        self:UpdateFragmentedPowerDisplay(layoutName, data, max)
     end
 end
 
@@ -961,13 +969,14 @@ function BarMixin:CreateFragmentedPowerBars(layoutName, data)
     end
 end
 
-function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data)
+function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
     data = data or self:GetData(layoutName)
     if not data then return end
 
     local resource = self:GetResource()
     if not resource then return end
-    local maxPower = resource == "MAELSTROM_WEAPON" and 5 or UnitPowerMax("player", resource)
+    -- Use passed maxPower to avoid redundant UnitPowerMax call
+    maxPower = maxPower or (resource == "MAELSTROM_WEAPON" and 5 or UnitPowerMax("player", resource))
     if maxPower <= 0 then return end
 
     local barWidth = self.Frame:GetWidth()
@@ -980,7 +989,8 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data)
 
     if resource == Enum.PowerType.ComboPoints then
         local current = UnitPower("player", resource)
-        local maxCP = UnitPowerMax("player", resource)
+        -- Reuse cached maxPower to avoid redundant API call
+        local maxCP = maxPower
 
         local overchargedCpColor = addonTable:GetOverrideResourceColor("OVERCHARGED_COMBO_POINTS") or color
         local charged = GetUnitChargedPowerPoints("player") or {}
@@ -1128,23 +1138,45 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data)
             end
         end
     elseif resource == Enum.PowerType.Runes then
-        -- Collect rune states: ready and recharging
-        local readyList = {}
-        local cdList = {}
+        -- Collect rune states: ready and recharging (reuse pre-allocated tables)
+        local readyList = self._runeReadyList
+        local cdList = self._runeCdList
+        -- Clear previous data
+        for i = #readyList, 1, -1 do readyList[i] = nil end
+        for i = #cdList, 1, -1 do cdList[i] = nil end
+        
         local now = GetTime()
+        local poolIdx = 1
         for i = 1, maxPower do
-            local start, duration, runeReady = GetRuneCooldown(i)
-            if runeReady then
-                table.insert(readyList, { index = i })
+            -- Try to use cached cooldown data first (for runes, cached by GetResourceValue)
+            local start, duration, runeReady
+            if self._runeCooldownCache and self._runeCooldownCache[i] then
+                local cached = self._runeCooldownCache[i]
+                start, duration, runeReady = cached.start, cached.duration, cached.runeReady
             else
+                start, duration, runeReady = GetRuneCooldown(i)
+            end
+            
+            if runeReady then
+                -- Reuse pre-allocated struct
+                local info = self._runeInfoPool[poolIdx]
+                poolIdx = poolIdx + 1
+                info.index = i
+                table.insert(readyList, info)
+            else
+                -- Reuse pre-allocated struct
+                local info = self._runeInfoPool[poolIdx]
+                poolIdx = poolIdx + 1
+                info.index = i
                 if start and duration and duration > 0 then
                     local elapsed = now - start
-                    local remaining = math.max(0, duration - elapsed)
-                    local frac = math.max(0, math.min(1, elapsed / duration))
-                    table.insert(cdList, { index = i, remaining = remaining, frac = frac })
+                    info.remaining = math.max(0, duration - elapsed)
+                    info.frac = math.max(0, math.min(1, elapsed / duration))
                 else
-                    table.insert(cdList, { index = i, remaining = math.huge, frac = 0 })
+                    info.remaining = math.huge
+                    info.frac = 0
                 end
+                table.insert(cdList, info)
             end
         end
 
