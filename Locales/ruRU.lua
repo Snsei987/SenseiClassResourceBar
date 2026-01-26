@@ -134,6 +134,9 @@ local baseLocale = {
     ["FONT"] = "Шрифт",
     ["FONT_SIZE"] = "Размер",
     ["FONT_OUTLINE"] = "Обводка",
+
+    -- Other
+    ["POWER_COLOR_SETTINGS"] = "Настройки цветов ресурса",    
 }
 
 addonTable:RegisterLocale("ruRU", baseLocale)
