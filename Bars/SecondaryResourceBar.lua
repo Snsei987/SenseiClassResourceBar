@@ -137,16 +137,9 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
     if resource == "MAELSTROM_WEAPON" then
         local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179) -- Maelstrom Weapon
         local current = auraData and auraData.applications or 0
-        local max = 10
+        local max = data.maelstromWeaponUseTenBars and 10 or 5
 
-        local data = self:GetData()
-        local maelstromWeaponUseTenBars = data and data.maelstromWeaponUseTenBars
-
-        if maelstromWeaponUseTenBars then
-            return max, current
-        else
-            return max / 2, current
-        end
+        return max, current
     end
 
     if resource == "TIP_OF_THE_SPEAR" then
@@ -392,19 +385,17 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                 set = function(layoutName, value)
                     SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
 
-                    local data = SenseiClassResourceBarDB[dbName][layoutName]
-                    data.maelstromWeaponUseTenBars = value
+                    SenseiClassResourceBarDB[dbName][layoutName].maelstromWeaponUseTenBars = value
 
                     bar:ApplyLayout(layoutName)
 
                 end,
                 isEnabled = function(layoutName)
-                    local _, playerClass = UnitClass("player")
+                    local playerClass = select(2, UnitClass("player"))
                     local spec = C_SpecializationInfo.GetSpecialization()
                     local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
-                    return playerClass == "SHAMAN" and specID == 263
+                    return playerClass == "SHAMAN" and specID == 263 -- Enhancement
                 end,
-                tooltip = L["USE_TEN_TICK_MAELSTROM_BAR"],
             },
             {
                 parentId = L["CATEGORY_TEXT_SETTINGS"],

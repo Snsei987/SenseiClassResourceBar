@@ -839,8 +839,7 @@ function BarMixin:UpdateTicksLayout(layoutName)
     local resource = self:GetResource()
     local max = 0;
     if resource == "MAELSTROM_WEAPON" then
-        local maelstromWeaponUseTenBars = data and data.maelstromWeaponUseTenBars
-        max = maelstromWeaponUseTenBars and 10 or 5
+        max = data.maelstromWeaponUseTenBars and 10 or 5
     elseif resource == "TIP_OF_THE_SPEAR" then
         max = addonTable.TipOfTheSpear.TIP_MAX_STACKS
     elseif type(resource) == "number" then
@@ -911,8 +910,7 @@ function BarMixin:CreateFragmentedPowerBars(layoutName)
 
     local maxPower
     if resource == "MAELSTROM_WEAPON" then
-        local maelstromWeaponUseTenBars = data and data.maelstromWeaponUseTenBars
-        maxPower = maelstromWeaponUseTenBars and 10 or 5
+        maxPower = data.maelstromWeaponUseTenBars and 10 or 5
     else
         maxPower = UnitPowerMax("player", resource) or 0
     end
