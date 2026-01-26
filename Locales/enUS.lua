@@ -134,6 +134,9 @@ local baseLocale = {
     ["FONT"] = "Font",
     ["FONT_SIZE"] = "Size",
     ["FONT_OUTLINE"] = "Outline",
+    
+    -- Other
+    ["POWER_COLOR_SETTINGS"] = "Power Color Settings",
 }
 
 addonTable:RegisterLocale("enUS", baseLocale)

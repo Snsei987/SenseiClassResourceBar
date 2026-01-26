@@ -2,4 +2,5 @@
 ..\..\Blizzard_SharedXML\UI.xsd">
 	<Script file="Loader.lua"/>
 	<Script file="enUS.lua"/>
+	<Script file="zhCN.lua"/>
 </Ui>
