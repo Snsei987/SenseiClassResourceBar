@@ -139,7 +139,14 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
         local current = auraData and auraData.applications or 0
         local max = 10
 
-        return max / 2, current
+        local data = self:GetData()
+        local maelstromWeaponUseTenBars = data and data.maelstromWeaponUseTenBars
+
+        if maelstromWeaponUseTenBars then
+            return max, current
+        else
+            return max / 2, current
+        end
     end
 
     if resource == "TIP_OF_THE_SPEAR" then
@@ -233,6 +240,7 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
         tickColor = {r = 0, g = 0, b = 0, a = 1},
         tickThickness = 1,
         useResourceAtlas = false,
+        maelstromWeaponUseTenBars = false,
     },
     lemSettings = function(bar, defaults)
         local dbName = bar:GetConfig().dbName
@@ -371,6 +379,66 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                     bar:ApplyLayout(layoutName)
                 end,
             },
+            {
+                parentId = L["CATEGORY_BAR_STYLE"],
+                order = 406,
+                name = L["USE_TEN_TICK_MAELSTROM_BAR"],
+                kind = LEM.SettingType.Checkbox,
+                default = false,
+                get = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    return data and data.maelstromWeaponUseTenBars or false
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    data.maelstromWeaponUseTenBars = value
+
+                    bar:ApplyLayout(layoutName)
+
+                end,
+                isEnabled = function(layoutName)
+                    local _, playerClass = UnitClass("player")
+                    local spec = C_SpecializationInfo.GetSpecialization()
+                    local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
+                    return playerClass == "SHAMAN" and specID == 263
+                end,
+                tooltip = L["USE_TEN_TICK_MAELSTROM_BAR"],
+            },
+            {
+                parentId = L["CATEGORY_BAR_STYLE"],
+                order = 407,
+                name = L["MAELSTROM_HIGHLIGHT_THRESHOLD"],
+                kind = LEM.SettingType.Slider,
+                minValue = 6,
+                maxValue = 10,
+                valueStep = 1,
+                default = 6,
+                get = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    return data and data.maelstromHighlightThreshold or 6
+                end,
+                set = function(layoutName, value)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    if not data then
+                        SenseiClassResourceBarDB[dbName][layoutName] = CopyTable(defaults)
+                        data = SenseiClassResourceBarDB[dbName][layoutName]
+                    end
+
+                    local num = tonumber(value)
+                    if num and num >= 1 then
+                        data.maelstromHighlightThreshold = num
+                        bar:UpdateFragmentedPowerDisplay(layoutName)
+                    end
+                end,
+                isEnabled = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    return data and data.maelstromWeaponUseTenBars
+                end,
+                tooltip = L["MAELSTROM_HIGHLIGHT_THRESHOLD"]
+            },
+
             {
                 parentId = L["CATEGORY_TEXT_SETTINGS"],
                 order = 505,

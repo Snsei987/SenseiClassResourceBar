@@ -839,7 +839,8 @@ function BarMixin:UpdateTicksLayout(layoutName)
     local resource = self:GetResource()
     local max = 0;
     if resource == "MAELSTROM_WEAPON" then
-        max = 5
+        local maelstromWeaponUseTenBars = data and data.maelstromWeaponmaelstromWeaponUseTenBars
+        max = maelstromWeaponUseTenBars and 10 or 5
     elseif resource == "TIP_OF_THE_SPEAR" then
         max = addonTable.TipOfTheSpear.TIP_MAX_STACKS
     elseif type(resource) == "number" then
@@ -908,7 +909,13 @@ function BarMixin:CreateFragmentedPowerBars(layoutName)
     local resource = self:GetResource()
     if not resource then return end
 
-    local maxPower = resource == "MAELSTROM_WEAPON" and 5 or UnitPowerMax("player", resource) or 0
+    local maxPower
+    if resource == "MAELSTROM_WEAPON" then
+        local maelstromWeaponUseTenBars = data and data.maelstromWeaponmaelstromWeaponUseTenBars
+        maxPower = maelstromWeaponUseTenBars and 10 or 5
+    else
+        maxPower = UnitPowerMax("player", resource) or 0
+    end
 
     for i = 1, maxPower or 0 do
         if not self.FragmentedPowerBars[i] then
@@ -942,7 +949,15 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
 
     local resource = self:GetResource()
     if not resource then return end
-    local maxPower = resource == "MAELSTROM_WEAPON" and 5 or UnitPowerMax("player", resource)
+
+    local maelstromWeaponUseTenBars = data and data.maelstromWeaponmaelstromWeaponUseTenBars
+
+    local maxPower
+    if resource == "MAELSTROM_WEAPON" then
+        maxPower = maelstromWeaponUseTenBars and 10 or 5
+    else
+        maxPower = UnitPowerMax("player", resource)
+    end
     if maxPower <= 0 then return end
 
     local barWidth = self.Frame:GetWidth()
@@ -1206,6 +1221,15 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
             local mwFrame = self.FragmentedPowerBars[idx]
             local mwText = self.FragmentedPowerBarTexts[idx]
 
+            local highlightTreshold
+            if maelstromWeaponUseTenBars then
+                highlightTreshold = tonumber(data.maelstromHighlightThreshold) or 5
+            else
+                highlightTreshold = 6
+            end
+
+            local segmentSize = maelstromWeaponUseTenBars and 10 or 5
+
             if mwFrame then
                 mwFrame:ClearAllPoints()
                 if self.StatusBar:GetOrientation() == "VERTICAL" then
@@ -1220,7 +1244,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
 
                 if idx <= current then
                     mwFrame:SetValue(1, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                    if current > 5 and idx <= math.fmod(current - 1, 5) + 1 then
+                    if current >= highlightTreshold and idx <= math.fmod(current - 1, segmentSize) + 1 then
                         mwFrame:SetStatusBarColor(above5MwColor.r, above5MwColor.g, above5MwColor.b, above5MwColor.a or 1)
                     else
                         mwFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
