@@ -116,7 +116,6 @@ local baseLocale = {
     ["USE_BAR_COLOR_FOR_BACKGROUND_COLOR"] = "Use Bar Color For Background Color",
     ["BORDER"] = "Border",
     ["USE_TEN_TICK_MAELSTROM_BAR"] = "Use Ten Tick Maelstrom Bar",
-    ["MAELSTROM_HIGHLIGHT_THRESHOLD"] = "Maelstrom Weapon Highlight Threshold",
 
     -- Text settings category - Edit Mode
     ["CATEGORY_TEXT_SETTINGS"] = "Text Settings",

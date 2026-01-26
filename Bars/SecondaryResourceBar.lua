@@ -407,39 +407,6 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                 tooltip = L["USE_TEN_TICK_MAELSTROM_BAR"],
             },
             {
-                parentId = L["CATEGORY_BAR_STYLE"],
-                order = 407,
-                name = L["MAELSTROM_HIGHLIGHT_THRESHOLD"],
-                kind = LEM.SettingType.Slider,
-                minValue = 6,
-                maxValue = 10,
-                valueStep = 1,
-                default = 6,
-                get = function(layoutName)
-                    local data = SenseiClassResourceBarDB[dbName][layoutName]
-                    return data and data.maelstromHighlightThreshold or 6
-                end,
-                set = function(layoutName, value)
-                    local data = SenseiClassResourceBarDB[dbName][layoutName]
-                    if not data then
-                        SenseiClassResourceBarDB[dbName][layoutName] = CopyTable(defaults)
-                        data = SenseiClassResourceBarDB[dbName][layoutName]
-                    end
-
-                    local num = tonumber(value)
-                    if num and num >= 1 then
-                        data.maelstromHighlightThreshold = num
-                        bar:UpdateFragmentedPowerDisplay(layoutName)
-                    end
-                end,
-                isEnabled = function(layoutName)
-                    local data = SenseiClassResourceBarDB[dbName][layoutName]
-                    return data and data.maelstromWeaponUseTenBars
-                end,
-                tooltip = L["MAELSTROM_HIGHLIGHT_THRESHOLD"]
-            },
-
-            {
                 parentId = L["CATEGORY_TEXT_SETTINGS"],
                 order = 505,
                 name = L["SHOW_MANA_AS_PERCENT"],
