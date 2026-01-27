@@ -178,7 +178,7 @@ end
 
 function SecondaryResourceBarMixin:GetTagValues(resource, max, current, precision)
     local pFormat = "%." .. (precision or 0) .. "f"
-
+    local data = self:GetData()
     local tagValues = addonTable.PowerBarMixin.GetTagValues(self, resource, max, current, precision)
 
     if resource == "STAGGER" then
@@ -202,8 +202,11 @@ function SecondaryResourceBarMixin:GetTagValues(resource, max, current, precisio
     end
 
     if resource == "MAELSTROM_WEAPON" then
-        local percentStr = string.format(pFormat, (current / (max * 2)) * 100)
-        local maxStr = string.format("%s", AbbreviateNumbers(max * 2))
+        local isRagingMaelstromTalented = C_SpellBook.IsSpellKnown(384143)
+        local effectiveMax = (data.maelstromWeaponUseTenBars or isRagingMaelstromTalented) and 10 or 5
+
+        local percentStr = string.format(pFormat, (current / (effectiveMax)) * 100)
+        local maxStr = string.format("%s", AbbreviateNumbers(effectiveMax))
         tagValues["[percent]"] = function() return percentStr end
         tagValues["[max]"] = function() return maxStr end
     end
@@ -412,10 +415,19 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                 default = false,
                 get = function(layoutName)
                     local data = SenseiClassResourceBarDB[dbName][layoutName]
-                    return data and data.maelstromWeaponUseTenBars or false
+                    if data and data.maelstromWeaponUseTenBars ~= nil then
+                        return data.maelstromWeaponUseTenBars
+                    else
+                        return defaults.maelstromWeaponUseTenBars
+                    end
                 end,
                 set = function(layoutName, value)
                     SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+
+                    local isRagingMaelstromTalented = C_SpellBook.IsSpellKnown(384143) -- Raging Maelstrom
+                    if not isRagingMaelstromTalented then
+                        value = false
+                    end
 
                     SenseiClassResourceBarDB[dbName][layoutName].maelstromWeaponUseTenBars = value
 
@@ -426,7 +438,8 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                     local playerClass = select(2, UnitClass("player"))
                     local spec = C_SpecializationInfo.GetSpecialization()
                     local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
-                    return playerClass == "SHAMAN" and specID == 263 -- Enhancement
+                    local isRagingMaelstromTalented = C_SpellBook.IsSpellKnown(384143) -- Raging Maelstrom
+                    return playerClass == "SHAMAN" and isRagingMaelstromTalented and specID == 263 -- Enhancement
                 end,
             },
             {

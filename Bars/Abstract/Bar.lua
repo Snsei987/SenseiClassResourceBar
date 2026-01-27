@@ -1263,6 +1263,15 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
         local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179) -- Maelstrom Weapon
         local current = auraData and auraData.applications or 0
         local above5MwColor = addonTable:GetOverrideResourceColor("MAELSTROM_WEAPON_ABOVE_5") or color
+        
+        local isRagingMaelstromTalented = C_SpellBook.IsSpellKnown(384143) -- Raging Maelstrom
+
+        if data.maelstromWeaponUseTenBars and not isRagingMaelstromTalented then
+            data.maelstromWeaponUseTenBars = false;
+            self:ApplyLayout(layoutName)
+        end
+
+        local segmentSize = (data and data.maelstromWeaponUseTenBars) and 10 or 5
 
         -- Reuse pre-allocated table for performance
         local displayOrder = self._displayOrder
@@ -1281,8 +1290,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
             local idx = displayOrder[pos]
             local mwFrame = self.FragmentedPowerBars[idx]
             local mwText = self.FragmentedPowerBarTexts[idx]
-
-            local segmentSize = maelstromWeaponUseTenBars and 10 or 5
+                  
 
             if mwFrame then
                 mwFrame:ClearAllPoints()
@@ -1299,10 +1307,10 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
                 if idx <= current then
                     mwFrame:SetValue(1, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                     if current > 5 and idx <= math.fmod(current - 1, segmentSize) + 1 then
-                        mwFrame:SetStatusBarColor(above5MwColor.r, above5MwColor.g, above5MwColor.b, above5MwColor.a or 1)
-                    else
-                        mwFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
-                    end
+                            mwFrame:SetStatusBarColor(above5MwColor.r, above5MwColor.g, above5MwColor.b, above5MwColor.a or 1)
+                        else
+                            mwFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+                        end
                 else
                     mwFrame:SetValue(0, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                     mwFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
