@@ -984,12 +984,12 @@ function BarMixin:UpdateTicksLayout(layoutName, data)
         t:SetColorTexture(tickColor.r or 0, tickColor.g or 0, tickColor.b or 0, tickColor.a or 1)
         t:ClearAllPoints()
         if self.StatusBar:GetOrientation() == "VERTICAL" then
-            local rawY = (i / max) * height
+            local rawY = tickPositions[i] * height
             local snappedY = addonTable.rounded(rawY / ppScale) * ppScale
             t:SetSize(width, pThickness)
             t:SetPoint("BOTTOM", self.StatusBar, "BOTTOM", 0, snappedY)
         else
-            local rawX = (i / max) * width
+            local rawX = tickPositions[i] * width
             local snappedX = addonTable.rounded(rawX / ppScale) * ppScale
             t:SetSize(pThickness, height)
             t:SetPoint("LEFT", self.StatusBar, "LEFT", snappedX, 0)
