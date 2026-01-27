@@ -222,3 +222,9 @@ addonTable.rounded = function(num, idp)
     local mult = 10^(idp or 0)
     return math.floor(num * mult + 0.5) / mult
 end
+
+addonTable.getPixelPerfectScale = function()
+    local _, screenHeight = GetPhysicalScreenSize()
+    local scale = UIParent:GetEffectiveScale()
+    return 768 / screenHeight / scale
+end

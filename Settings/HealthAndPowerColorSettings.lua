@@ -29,6 +29,10 @@ local PowerData = {
         key = Enum.PowerType.Rage,
     },
     {
+        label = L["WHIRLWIND"],
+        key = "WHIRLWIND",
+    },
+    {
         label = L["FOCUS"],
         key = Enum.PowerType.Focus,
     },

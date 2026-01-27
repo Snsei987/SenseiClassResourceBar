@@ -55,18 +55,22 @@ end
 function PowerBarMixin:GetTagValues(resource, max, current, precision)
     local pFormat = "%." .. (precision or 0) .. "f"
 
+    -- Pre-compute values instead of creating closures for better performance
+    local currentStr = string.format("%s", AbbreviateNumbers(current))
+    local maxStr = string.format("%s", AbbreviateNumbers(max))
+    local percentStr
+    if type(resource) == "number" and (issecretvalue(max) or issecretvalue(current)) then
+        percentStr = string.format(pFormat, UnitPowerPercent("player", resource, true, CurveConstants.ScaleTo100))
+    elseif not issecretvalue(max) and not issecretvalue(current) and max ~= 0 then
+        percentStr = string.format(pFormat, (current / max) * 100)
+    else
+        percentStr = ''
+    end
+
     return {
-        ["[current]"] = function() return string.format("%s", AbbreviateNumbers(current)) end,
-        ["[percent]"] = function()
-            if issecretvalue(max) or issecretvalue(current) then
-                return string.format(pFormat, UnitPowerPercent("player", resource, true, CurveConstants.ScaleTo100))
-            elseif max ~= 0 then
-                return string.format(pFormat, (current / max) * 100)
-            else
-                return ''
-            end
-        end,
-        ["[max]"] = function() return string.format("%s", AbbreviateNumbers(max)) end,
+        ["[current]"] = function() return currentStr end,
+        ["[percent]"] = function() return percentStr end,
+        ["[max]"] = function() return maxStr end,
     }
 end
 
