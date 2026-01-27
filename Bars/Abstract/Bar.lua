@@ -92,6 +92,9 @@ function BarMixin:Init(config, parent, frameLevel)
     
     -- Pre-allocate essence state list (for Evokers)
     self._essenceStateList = {}
+    
+    -- Track combat state for conditional OnUpdate
+    self._inCombat = InCombatLockdown()
 
     self.Frame = Frame
 end
@@ -232,12 +235,21 @@ end
 function BarMixin:UpdateOnUpdateState()
     local resource = self:GetResource()
     
-    -- Only enable OnUpdate for resources that need cooldown tracking
+    -- Enable OnUpdate for resources that need continuous updates:
+    -- 1. Cooldown tracking (Runes, Essences) - always needed
+    -- 2. Decay over time (Rage, Runic Power) - only needed OUT of combat
     local needsOnUpdate = false
+    local isDecayingResource = false
     
     if resource == Enum.PowerType.Runes or resource == Enum.PowerType.Essence then
-        -- Runes and Essences need OnUpdate for cooldown/regen display
+        -- Runes and Essences always need OnUpdate for cooldown/regen display
         needsOnUpdate = true
+    elseif resource == Enum.PowerType.Rage or resource == Enum.PowerType.RunicPower then
+        -- Rage and Runic Power decay over time
+        isDecayingResource = true
+        -- Only need OnUpdate when OUT of combat for smooth decay
+        -- In combat, UNIT_POWER_UPDATE events handle updates
+        needsOnUpdate = not self._inCombat
     end
     
     -- Check user preference

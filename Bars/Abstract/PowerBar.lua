@@ -48,8 +48,20 @@ function PowerBarMixin:OnEvent(event, ...)
         or event == "PLAYER_MOUNT_DISPLAY_CHANGED"
         or event == "PET_BATTLE_OPENING_START" or event == "PET_BATTLE_CLOSE" then
 
+        -- Update combat state for OnUpdate management
+        if event == "PLAYER_REGEN_DISABLED" then
+            self._inCombat = true
+        elseif event == "PLAYER_REGEN_ENABLED" then
+            self._inCombat = false
+        end
+        
         self:ApplyVisibilitySettings(nil, event == "PLAYER_REGEN_DISABLED")
         self:UpdateDisplay()
+        
+        -- Update OnUpdate state when entering/leaving combat (for decaying resources)
+        if event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" then
+            self:UpdateOnUpdateState()
+        end
 
     elseif event == "UNIT_MAXPOWER" and unit == "player" then
 
