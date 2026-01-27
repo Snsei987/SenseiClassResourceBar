@@ -19,7 +19,6 @@ local baseLocale = {
     ["IMPORT_DECODE_FAILED"] = "Decode failed",
     ["IMPORT_DECOMPRESSION_FAILED"] = "Decompression failed",
     ["IMPORT_DESERIALIZATION_FAILED"] = "Deserialization failed",
-    ["ENTER_TICK_VALUES"] = "Enter comma-separated tick values (e.g., 25, 50, 75):",
 
     -- Settings (Esc > Options > AddOns)
     ["SETTINGS_HEADER_POWER_COLORS"] = "Power Colors",
@@ -109,17 +108,13 @@ local baseLocale = {
     ["SMOOTH_PROGRESS"] = "Smooth Progress",
     ["SHOW_TICKS_WHEN_AVAILABLE"] = "Show Ticks When Available",
     ["TICK_THICKNESS"] = "Tick Thickness",
-    ["ENABLE_CUSTOM_TICK"] = "Enable Custom Ticks",
-    ["ADD_CUSTOM_TICK"] = "Add Custom Tick",
+    ["CATEGORY_TICK_SETTINGS"] = "Tick Settings",
     ["CUSTOM_TICK"] = "Custom Tick",
     ["TICK_RESOURCE_TYPE"] = "Resource Type",
     ["TICK_MODE"] = "Mode",
     ["TICK_MODE_PERCENTAGE"] = "Percentage",
     ["TICK_MODE_FIXED"] = "Fixed Value",
     ["TICK_VALUE"] = "Value",
-    ["TICK_VALUE_PERCENTAGE_TOOLTIP"] = "Percentage of maximum resource (1-100%)",
-    ["TICK_VALUE_FIXED_TOOLTIP"] = "Fixed resource value",
-    ["REMOVE_TICK"] = "Remove",
 
     -- Bar style category - Edit Mode
     ["CATEGORY_BAR_STYLE"] = "Bar Style",

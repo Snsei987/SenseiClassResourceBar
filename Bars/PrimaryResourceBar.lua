@@ -144,7 +144,7 @@ addonTable.RegisteredBar.PrimaryResourceBar = {
                 tooltip = L["HIDE_MANA_ON_ROLE_PRIMARY_BAR_TOOLTIP"],
             },
             {
-                order = 305,
+                order = 400,
                 name = L["CATEGORY_TICK_SETTINGS"],
                 kind = LEM.SettingType.Collapsible,
                 id = L["CATEGORY_TICK_SETTINGS"],
@@ -152,7 +152,7 @@ addonTable.RegisteredBar.PrimaryResourceBar = {
             },
             {
                 parentId = L["CATEGORY_TICK_SETTINGS"],
-                order = 306,
+                order = 401,
                 name = L["SHOW_TICKS_WHEN_AVAILABLE"],
                 kind = LEM.SettingType.CheckboxColor,
                 default = defaults.showTicks,
@@ -182,7 +182,7 @@ addonTable.RegisteredBar.PrimaryResourceBar = {
             },
             {
                 parentId = L["CATEGORY_TICK_SETTINGS"],
-                order = 307,
+                order = 402,
                 name = L["TICK_THICKNESS"],
                 kind = LEM.SettingType.Slider,
                 default = defaults.tickThickness,
@@ -208,7 +208,7 @@ addonTable.RegisteredBar.PrimaryResourceBar = {
         -- Pre-generate settings for up to 4 custom ticks
         for i = 1, 4 do
             local tickIndex = i  -- Capture the value for closures
-            local baseOrder = 310 + (tickIndex * 10)
+            local baseOrder = 410 + (tickIndex * 10)
             
             -- Divider
             table.insert(settings, {
