@@ -71,6 +71,19 @@ function BarMixin:Init(config, parent, frameLevel)
     -- Fragmented powers (Runes, Essences) specific visual elements
     self.FragmentedPowerBars = {}
     self.FragmentedPowerBarTexts = {}
+    
+    -- Performance optimizations: pre-allocated tables
+    self._displayOrder = {}
+    self._cachedTextFormat = nil
+    self._cachedTextPattern = nil
+    -- Pre-allocate rune tracking tables (for Death Knights)
+    self._runeReadyList = {}
+    self._runeCdList = {}
+    -- Pre-allocate rune info structs to avoid per-rune allocations
+    self._runeInfoPool = {}
+    for i = 1, 6 do
+        self._runeInfoPool[i] = { index = 0, remaining = 0, frac = 0 }
+    end
 
     self.Frame = Frame
 end
@@ -209,25 +222,31 @@ end
 -- You should handle what to change here too and set self.fasterUpdates to true
 function BarMixin:EnableFasterUpdates()
     self.fasterUpdates = true
-    self.Frame:SetScript("OnUpdate", function(_, delta)
-        self.Frame.elapsed = (self.Frame.elapsed or 0) + delta
-        if self.Frame.elapsed >= 0.1 then
-            self.Frame.elapsed = 0
-            self:UpdateDisplay()
+    if not self._OnUpdateFast then
+        self._OnUpdateFast = function(frame, delta)
+            frame.elapsed = (frame.elapsed or 0) + delta
+            if frame.elapsed >= 0.1 then
+                frame.elapsed = 0
+                self:UpdateDisplay()
+            end
         end
-    end)
+    end
+    self.Frame:SetScript("OnUpdate", self._OnUpdateFast)
 end
 
 -- You should handle what to change here too and set self.fasterUpdates to false
 function BarMixin:DisableFasterUpdates()
     self.fasterUpdates = false
-    self.Frame:SetScript("OnUpdate", function(_, delta)
-        self.Frame.elapsed = (self.Frame.elapsed or 0) + delta
-        if self.Frame.elapsed >= 0.25 then
-            self.Frame.elapsed = 0
-            self:UpdateDisplay()
+    if not self._OnUpdateSlow then
+        self._OnUpdateSlow = function(frame, delta)
+            frame.elapsed = (frame.elapsed or 0) + delta
+            if frame.elapsed >= 0.25 then
+                frame.elapsed = 0
+                self:UpdateDisplay()
+            end
         end
-    end)
+    end
+    self.Frame:SetScript("OnUpdate", self._OnUpdateSlow)
 end
 
 ------------------------------------------------------------
@@ -239,6 +258,8 @@ function BarMixin:UpdateDisplay(layoutName, force)
 
     local data = self:GetData(layoutName)
     if not data then return end
+    
+    -- Cache data to avoid redundant GetData() calls
 
     local resource = self:GetResource()
     if not resource then
@@ -279,22 +300,32 @@ function BarMixin:UpdateDisplay(layoutName, force)
             textFormat = "[current] - [percent]" .. (data.textFormat == "Current - Percent%" and "%" or "")
         end
 
+        -- Cache compiled format to avoid repeated pattern matching
+        if self._cachedTextFormat ~= textFormat then
+            self._cachedTextFormat = textFormat
+            self._cachedTextPattern = {}
+            for tag in textFormat:gmatch('%[..-%]+') do
+                self._cachedTextPattern[#self._cachedTextPattern + 1] = tag
+            end
+            self._cachedFormat, self._cachedNum = textFormat:gsub('%%', '%%%%'):gsub('%[..-%]+', '%%s')
+        end
+
         -- Thanks oUF
         local valuesToDisplay = {}
-        for tag in textFormat:gmatch('%[..-%]+') do
+        for i = 1, #self._cachedTextPattern do
+            local tag = self._cachedTextPattern[i]
             if tagValues and tagValues[tag] then
-                table.insert(valuesToDisplay, tagValues[tag]())
+                valuesToDisplay[i] = tagValues[tag]()
             else
-                table.insert(valuesToDisplay, '')
+                valuesToDisplay[i] = ''
             end
         end
-        local format, num = textFormat:gsub('%%', '%%%%'):gsub('%[..-%]+', '%%s')
 
-        self.TextValue:SetFormattedText(format, unpack(valuesToDisplay, 1, num))
+        self.TextValue:SetFormattedText(self._cachedFormat, unpack(valuesToDisplay, 1, self._cachedNum))
     end
 
     if addonTable.fragmentedPowerTypes[resource] then
-        self:UpdateFragmentedPowerDisplay(layoutName)
+        self:UpdateFragmentedPowerDisplay(layoutName, data, max)
     end
 end
 
@@ -306,8 +337,8 @@ function BarMixin:ApplyVisibilitySettings(layoutName, inCombat)
     local data = self:GetData(layoutName)
     if not data then return end
 
-    self:HideBlizzardPlayerContainer(layoutName)
-    self:HideBlizzardSecondaryResource(layoutName)
+    self:HideBlizzardPlayerContainer(layoutName, data)
+    self:HideBlizzardSecondaryResource(layoutName, data)
 
     -- Don't hide while in edit mode...
     if LEM:IsInEditMode() then
@@ -384,11 +415,11 @@ function BarMixin:ApplyVisibilitySettings(layoutName, inCombat)
         self:Show()
     end
 
-    self:ApplyTextVisibilitySettings(layoutName)
+    self:ApplyTextVisibilitySettings(layoutName, data)
 end
 
-function BarMixin:ApplyTextVisibilitySettings(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:ApplyTextVisibilitySettings(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     self.TextFrame:SetShown(data.showText ~= false)
@@ -398,8 +429,8 @@ function BarMixin:ApplyTextVisibilitySettings(layoutName)
     end
 end
 
-function BarMixin:HideBlizzardPlayerContainer(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:HideBlizzardPlayerContainer(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     -- InCombatLockdown() means protected frames so we cannot touch it
@@ -418,8 +449,8 @@ function BarMixin:HideBlizzardPlayerContainer(layoutName)
     end
 end
 
-function BarMixin:HideBlizzardSecondaryResource(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:HideBlizzardSecondaryResource(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     -- InCombatLockdown() means protected frames so we cannot touch it
@@ -489,10 +520,10 @@ function BarMixin:GetPoint(layoutName)
     return point, resolvedRelativeFrame, relativePoint, addonTable.clamp(x, uiWidth * -1, uiWidth), addonTable.clamp(y, uiHeight * -1, uiHeight)
 end
 
-function BarMixin:GetSize(layoutName)
+function BarMixin:GetSize(layoutName, data)
     local defaults = self.defaults or {}
 
-    local data = self:GetData(layoutName)
+    data = data or self:GetData(layoutName)
     if not data then return defaults.width or 200, defaults.height or 15 end
 
     local width = nil
@@ -521,12 +552,12 @@ function BarMixin:ApplyLayout(layoutName, force)
     -- Init Fragmented Power Bars if needed
     local resource = self:GetResource()
     if addonTable.fragmentedPowerTypes[resource] then
-        self:CreateFragmentedPowerBars(layoutName)
+        self:CreateFragmentedPowerBars(layoutName, data)
     end
 
     local defaults = self.defaults or {}
 
-    local width, height = self:GetSize(layoutName)
+    local width, height = self:GetSize(layoutName, data)
     self.Frame:SetSize(max(LEM:IsInEditMode() and 2 or 1, width), max(LEM:IsInEditMode() and 2 or 1, height))
 
     local point, relativeTo, relativePoint, x, y = self:GetPoint(layoutName)
@@ -537,13 +568,13 @@ function BarMixin:ApplyLayout(layoutName, force)
     LEM:SetFrameDragEnabled(self.Frame, relativeTo == UIParent)
 
     self:SetFrameStrata(data.barStrata or defaults.barStrata)
-    self:ApplyFontSettings(layoutName)
-    self:ApplyFillDirectionSettings(layoutName)
-    self:ApplyMaskAndBorderSettings(layoutName)
-    self:ApplyForegroundSettings(layoutName)
-    self:ApplyBackgroundSettings(layoutName)
+    self:ApplyFontSettings(layoutName, data)
+    self:ApplyFillDirectionSettings(layoutName, data)
+    self:ApplyMaskAndBorderSettings(layoutName, data)
+    self:ApplyForegroundSettings(layoutName, data)
+    self:ApplyBackgroundSettings(layoutName, data)
 
-    self:UpdateTicksLayout(layoutName)
+    self:UpdateTicksLayout(layoutName, data)
 
     if data.fasterUpdates then
         self:EnableFasterUpdates()
@@ -552,7 +583,7 @@ function BarMixin:ApplyLayout(layoutName, force)
     end
 
     if addonTable.fragmentedPowerTypes[resource] then
-        self:UpdateFragmentedPowerDisplay(layoutName)
+        self:UpdateFragmentedPowerDisplay(layoutName, data)
     else
         self.StatusBar:SetAlpha(1)
         for i, _ in pairs(self.FragmentedPowerBars or {}) do
@@ -566,8 +597,8 @@ function BarMixin:ApplyLayout(layoutName, force)
     end
 end
 
-function BarMixin:ApplyFontSettings(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:ApplyFontSettings(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     local defaults = self.defaults or {}
@@ -616,8 +647,8 @@ function BarMixin:ApplyFontSettings(layoutName)
     end
 end
 
-function BarMixin:ApplyFillDirectionSettings(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:ApplyFillDirectionSettings(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     if data.fillDirection == "Top to Bottom" or data.fillDirection == "Bottom to Top" then
@@ -647,8 +678,8 @@ function BarMixin:ApplyFillDirectionSettings(layoutName)
     end
 end
 
-function BarMixin:ApplyMaskAndBorderSettings(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:ApplyMaskAndBorderSettings(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     local defaults = self.defaults or {}
@@ -698,7 +729,8 @@ function BarMixin:ApplyMaskAndBorderSettings(layoutName)
 
         -- Linear multiplier: for example, thickness grows 1x at scale 1, 2x at scale 2
         local thickness = (style.thickness or 1) * math.max(data.scale or defaults.scale, 1)
-        thickness = math.max(thickness, 1)
+        local ppScale = addonTable.getPixelPerfectScale()
+        local pThickness = math.max(addonTable.rounded(thickness), 1) * ppScale
 
         local borderColor = data.borderColor or defaults.borderColor
 
@@ -709,9 +741,9 @@ function BarMixin:ApplyMaskAndBorderSettings(layoutName)
             t:SetPoint(points[2], self.Frame, points[2])
             t:SetColorTexture(borderColor.r or 0, borderColor.g or 0, borderColor.b or 0, borderColor.a or 1)
             if edge == "top" or edge == "bottom" then
-                t:SetHeight(thickness)
+                t:SetHeight(pThickness)
             else
-                t:SetWidth(thickness)
+                t:SetWidth(pThickness)
             end
             t:Show()
         end
@@ -761,8 +793,8 @@ function BarMixin:GetCooldownManagerWidth(layoutName)
     return nil
 end
 
-function BarMixin:ApplyBackgroundSettings(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:ApplyBackgroundSettings(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     local defaults = self.defaults or {}
@@ -794,8 +826,8 @@ function BarMixin:ApplyBackgroundSettings(layoutName)
     end
 end
 
-function BarMixin:ApplyForegroundSettings(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:ApplyForegroundSettings(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     local defaults = self.defaults or {}
@@ -832,8 +864,8 @@ function BarMixin:ApplyForegroundSettings(layoutName)
     end
 end
 
-function BarMixin:UpdateTicksLayout(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:UpdateTicksLayout(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     local resource = self:GetResource()
@@ -842,6 +874,8 @@ function BarMixin:UpdateTicksLayout(layoutName)
         max = data.maelstromWeaponUseTenBars and 10 or 5
     elseif resource == "TIP_OF_THE_SPEAR" then
         max = addonTable.TipOfTheSpear.TIP_MAX_STACKS
+    elseif resource == "WHIRLWIND" then
+        max = addonTable.Whirlwind.IW_MAX_STACKS
     elseif resource == "SOUL_FRAGMENTS_VENGEANCE" then
         max = 6
     elseif type(resource) == "number" then
@@ -870,6 +904,8 @@ function BarMixin:UpdateTicksLayout(layoutName)
 
     local tickThickness = data.tickThickness or defaults.tickThickness or 1
     local tickColor = data.tickColor or defaults.tickColor
+    local ppScale = addonTable.getPixelPerfectScale()
+    local pThickness = tickThickness * ppScale
 
     local needed = max - 1
     for i = 1, needed do
@@ -881,13 +917,15 @@ function BarMixin:UpdateTicksLayout(layoutName)
         t:SetColorTexture(tickColor.r or 0, tickColor.g or 0, tickColor.b or 0, tickColor.a or 1)
         t:ClearAllPoints()
         if self.StatusBar:GetOrientation() == "VERTICAL" then
-            local y = (i / max) * height
-            t:SetSize(width, tickThickness)
-            t:SetPoint("BOTTOM", self.StatusBar, "BOTTOM", 0, y - (tickThickness) / 2)
+            local rawY = (i / max) * height
+            local snappedY = addonTable.rounded(rawY / ppScale) * ppScale
+            t:SetSize(width, pThickness)
+            t:SetPoint("BOTTOM", self.StatusBar, "BOTTOM", 0, snappedY)
         else
-            local x = (i / max) * width
-            t:SetSize(tickThickness, height)
-            t:SetPoint("LEFT", self.StatusBar, "LEFT", x - (tickThickness) / 2, 0)
+            local rawX = (i / max) * width
+            local snappedX = addonTable.rounded(rawX / ppScale) * ppScale
+            t:SetSize(pThickness, height)
+            t:SetPoint("LEFT", self.StatusBar, "LEFT", snappedX, 0)
         end
         t:Show()
     end
@@ -901,8 +939,8 @@ function BarMixin:UpdateTicksLayout(layoutName)
     end
 end
 
-function BarMixin:CreateFragmentedPowerBars(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:CreateFragmentedPowerBars(layoutName, data)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     local defaults = self.defaults or {}
@@ -943,21 +981,14 @@ function BarMixin:CreateFragmentedPowerBars(layoutName)
     end
 end
 
-function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
-    local data = self:GetData(layoutName)
+function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
+    data = data or self:GetData(layoutName)
     if not data then return end
 
     local resource = self:GetResource()
     if not resource then return end
-
-    local maelstromWeaponUseTenBars = data and data.maelstromWeaponUseTenBars
-
-    local maxPower
-    if resource == "MAELSTROM_WEAPON" then
-        maxPower = maelstromWeaponUseTenBars and 10 or 5
-    else
-        maxPower = UnitPowerMax("player", resource)
-    end
+    -- Use passed maxPower to avoid redundant UnitPowerMax call
+    maxPower = maxPower or (resource == "MAELSTROM_WEAPON" and 5 or UnitPowerMax("player", resource))
     if maxPower <= 0 then return end
 
     local barWidth = self.Frame:GetWidth()
@@ -970,7 +1001,8 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
 
     if resource == Enum.PowerType.ComboPoints then
         local current = UnitPower("player", resource)
-        local maxCP = UnitPowerMax("player", resource)
+        -- Reuse cached maxPower to avoid redundant API call
+        local maxCP = maxPower
 
         local overchargedCpColor = addonTable:GetOverrideResourceColor("OVERCHARGED_COMBO_POINTS") or color
         local charged = GetUnitChargedPowerPoints("player") or {}
@@ -979,15 +1011,16 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
             chargedLookup[index] = true
         end
 
-        local displayOrder = {}
+        -- Reuse pre-allocated table for performance
+        local displayOrder = self._displayOrder
         for i = 1, maxCP do
-            table.insert(displayOrder, i)
+            displayOrder[i] = i
         end
 
         -- Reverse if needed
         if data.fillDirection == "Right to Left" or data.fillDirection == "Top to Bottom" then
-            for i = 1, math.floor(#displayOrder / 2) do
-                displayOrder[i], displayOrder[#displayOrder - i + 1] = displayOrder[#displayOrder - i + 1], displayOrder[i]
+            for i = 1, math.floor(maxCP / 2) do
+                displayOrder[i], displayOrder[maxCP - i + 1] = displayOrder[maxCP - i + 1], displayOrder[i]
             end
         end
 
@@ -1061,7 +1094,8 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
 
         self._LastEssence = current
 
-        local displayOrder = {}
+        -- Reuse pre-allocated table for performance
+        local displayOrder = self._displayOrder
         local stateList = {}
         for i = 1, maxEssence do
             if i <= current then
@@ -1071,7 +1105,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
             else
                 stateList[i] = "empty"
             end
-            table.insert(displayOrder, i)
+            displayOrder[i] = i
         end
 
         self.StatusBar:SetValue(current)
@@ -1116,23 +1150,45 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
             end
         end
     elseif resource == Enum.PowerType.Runes then
-        -- Collect rune states: ready and recharging
-        local readyList = {}
-        local cdList = {}
+        -- Collect rune states: ready and recharging (reuse pre-allocated tables)
+        local readyList = self._runeReadyList
+        local cdList = self._runeCdList
+        -- Clear previous data
+        for i = #readyList, 1, -1 do readyList[i] = nil end
+        for i = #cdList, 1, -1 do cdList[i] = nil end
+        
         local now = GetTime()
+        local poolIdx = 1
         for i = 1, maxPower do
-            local start, duration, runeReady = GetRuneCooldown(i)
-            if runeReady then
-                table.insert(readyList, { index = i })
+            -- Try to use cached cooldown data first (for runes, cached by GetResourceValue)
+            local start, duration, runeReady
+            if self._runeCooldownCache and self._runeCooldownCache[i] then
+                local cached = self._runeCooldownCache[i]
+                start, duration, runeReady = cached.start, cached.duration, cached.runeReady
             else
+                start, duration, runeReady = GetRuneCooldown(i)
+            end
+            
+            if runeReady then
+                -- Reuse pre-allocated struct
+                local info = self._runeInfoPool[poolIdx]
+                poolIdx = poolIdx + 1
+                info.index = i
+                table.insert(readyList, info)
+            else
+                -- Reuse pre-allocated struct
+                local info = self._runeInfoPool[poolIdx]
+                poolIdx = poolIdx + 1
+                info.index = i
                 if start and duration and duration > 0 then
                     local elapsed = now - start
-                    local remaining = math.max(0, duration - elapsed)
-                    local frac = math.max(0, math.min(1, elapsed / duration))
-                    table.insert(cdList, { index = i, remaining = remaining, frac = frac })
+                    info.remaining = math.max(0, duration - elapsed)
+                    info.frac = math.max(0, math.min(1, elapsed / duration))
                 else
-                    table.insert(cdList, { index = i, remaining = math.huge, frac = 0 })
+                    info.remaining = math.huge
+                    info.frac = 0
                 end
+                table.insert(cdList, info)
             end
         end
 
@@ -1142,28 +1198,32 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
         end)
 
         -- Build final display order: ready runes first (left), then CD runes sorted by remaining
-        local displayOrder = {}
+        local displayOrder = self._displayOrder
         local readyLookup = {}
         local cdLookup = {}
+        local orderIndex = 1
         for _, v in ipairs(readyList) do
-            table.insert(displayOrder, v.index)
+            displayOrder[orderIndex] = v.index
+            orderIndex = orderIndex + 1
             readyLookup[v.index] = true
         end
         for _, v in ipairs(cdList) do
-            table.insert(displayOrder, v.index)
+            displayOrder[orderIndex] = v.index
+            orderIndex = orderIndex + 1
             cdLookup[v.index] = v
         end
+        local totalRunes = orderIndex - 1
 
         if data.fillDirection == "Right to Left" or data.fillDirection == "Top to Bottom" then
-            for i = 1, math.floor(#displayOrder / 2) do
-                displayOrder[i], displayOrder[#displayOrder - i + 1] = displayOrder[#displayOrder - i + 1], displayOrder[i]
+            for i = 1, math.floor(totalRunes / 2) do
+                displayOrder[i], displayOrder[totalRunes - i + 1] = displayOrder[totalRunes - i + 1], displayOrder[i]
             end
         end
 
         self.StatusBar:SetValue(#readyList)
 
         local precision = data.fragmentedPowerBarTextPrecision and math.max(0, string.len(data.fragmentedPowerBarTextPrecision) - 3) or 0
-        for pos = 1, #displayOrder do
+        for pos = 1, totalRunes do
             local runeIndex = displayOrder[pos]
             local runeFrame = self.FragmentedPowerBars[runeIndex]
             local runeText = self.FragmentedPowerBarTexts[runeIndex]
@@ -1204,14 +1264,15 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
         local current = auraData and auraData.applications or 0
         local above5MwColor = addonTable:GetOverrideResourceColor("MAELSTROM_WEAPON_ABOVE_5") or color
 
-        local displayOrder = {}
+        -- Reuse pre-allocated table for performance
+        local displayOrder = self._displayOrder
         for i = 1, maxPower do
-            table.insert(displayOrder, i)
+            displayOrder[i] = i
         end
 
         if data.fillDirection == "Right to Left" or data.fillDirection == "Top to Bottom" then
-            for i = 1, math.floor(#displayOrder / 2) do
-                displayOrder[i], displayOrder[#displayOrder - i + 1] = displayOrder[#displayOrder - i + 1], displayOrder[i]
+            for i = 1, math.floor(maxPower / 2) do
+                displayOrder[i], displayOrder[maxPower - i + 1] = displayOrder[maxPower - i + 1], displayOrder[i]
             end
         end
 

@@ -29,6 +29,10 @@ local PowerData = {
         key = Enum.PowerType.Rage,
     },
     {
+        label = L["WHIRLWIND"],
+        key = "WHIRLWIND",
+    },
+    {
         label = L["FOCUS"],
         key = Enum.PowerType.Focus,
     },
@@ -49,7 +53,7 @@ local PowerData = {
         key = Enum.PowerType.LunarPower,
     },
     {
-        label = L["MAELSTORM"],
+        label = L["MAELSTROM"],
         key = Enum.PowerType.Maelstrom,
     },
     {
@@ -125,7 +129,7 @@ local PowerData = {
         key = "SOUL_FRAGMENTS",
     },
     {
-        label = L["SOUL_FRAGMENTS_VOIC_META"],
+        label = L["SOUL_FRAGMENTS_VOID_META"],
         key = "SOUL_FRAGMENTS_VOID_META",
     },
     {

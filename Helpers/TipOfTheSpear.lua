@@ -9,6 +9,9 @@ local TIP_DURATION = 10
 
 local TIP_OF_THE_SPEAR_ID = 260285
 local KILL_COMMAND_ID = 259489
+local TWIN_FANG_ID = 1272139
+local TAKEDOWN_ID = 1250646
+local PRIMAL_SURGE_ID = 1272154
 
 -- Abilities that consume Tip of the Spear stacks
 local SPENDER_IDS = {
@@ -40,7 +43,14 @@ function TipOfTheSpear:OnEvent(_, event, ...)
 
     -- Gain 1/2 stacks from Kill Command
     if spellID == KILL_COMMAND_ID then
-        tipStacks = math.min(self.TIP_MAX_STACKS, tipStacks + (C_SpellBook.IsSpellKnown(1272154) and 2 or 1)) -- Primal Surge
+        tipStacks = math.min(self.TIP_MAX_STACKS, tipStacks + (C_SpellBook.IsSpellKnown(PRIMAL_SURGE_ID) and 2 or 1))
+        tipExpiresAt = GetTime() + TIP_DURATION
+        return
+    end
+
+    -- Gain 2 stacks from Takedown
+    if spellID == TAKEDOWN_ID and C_SpellBook.IsSpellKnown(TWIN_FANG_ID) then
+        tipStacks = math.min(self.TIP_MAX_STACKS, tipStacks + 2) -- Takedown auto consumes a stack it seems ?
         tipExpiresAt = GetTime() + TIP_DURATION
         return
     end

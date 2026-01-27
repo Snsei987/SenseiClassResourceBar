@@ -35,10 +35,15 @@ end
 function HealthBarMixin:GetTagValues(_, max, current, precision)
     local pFormat = "%." .. (precision or 0) .. "f"
 
+    -- Pre-compute values instead of creating closures for better performance
+    local currentStr = string.format("%s", AbbreviateNumbers(current))
+    local percentStr = string.format(pFormat, UnitHealthPercent("player", true, CurveConstants.ScaleTo100))
+    local maxStr = string.format("%s", AbbreviateNumbers(max))
+
     return {
-        ["[current]"] = function() return string.format("%s", AbbreviateNumbers(current)) end,
-        ["[percent]"] = function() return string.format(pFormat, UnitHealthPercent("player", true, CurveConstants.ScaleTo100)) end,
-        ["[max]"] = function() return string.format("%s", AbbreviateNumbers(max)) end,
+        ["[current]"] = function() return currentStr end,
+        ["[percent]"] = function() return percentStr end,
+        ["[max]"] = function() return maxStr end,
     }
 end
 

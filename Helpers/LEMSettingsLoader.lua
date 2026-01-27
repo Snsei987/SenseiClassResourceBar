@@ -884,7 +884,7 @@ function LEMSettingsLoaderMixin:LoadSettings()
 
     local buttonSettings = {
         {
-            text = "Power Color Settings",
+            text = L["POWER_COLOR_SETTINGS"],
             click = function() -- Cannot directly close Edit Mode because it is protected
                 if not addonTable._SCRB_EditModeManagerFrame_OnHide_openSettingsOnExit then
                     addonTable.prettyPrint(L["SETTING_OPEN_AFTER_EDIT_MODE_CLOSE"])

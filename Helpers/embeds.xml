@@ -4,4 +4,5 @@
 	<Script file="Color.lua"/>
 	<Script file="LEMSettingsLoader.lua"/>
 	<Script file="TipOfTheSpear.lua"/>
+	<Script file="Whirlwind.lua"/>
 </Ui>
