@@ -28,6 +28,10 @@ addonTable.fullUpdateBar = function(name)
     bar:ApplyVisibilitySettings()
     bar:ApplyLayout()
     bar:UpdateDisplay()
+
+    if type(bar.ApplyMouseSettings) == "function" then
+        bar:ApplyMouseSettings()
+    end
 end
 
 addonTable.fullUpdateBars = function()

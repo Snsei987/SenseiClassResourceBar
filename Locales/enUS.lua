@@ -108,6 +108,8 @@ local baseLocale = {
     ["SMOOTH_PROGRESS"] = "Smooth Progress",
     ["SHOW_TICKS_WHEN_AVAILABLE"] = "Show Ticks When Available",
     ["TICK_THICKNESS"] = "Tick Thickness",
+    ["ENABLE_HP_BAR_MOUSE_INTERACTION"] = "Clickable Health Bar",
+    ["ENABLE_HP_BAR_MOUSE_INTERACTION_TOOLTIP"] = "Enable default Player Frame click behavior on the Health Bar.",
 
     -- Bar style category - Edit Mode
     ["CATEGORY_BAR_STYLE"] = "Bar Style",

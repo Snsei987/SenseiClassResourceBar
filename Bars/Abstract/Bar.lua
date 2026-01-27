@@ -15,7 +15,7 @@ local BarMixin = {}
 ------------------------------------------------------------
 
 function BarMixin:Init(config, parent, frameLevel)
-    local Frame = CreateFrame("Frame", config.frameName or "", parent or UIParent)
+    local Frame = CreateFrame(config.frameType or "Frame", config.frameName or "", parent or UIParent, config.frameTemplate or nil)
 
     Frame:SetFrameLevel(frameLevel)
     self.config = config

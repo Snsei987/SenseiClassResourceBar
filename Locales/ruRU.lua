@@ -108,6 +108,8 @@ local baseLocale = {
     ["SMOOTH_PROGRESS"] = "Плавный прогресс",
     ["SHOW_TICKS_WHEN_AVAILABLE"] = "Показывать тики, когда доступно",
     ["TICK_THICKNESS"] = "Толщина тиков",
+    ["ENABLE_HP_BAR_MOUSE_INTERACTION"] = "Кликабельная полоса здоровья",
+    ["ENABLE_HP_BAR_MOUSE_INTERACTION_TOOLTIP"] = "Включает стандартное поведение кликов фрейма игрока для полосы здоровья.",
 
     -- Bar style category - Edit Mode
     ["CATEGORY_BAR_STYLE"] = "Стиль полосы",

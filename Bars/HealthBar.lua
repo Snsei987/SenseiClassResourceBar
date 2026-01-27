@@ -47,6 +47,25 @@ function HealthBarMixin:GetTagValues(_, max, current, precision)
     }
 end
 
+function HealthBarMixin:ApplyMouseSettings()
+    local data = self:GetData()
+    local shouldEnable = data and data.enableHealthBarMouseInteraction
+
+    if InCombatLockdown() then
+        self.mouseUpdatePending = true
+        return -- defer until PLAYER_REGEN_ENABLED
+    end
+
+    -- Apply
+    self.Frame:EnableMouse(shouldEnable)
+    if shouldEnable then
+        self.Frame:RegisterForClicks("AnyUp")
+    else
+        self.Frame:RegisterForClicks()
+    end
+    self.mouseUpdatePending = false
+end
+
 function HealthBarMixin:OnLoad()
     self.Frame:RegisterEvent("PLAYER_ENTERING_WORLD")
     self.Frame:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
@@ -58,6 +77,15 @@ function HealthBarMixin:OnLoad()
     self.Frame:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
     self.Frame:RegisterEvent("PET_BATTLE_OPENING_START")
     self.Frame:RegisterEvent("PET_BATTLE_CLOSE")
+
+    self.mouseUpdatePending = false
+    self.Frame:RegisterForClicks("AnyUp")
+    self.Frame:SetAttribute("unit", "player")
+    self.Frame:SetAttribute("*type1", "target")
+    self.Frame:SetAttribute("*type2", "togglemenu")
+    self.Frame.menu = function(frame)
+        UnitPopup_ShowMenu(frame, "PLAYER", "player")
+    end
 end
 
 function HealthBarMixin:OnEvent(event, ...)
@@ -79,6 +107,13 @@ function HealthBarMixin:OnEvent(event, ...)
             self:ApplyVisibilitySettings(nil, event == "PLAYER_REGEN_DISABLED")
             self:UpdateDisplay()
 
+    end
+
+    -- Handle mouse init and deferred updates
+    if event == "PLAYER_ENTERING_WORLD" then
+        self:ApplyMouseSettings()
+    elseif event == "PLAYER_REGEN_ENABLED" and self.mouseUpdatePending then
+        self:ApplyMouseSettings()
     end
 end
 
@@ -133,6 +168,8 @@ addonTable.RegisteredBar.HealthBar = {
     mixin = addonTable.HealthBarMixin,
     dbName = "healthBarDB",
     editModeName = L["HEALTH_BAR_EDIT_MODE_NAME"],
+    frameType = "Button",
+    frameTemplate = "SecureUnitButtonTemplate",
     frameName = "HealthBar",
     frameLevel = 0,
     defaultValues = {
@@ -144,6 +181,7 @@ addonTable.RegisteredBar.HealthBar = {
         hideHealthOnRole = {},
         hideBlizzardPlayerContainerUi = false,
         useClassColor = true,
+        enableHealthBarMouseInteraction = false,
     },
     lemSettings = function(bar, defaults)
         local config = bar:GetConfig()
@@ -204,6 +242,22 @@ addonTable.RegisteredBar.HealthBar = {
                     SenseiClassResourceBarDB[dbName][layoutName].positionMode = value
                     bar:ApplyLayout(layoutName)
                 end,
+            },
+            {
+                parentId = L["CATEGORY_BAR_VISIBILITY"],
+                order = 106,
+                name = L["ENABLE_HP_BAR_MOUSE_INTERACTION"],
+                kind = LEM.SettingType.Checkbox,
+                default = defaults.enableHealthBarMouseInteraction,
+                get = function(layoutName)
+                    return (SenseiClassResourceBarDB[dbName][layoutName] and SenseiClassResourceBarDB[dbName][layoutName].enableHealthBarMouseInteraction) or defaults.enableHealthBarMouseInteraction
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].enableHealthBarMouseInteraction = value
+                    bar:ApplyMouseSettings()
+                end,
+                tooltip = L["ENABLE_HP_BAR_MOUSE_INTERACTION_TOOLTIP"],
             },
             {
                 parentId = L["CATEGORY_BAR_STYLE"],

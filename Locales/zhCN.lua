@@ -107,6 +107,8 @@ local baseLocale = {
     ["SMOOTH_PROGRESS"] = "平滑进度",
     ["SHOW_TICKS_WHEN_AVAILABLE"] = "显示刻度（如果可用）",
     ["TICK_THICKNESS"] = "刻度粗细",
+    ["ENABLE_HP_BAR_MOUSE_INTERACTION"] = "可点击生命条",
+    ["ENABLE_HP_BAR_MOUSE_INTERACTION_TOOLTIP"] = "在生命条上启用玩家框体的默认点击行为。",
 
     -- Bar style category - Edit Mode
     ["CATEGORY_BAR_STYLE"] = "条形风格",
