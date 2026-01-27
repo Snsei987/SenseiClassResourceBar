@@ -90,12 +90,13 @@ This system provides tools to measure and validate performance optimizations for
    - Only relevant for classes with fragmented power (Runes, ComboPoints, etc.)
    - Should have reasonable average time (<0.5ms)
 
-### Expected Improvements After Optimization
+### Performance Targets
 
-- **OnUpdate calls reduced by 90%+** (event-driven updates)
-- **Average UpdateDisplay time reduced by 20-40%** (caching, less redundant work)
-- **Memory delta should be neutral or lower** (better table reuse)
-- **Calls/second for UpdateDisplay should be appropriate** (only when needed, not constant)
+- **OnUpdate should be minimal or conditional** - Only use when necessary (cooldowns, smooth animations)
+- **UpdateDisplay should be efficient** - Low average time per call (<0.2ms ideal)
+- **ApplyLayout should be rare** - Called only on config changes, not frequently
+- **Memory should be stable** - No continuous growth during normal play
+- **Event-driven updates preferred** - React to game events rather than polling when possible
 
 ## Understanding the Output
 
