@@ -18,6 +18,10 @@ function PowerBarMixin:OnLoad()
     self.Frame:RegisterUnitEvent("UNIT_MAXPOWER", "player")
     self.Frame:RegisterEvent("PET_BATTLE_OPENING_START")
     self.Frame:RegisterEvent("PET_BATTLE_CLOSE")
+    
+    -- Event-driven power updates instead of constant OnUpdate polling
+    self.Frame:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
+    self.Frame:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player")
 
     local playerClass = select(2, UnitClass("player"))
 
@@ -35,6 +39,8 @@ function PowerBarMixin:OnEvent(event, ...)
 
         self:ApplyVisibilitySettings()
         self:ApplyLayout(nil, true)
+        self:UpdateDisplay(true)
+        self:UpdateOnUpdateState()
 
     elseif event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED"
         or event == "PLAYER_TARGET_CHANGED"
@@ -48,6 +54,12 @@ function PowerBarMixin:OnEvent(event, ...)
     elseif event == "UNIT_MAXPOWER" and unit == "player" then
 
         self:ApplyLayout(nil, true)
+        self:UpdateDisplay(true)
+
+    elseif (event == "UNIT_POWER_UPDATE" or event == "UNIT_DISPLAYPOWER") and unit == "player" then
+        
+        -- Event-driven update: only update when power actually changes
+        self:UpdateDisplay()
 
     end
 end
