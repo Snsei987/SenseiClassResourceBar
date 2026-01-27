@@ -842,6 +842,8 @@ function BarMixin:UpdateTicksLayout(layoutName)
         max = data.maelstromWeaponUseTenBars and 10 or 5
     elseif resource == "TIP_OF_THE_SPEAR" then
         max = addonTable.TipOfTheSpear.TIP_MAX_STACKS
+    elseif resource == "SOUL_FRAGMENTS_VENGEANCE" then
+        max = 6
     elseif type(resource) == "number" then
         max = UnitPowerMax("player", resource)
     end

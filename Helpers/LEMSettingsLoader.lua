@@ -613,6 +613,7 @@ local function BuildLemSettings(bar, defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName].textFormat = value
                 bar:UpdateDisplay(layoutName)
             end,
+            tooltip = L["RESOURCE_NUMBER_FORMAT_TOOLTIP"],
             isEnabled = function(layoutName)
                 local data = SenseiClassResourceBarDB[config.dbName][layoutName]
                 return data.showText

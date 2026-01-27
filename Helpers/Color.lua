@@ -85,6 +85,8 @@ function addonTable:GetResourceColor(resource)
         else
             color = { r = 0.278, g = 0.125, b = 0.796, atlas = "UF-DDH-VoidMeta-Bar-Ready" }
         end
+    elseif resource == "SOUL_FRAGMENTS_VENGEANCE" then
+        color = { r = 0.341, g = 0.063, b = 0.459 }
     elseif resource == Enum.PowerType.Runes or resource == Enum.PowerType.RuneBlood or resource == Enum.PowerType.RuneUnholy or resource == Enum.PowerType.RuneFrost then
         local spec = C_SpecializationInfo.GetSpecialization()
         local specID = C_SpecializationInfo.GetSpecializationInfo(spec)

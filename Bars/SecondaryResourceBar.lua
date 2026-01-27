@@ -24,6 +24,7 @@ function SecondaryResourceBarMixin:GetResource()
     local secondaryResources = {
         ["DEATHKNIGHT"] = Enum.PowerType.Runes,
         ["DEMONHUNTER"] = {
+            [581] = "SOUL_FRAGMENTS_VENGEANCE", -- Vengeance
             [1480] = "SOUL_FRAGMENTS", -- Devourer
         },
         ["DRUID"]       = {
@@ -98,6 +99,13 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
         return maxHealth, stagger
     end
 
+    if resource == "SOUL_FRAGMENTS_VENGEANCE" then
+        local current = C_Spell.GetSpellCastCount(228477) or 0 -- Soul Cleave
+        local max = 6
+
+        return max, current
+    end
+
     if resource == "SOUL_FRAGMENTS" then
         local auraData = C_UnitAuras.GetPlayerAuraBySpellID(1225789) or C_UnitAuras.GetPlayerAuraBySpellID(1227702) -- Soul Fragments / Collapsing Star
         local current = auraData and auraData.applications or 0
@@ -161,6 +169,10 @@ function SecondaryResourceBarMixin:GetTagValues(resource, max, current, precisio
 
     if resource == "STAGGER" then
         tagValues["[percent]"] = function() return string.format(pFormat, self._lastStaggerPercent) end
+    end
+
+    if resource == "SOUL_FRAGMENTS_VENGEANCE" then
+        tagValues["[percent]"] = function() return '' end -- As the value is secret, cannot get percent for it
     end
 
     if resource == Enum.PowerType.SoulShards then
