@@ -237,16 +237,19 @@ function BarMixin:UpdateOnUpdateState()
     
     -- Enable OnUpdate for resources that need continuous updates:
     -- 1. Cooldown tracking (Runes, Essences) - always needed
-    -- 2. Decay over time (Rage, Runic Power) - only needed OUT of combat
+    -- 2. Regenerating resources (Energy, Focus, Fury) - always needed for smooth regen
+    -- 3. Decay over time (Rage, Runic Power) - only needed OUT of combat
     local needsOnUpdate = false
-    local isDecayingResource = false
     
     if resource == Enum.PowerType.Runes or resource == Enum.PowerType.Essence then
         -- Runes and Essences always need OnUpdate for cooldown/regen display
         needsOnUpdate = true
+    elseif resource == Enum.PowerType.Energy or resource == Enum.PowerType.Focus or resource == Enum.PowerType.Fury then
+        -- Energy, Focus, and Fury regenerate continuously - need OnUpdate for smooth display
+        -- UNIT_POWER_UPDATE events don't fire frequently enough during passive regen
+        needsOnUpdate = true
     elseif resource == Enum.PowerType.Rage or resource == Enum.PowerType.RunicPower then
         -- Rage and Runic Power decay over time
-        isDecayingResource = true
         -- Only need OnUpdate when OUT of combat for smooth decay
         -- In combat, UNIT_POWER_UPDATE events handle updates
         needsOnUpdate = not self._inCombat
