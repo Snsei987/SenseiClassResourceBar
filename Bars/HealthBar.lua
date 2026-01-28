@@ -52,7 +52,7 @@ function HealthBarMixin:ApplyMouseSettings()
     local shouldEnable = data and data.enableHealthBarMouseInteraction
 
     if InCombatLockdown() then
-        self.mouseUpdatePending = true
+        self._mouseUpdatePending = true
         return -- defer until PLAYER_REGEN_ENABLED
     end
 
@@ -63,7 +63,7 @@ function HealthBarMixin:ApplyMouseSettings()
     else
         self.Frame:RegisterForClicks()
     end
-    self.mouseUpdatePending = false
+    self._mouseUpdatePending = false
 end
 
 function HealthBarMixin:OnLoad()
@@ -78,7 +78,8 @@ function HealthBarMixin:OnLoad()
     self.Frame:RegisterEvent("PET_BATTLE_OPENING_START")
     self.Frame:RegisterEvent("PET_BATTLE_CLOSE")
 
-    self.mouseUpdatePending = false
+    self:RegisterSecureVisibility()
+    self._mouseUpdatePending = false
     self.Frame:RegisterForClicks("AnyUp")
     self.Frame:SetAttribute("unit", "player")
     self.Frame:SetAttribute("*type1", "target")
@@ -104,17 +105,67 @@ function HealthBarMixin:OnEvent(event, ...)
         or event == "PLAYER_MOUNT_DISPLAY_CHANGED"
         or event == "PET_BATTLE_OPENING_START" or event == "PET_BATTLE_CLOSE" then
 
-            self:ApplyVisibilitySettings(nil, event == "PLAYER_REGEN_DISABLED")
+            self:ApplyVisibilitySettings(nil)
             self:UpdateDisplay()
-
     end
 
     -- Handle mouse init and deferred updates
     if event == "PLAYER_ENTERING_WORLD" then
         self:ApplyMouseSettings()
-    elseif event == "PLAYER_REGEN_ENABLED" and self.mouseUpdatePending then
+    elseif event == "PLAYER_REGEN_ENABLED" and self._mouseUpdatePending then
         self:ApplyMouseSettings()
     end
+end
+
+function HealthBarMixin:RegisterSecureVisibility()
+
+    -- Don't hide in Edit Mode, unless config disables it
+    if LEM:IsInEditMode() then
+        local conditional = "show"
+        if type(self.config.allowEditPredicate) == "function" and self.config.allowEditPredicate() == false then
+            conditional = "hide"
+        end
+        RegisterAttributeDriver(self.Frame, "state-visibility", conditional)
+        return
+    end
+
+    local data = self:GetData()
+    local conditions = { "[petbattle] hide" } -- Always hide in Pet Battles
+
+    -- Hide based on role
+    local spec = C_SpecializationInfo.GetSpecialization()
+    local role = select(5, C_SpecializationInfo.GetSpecializationInfo(spec))
+    if data.hideHealthOnRole and data.hideHealthOnRole[role] then
+        table.insert(conditions, "hide")
+    end
+
+    -- Hide while mounted or in vehicle
+    if data.hideWhileMountedOrVehicule then
+        table.insert(conditions, "[mounted][vehicleui][possessbar][overridebar][flying] hide")
+    end
+
+    local setting = data.barVisible
+    if setting == "Always Visible" then table.insert(conditions, "show")
+    elseif setting == "Hidden" then table.insert(conditions, "hide")
+    elseif setting == "In Combat" then table.insert(conditions, "[combat] show; hide")
+    elseif setting == "Has Target Selected" then table.insert(conditions, "[@target, exists] show; hide")
+    elseif setting == "Has Target Selected OR In Combat" then table.insert(conditions, "[combat][@target, exists] show; hide")
+    else table.insert(conditions, "show") end
+
+    RegisterAttributeDriver(self.Frame, "state-visibility", table.concat(conditions, "; "))
+end
+
+function HealthBarMixin:ApplyVisibilitySettings(layoutName)
+    local data = self:GetData(layoutName)
+    if not data then return end
+
+    self:HideBlizzardPlayerContainer(layoutName, data)
+
+    if not InCombatLockdown() then
+        self:RegisterSecureVisibility()
+    end
+
+    self:ApplyTextVisibilitySettings(layoutName, data)
 end
 
 function HealthBarMixin:GetPoint(layoutName, ignorePositionMode)
