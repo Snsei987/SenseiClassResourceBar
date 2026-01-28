@@ -153,6 +153,34 @@ function BarMixin:InitCooldownManagerWidthHook(layoutName)
     end
 end
 
+function BarMixin:InitCustomFrameWidthHook(layoutName)
+    local data = self:GetData(layoutName)
+    if not data then return nil end
+    
+    self._SCRB_Custom_Frames_hooked = self._SCRB_Custom_Frames_hooked or {}
+    self._SCRB_Custom_Frame = data.customFrame
+
+    local hookCustomFrame = function(customFrame, width)
+        if not self._SCRB_Custom_Frame or not _G[self._SCRB_Custom_Frame] or _G[self._SCRB_Custom_Frame] ~= customFrame then
+            return
+        end
+
+        if (width == nil) or (type(width) == "number" and math.floor(width) > 1) then
+            self:ApplyLayout(nil, true)
+        end
+    end
+
+    local v = _G[data.customFrame]
+    if v and not self._SCRB_Custom_Frames_hooked[v] then
+        self._SCRB_Custom_Frames_hooked[v] = true
+
+        hooksecurefunc(v, "SetSize", hookCustomFrame)
+        hooksecurefunc(v, "SetWidth", hookCustomFrame)
+        hooksecurefunc(v, "Show", hookCustomFrame)
+        hooksecurefunc(v, "Hide", hookCustomFrame)
+    end
+end
+
 ------------------------------------------------------------
 -- FRAME methods
 ------------------------------------------------------------

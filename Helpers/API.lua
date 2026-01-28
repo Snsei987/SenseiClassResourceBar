@@ -25,6 +25,7 @@ addonTable.fullUpdateBar = function(name)
     if not bar then return end
 
     bar:InitCooldownManagerWidthHook()
+    bar:InitCustomFrameWidthHook()
     bar:ApplyVisibilitySettings()
     bar:ApplyLayout()
     bar:UpdateDisplay()
