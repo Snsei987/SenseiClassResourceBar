@@ -225,6 +225,31 @@ local function BuildLemSettings(bar, defaults)
         {
             parentId = L["CATEGORY_POSITION_AND_SIZE"],
             order = 213,
+            name = L["CUSTOM_FRAME"],
+            kind = LEM.SettingType.Dropdown,
+            default = defaults.customFrame,
+            useOldStyle = true,
+            values = addonTable.availableCustomFrames,
+            get = function(layoutName)
+                return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].customFrameName) or nil
+            end,
+            set = function(layoutName, value)
+                local _, customFrame = strsplit(" ", value)
+                if customFrame and _G[customFrame] then
+                    SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[config.dbName][layoutName].customFrame = customFrame
+                    SenseiClassResourceBarDB[config.dbName][layoutName].customFrameName = value
+                    bar:ApplyLayout(layoutName)
+                end
+            end,
+            isEnabled = function (layoutName)
+                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
+                return data.widthMode == "Custom"
+            end,
+        },
+        {
+            parentId = L["CATEGORY_POSITION_AND_SIZE"],
+            order = 214,
             name = L["WIDTH"],
             kind = LEM.SettingType.Slider,
             default = defaults.width,
@@ -248,7 +273,7 @@ local function BuildLemSettings(bar, defaults)
         },
         {
             parentId = L["CATEGORY_POSITION_AND_SIZE"],
-            order = 214,
+            order = 215,
             name = L["MINIMUM_WIDTH"],
             kind = LEM.SettingType.Slider,
             default = defaults.minWidth,
@@ -273,7 +298,7 @@ local function BuildLemSettings(bar, defaults)
         },
         {
             parentId = L["CATEGORY_POSITION_AND_SIZE"],
-            order = 215,
+            order = 216,
             name = L["HEIGHT"],
             kind = LEM.SettingType.Slider,
             default = defaults.height,
@@ -844,6 +869,7 @@ function LEMSettingsLoaderMixin:Init(bar, defaults)
         SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
         bar:OnLayoutChange(layoutName)
         bar:InitCooldownManagerWidthHook(layoutName)
+        bar:InitCustomFrameWidthHook(layoutName)
         bar:ApplyVisibilitySettings(layoutName)
         bar:ApplyLayout(layoutName, true)
         bar:UpdateDisplay(layoutName, true)
@@ -853,6 +879,7 @@ function LEMSettingsLoaderMixin:Init(bar, defaults)
         local original = LEM:GetLayouts()[duplicateIndices[1]].name
         SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][original] and CopyTable(SenseiClassResourceBarDB[config.dbName][original]) or CopyTable(defaults)
         bar:InitCooldownManagerWidthHook(layoutName)
+        bar:InitCustomFrameWidthHook(layoutName)
         bar:ApplyVisibilitySettings(layoutName)
         bar:ApplyLayout(layoutName, true)
         bar:UpdateDisplay(layoutName, true)
@@ -862,6 +889,7 @@ function LEMSettingsLoaderMixin:Init(bar, defaults)
         SenseiClassResourceBarDB[config.dbName][newLayoutName] = SenseiClassResourceBarDB[config.dbName][oldLayoutName] and CopyTable(SenseiClassResourceBarDB[config.dbName][oldLayoutName]) or CopyTable(defaults)
         SenseiClassResourceBarDB[config.dbName][oldLayoutName] = nil
         bar:InitCooldownManagerWidthHook(newLayoutName)
+        bar:InitCustomFrameWidthHook(newLayoutName)
         bar:ApplyVisibilitySettings()
         bar:ApplyLayout()
         bar:UpdateDisplay()

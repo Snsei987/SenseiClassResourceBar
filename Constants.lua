@@ -211,7 +211,10 @@ addonTable.availableWidthModes = {
     { text = "Sync With Essential Cooldowns" },
     { text = "Sync With Utility Cooldowns" },
     { text = "Sync With Tracked Buffs" },
+    { text = "Custom" },
 }
+
+addonTable.availableCustomFrames = {}
 
 addonTable.availableFillDirections = {
     { text = "Left to Right" },
