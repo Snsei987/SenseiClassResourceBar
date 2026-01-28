@@ -289,20 +289,41 @@ function SecondaryResourceBarMixin:OnHide()
     end
 end
 
+-- Map of Blizzard frames and the resource types they display
+local blizzardResourceFrames = {
+    ["DEATHKNIGHT"] = { frame = RuneFrame, resource = Enum.PowerType.Runes },
+    ["DRUID"] = { frame = DruidComboPointBarFrame, resource = Enum.PowerType.ComboPoints },
+    ["EVOKER"] = { frame = EssencePlayerFrame, resource = Enum.PowerType.Essence },
+    ["MAGE"] = { frame = MageArcaneChargesFrame, resource = Enum.PowerType.ArcaneCharges },
+    ["MONK"] = { frame = MonkHarmonyBarFrame, resource = Enum.PowerType.Chi },
+    ["PALADIN"] = { frame = PaladinPowerBarFrame, resource = Enum.PowerType.HolyPower },
+    ["ROGUE"] = { frame = RogueComboPointBarFrame, resource = Enum.PowerType.ComboPoints },
+    ["WARLOCK"] = { frame = WarlockPowerFrame, resource = Enum.PowerType.SoulShards },
+}
+
+-- Returns the Blizzard frame for the class (regardless of spec compatibility)
+function SecondaryResourceBarMixin:GetBlizzardFrameForClass()
+    local playerClass = select(2, UnitClass("player"))
+    local frameData = blizzardResourceFrames[playerClass]
+    return frameData and frameData.frame
+end
+
+-- Returns the Blizzard frame only if it matches the current spec's resource
 function SecondaryResourceBarMixin:GetBlizzardResourceFrame()
     local playerClass = select(2, UnitClass("player"))
-    local blizzardResourceFrames = {
-        ["DEATHKNIGHT"] = RuneFrame,
-        ["DRUID"] = DruidComboPointBarFrame,
-        ["EVOKER"] = EssencePlayerFrame,
-        ["MAGE"] = MageArcaneChargesFrame,
-        ["MONK"] = MonkHarmonyBarFrame,
-        ["PALADIN"] = PaladinPowerBarFrame,
-        ["ROGUE"] = RogueComboPointBarFrame,
-        ["WARLOCK"] = WarlockPowerFrame,
-    }
+    local frameData = blizzardResourceFrames[playerClass]
+    if not frameData then
+        return nil
+    end
 
-    return blizzardResourceFrames[playerClass]
+    -- Check if the current spec's resource matches what the Blizzard bar displays
+    -- If not, return nil to fall back to the custom bar
+    local currentResource = self:GetResource()
+    if currentResource ~= frameData.resource then
+        return nil
+    end
+
+    return frameData.frame
 end
 
 -- Determine if bar should be visible based on visibility settings
@@ -366,9 +387,18 @@ function SecondaryResourceBarMixin:UseBlizzardBarMode(layoutName, inCombat)
 
     local blizzardFrame = self:GetBlizzardResourceFrame()
     if not blizzardFrame then
-        -- No Blizzard bar for this class, show custom bar
+        -- No compatible Blizzard bar for current spec, fall back to custom bar
+        -- Hide the class's Blizzard bar if it exists (e.g., Chi bar for Brewmaster)
+        local classBlizzardFrame = self:GetBlizzardFrameForClass()
+        if classBlizzardFrame and data.useBlizzardBar and not InCombatLockdown() then
+            classBlizzardFrame:Hide()
+        end
+        -- Use the custom bar as if useBlizzardBar wasn't enabled
         self.Frame:Show()
-        self:ApplyVisibilitySettings(layoutName)
+        self.Frame:SetAlpha(1.0)
+        addonTable.PowerBarMixin.ApplyLayout(self, layoutName)
+        addonTable.PowerBarMixin.ApplyVisibilitySettings(self, layoutName, inCombat)
+        self:UpdateDisplay(true)
         return
     end
 
@@ -464,13 +494,13 @@ end
 function SecondaryResourceBarMixin:ApplyLayout(layoutName, force)
     local data = self:GetData(layoutName)
 
-    -- If using Blizzard bar, update its position instead
-    if data and data.useBlizzardBar then
+    -- If using Blizzard bar AND it's compatible with current spec, update its position
+    if data and data.useBlizzardBar and self:GetBlizzardResourceFrame() then
         self:UseBlizzardBarMode(layoutName)
         return
     end
 
-    -- Otherwise use default layout behavior
+    -- Otherwise use default layout behavior (including fallback when Blizzard bar is incompatible)
     addonTable.PowerBarMixin.ApplyLayout(self, layoutName, force)
 end
 
