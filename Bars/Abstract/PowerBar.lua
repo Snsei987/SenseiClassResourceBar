@@ -15,6 +15,7 @@ function PowerBarMixin:OnLoad()
     self.Frame:RegisterUnitEvent("UNIT_ENTERED_VEHICLE", "player")
     self.Frame:RegisterUnitEvent("UNIT_EXITED_VEHICLE", "player")
     self.Frame:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
+    self.Frame:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
     self.Frame:RegisterUnitEvent("UNIT_MAXPOWER", "player")
     self.Frame:RegisterEvent("PET_BATTLE_OPENING_START")
     self.Frame:RegisterEvent("PET_BATTLE_CLOSE")
@@ -45,7 +46,7 @@ function PowerBarMixin:OnEvent(event, ...)
         self:ApplyVisibilitySettings(nil, event == "PLAYER_REGEN_DISABLED")
         self:UpdateDisplay()
 
-    elseif event == "UNIT_MAXPOWER" and unit == "player" then
+    elseif event == "UNIT_MAXPOWER" or event =="UNIT_POWER_UPDATE" and unit == "player" then
 
         self:ApplyLayout(nil, true)
 
