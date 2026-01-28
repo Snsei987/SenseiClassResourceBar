@@ -58,6 +58,10 @@ function HealthBarMixin:OnLoad()
     self.Frame:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
     self.Frame:RegisterEvent("PET_BATTLE_OPENING_START")
     self.Frame:RegisterEvent("PET_BATTLE_CLOSE")
+    
+    -- Event-driven health updates
+    self.Frame:RegisterUnitEvent("UNIT_HEALTH", "player")
+    self.Frame:RegisterUnitEvent("UNIT_MAXHEALTH", "player")
 end
 
 function HealthBarMixin:OnEvent(event, ...)
@@ -78,6 +82,11 @@ function HealthBarMixin:OnEvent(event, ...)
 
             self:ApplyVisibilitySettings(nil, event == "PLAYER_REGEN_DISABLED")
             self:UpdateDisplay()
+
+    elseif (event == "UNIT_HEALTH" or event == "UNIT_MAXHEALTH") and unit == "player" then
+        
+        -- Event-driven update: only update when health actually changes
+        self:UpdateDisplay()
 
     end
 end

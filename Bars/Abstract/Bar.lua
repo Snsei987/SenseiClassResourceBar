@@ -76,6 +76,8 @@ function BarMixin:Init(config, parent, frameLevel)
     self._displayOrder = {}
     self._cachedTextFormat = nil
     self._cachedTextPattern = nil
+    self._lastDisplayedText = ""
+    
     -- Pre-allocate rune tracking tables (for Death Knights)
     self._runeReadyList = {}
     self._runeCdList = {}
@@ -84,6 +86,15 @@ function BarMixin:Init(config, parent, frameLevel)
     for i = 1, 6 do
         self._runeInfoPool[i] = { index = 0, remaining = 0, frac = 0 }
     end
+    
+    -- Pre-allocate combo point tracking (for Rogues, Druids, etc.)
+    self._chargedLookup = {}
+    
+    -- Pre-allocate essence state list (for Evokers)
+    self._essenceStateList = {}
+    
+    -- Track combat state for conditional OnUpdate
+    self._inCombat = InCombatLockdown()
 
     self.Frame = Frame
 end
@@ -240,6 +251,48 @@ end
 ---@param event string
 ---@param ... any
 function BarMixin:OnEvent(event, ...)
+    -- Override in child classes
+end
+
+-- Intelligently manage OnUpdate based on resource type
+function BarMixin:UpdateOnUpdateState()
+    local resource = self:GetResource()
+    
+    -- Enable OnUpdate for resources that need continuous updates:
+    -- 1. Cooldown tracking (Runes, Essences) - always needed
+    -- 2. Regenerating resources (Energy, Focus, Fury) - always needed for smooth regen
+    -- 3. Decay over time (Rage, Runic Power) - only needed OUT of combat
+    local needsOnUpdate = false
+    
+    if resource == Enum.PowerType.Runes or resource == Enum.PowerType.Essence then
+        -- Runes and Essences always need OnUpdate for cooldown/regen display
+        needsOnUpdate = true
+    elseif resource == Enum.PowerType.Energy or resource == Enum.PowerType.Focus or resource == Enum.PowerType.Fury then
+        -- Energy, Focus, and Fury regenerate continuously - need OnUpdate for smooth display
+        -- UNIT_POWER_UPDATE events don't fire frequently enough during passive regen
+        needsOnUpdate = true
+    elseif resource == Enum.PowerType.Rage or resource == Enum.PowerType.RunicPower then
+        -- Rage and Runic Power decay over time
+        -- Only need OnUpdate when OUT of combat for smooth decay
+        -- In combat, UNIT_POWER_UPDATE events handle updates
+        needsOnUpdate = not self._inCombat
+    end
+    
+    -- Check user preference
+    local data = self:GetData()
+    if data and data.fasterUpdates == true and needsOnUpdate then
+        self:EnableFasterUpdates()
+    elseif needsOnUpdate then
+        self:DisableFasterUpdates()
+    else
+        -- No OnUpdate needed - rely on events only
+        self:DisableOnUpdate()
+    end
+end
+
+function BarMixin:DisableOnUpdate()
+    self.fasterUpdates = false
+    self.Frame:SetScript("OnUpdate", nil)
 end
 
 -- You should handle what to change here too and set self.fasterUpdates to true
@@ -250,7 +303,9 @@ function BarMixin:EnableFasterUpdates()
             frame.elapsed = (frame.elapsed or 0) + delta
             if frame.elapsed >= 0.1 then
                 frame.elapsed = 0
+                if addonTable.Profiler then addonTable.Profiler:Start("OnUpdate:Fast") end
                 self:UpdateDisplay()
+                if addonTable.Profiler then addonTable.Profiler:Stop("OnUpdate:Fast") end
             end
         end
     end
@@ -265,7 +320,9 @@ function BarMixin:DisableFasterUpdates()
             frame.elapsed = (frame.elapsed or 0) + delta
             if frame.elapsed >= 0.25 then
                 frame.elapsed = 0
+                if addonTable.Profiler then addonTable.Profiler:Start("OnUpdate:Slow") end
                 self:UpdateDisplay()
+                if addonTable.Profiler then addonTable.Profiler:Stop("OnUpdate:Slow") end
             end
         end
     end
@@ -277,10 +334,18 @@ end
 ------------------------------------------------------------
 
 function BarMixin:UpdateDisplay(layoutName, force)
-    if not self:IsShown() and not force then return end
+    if addonTable.Profiler then addonTable.Profiler:Start("BarMixin:UpdateDisplay") end
+    
+    if not self:IsShown() and not force then 
+        if addonTable.Profiler then addonTable.Profiler:Stop("BarMixin:UpdateDisplay") end
+        return 
+    end
 
     local data = self:GetData(layoutName)
-    if not data then return end
+    if not data then 
+        if addonTable.Profiler then addonTable.Profiler:Stop("BarMixin:UpdateDisplay") end
+        return 
+    end
     
     -- Cache data to avoid redundant GetData() calls
 
@@ -344,12 +409,29 @@ function BarMixin:UpdateDisplay(layoutName, force)
             end
         end
 
-        self.TextValue:SetFormattedText(self._cachedFormat, unpack(valuesToDisplay, 1, self._cachedNum))
+        -- Only update text if values actually changed (dirty state tracking)
+        -- Skip comparison for secret values to avoid errors
+        local newText = string.format(self._cachedFormat, unpack(valuesToDisplay, 1, self._cachedNum))
+        if not issecretvalue(newText) and self._lastDisplayedText ~= newText then
+            self.TextValue:SetText(newText)
+            self._lastDisplayedText = newText
+        elseif issecretvalue(newText) then
+            -- For secret values, always update since we can't compare
+            self.TextValue:SetText(newText)
+        end
+    else
+        -- Clear text if not showing
+        if self._lastDisplayedText ~= "" then
+            self.TextValue:SetFormattedText("")
+            self._lastDisplayedText = ""
+        end
     end
 
     if addonTable.fragmentedPowerTypes[resource] then
         self:UpdateFragmentedPowerDisplay(layoutName, data, max)
     end
+    
+    if addonTable.Profiler then addonTable.Profiler:Stop("BarMixin:UpdateDisplay") end
 end
 
 ------------------------------------------------------------
@@ -567,10 +649,18 @@ function BarMixin:GetSize(layoutName, data)
 end
 
 function BarMixin:ApplyLayout(layoutName, force)
-    if not self:IsShown() and not force then return end
+    if addonTable.Profiler then addonTable.Profiler:Start("BarMixin:ApplyLayout") end
+    
+    if not self:IsShown() and not force then 
+        if addonTable.Profiler then addonTable.Profiler:Stop("BarMixin:ApplyLayout") end
+        return 
+    end
 
     local data = self:GetData(layoutName)
-    if not data then return end
+    if not data then 
+        if addonTable.Profiler then addonTable.Profiler:Stop("BarMixin:ApplyLayout") end
+        return 
+    end
 
     -- Init Fragmented Power Bars if needed
     local resource = self:GetResource()
@@ -599,11 +689,8 @@ function BarMixin:ApplyLayout(layoutName, force)
 
     self:UpdateTicksLayout(layoutName, data)
 
-    if data.fasterUpdates then
-        self:EnableFasterUpdates()
-    else
-        self:DisableFasterUpdates()
-    end
+    -- Intelligently enable/disable OnUpdate based on resource type
+    self:UpdateOnUpdateState()
 
     if addonTable.fragmentedPowerTypes[resource] then
         self:UpdateFragmentedPowerDisplay(layoutName, data)
@@ -618,6 +705,8 @@ function BarMixin:ApplyLayout(layoutName, force)
             end
         end
     end
+    
+    if addonTable.Profiler then addonTable.Profiler:Stop("BarMixin:ApplyLayout") end
 end
 
 function BarMixin:ApplyFontSettings(layoutName, data)
@@ -1005,11 +1094,19 @@ function BarMixin:CreateFragmentedPowerBars(layoutName, data)
 end
 
 function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
+    if addonTable.Profiler then addonTable.Profiler:Start("BarMixin:UpdateFragmentedPowerDisplay") end
+    
     data = data or self:GetData(layoutName)
-    if not data then return end
+    if not data then 
+        if addonTable.Profiler then addonTable.Profiler:Stop("BarMixin:UpdateFragmentedPowerDisplay") end
+        return 
+    end
 
     local resource = self:GetResource()
-    if not resource then return end
+    if not resource then 
+        if addonTable.Profiler then addonTable.Profiler:Stop("BarMixin:UpdateFragmentedPowerDisplay") end
+        return 
+    end
     -- Use passed maxPower to avoid redundant UnitPowerMax call
     maxPower = maxPower or (resource == "MAELSTROM_WEAPON" and 5 or UnitPowerMax("player", resource))
     if maxPower <= 0 then return end
@@ -1029,7 +1126,10 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
 
         local overchargedCpColor = addonTable:GetOverrideResourceColor("OVERCHARGED_COMBO_POINTS") or color
         local charged = GetUnitChargedPowerPoints("player") or {}
-        local chargedLookup = {}
+        
+        -- Reuse pre-allocated table instead of creating new one
+        local chargedLookup = self._chargedLookup
+        for k in pairs(chargedLookup) do chargedLookup[k] = nil end
         for _, index in ipairs(charged) do
             chargedLookup[index] = true
         end
@@ -1117,9 +1217,9 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
 
         self._LastEssence = current
 
-        -- Reuse pre-allocated table for performance
+        -- Reuse pre-allocated tables for performance
         local displayOrder = self._displayOrder
-        local stateList = {}
+        local stateList = self._essenceStateList
         for i = 1, maxEssence do
             if i <= current then
                 stateList[i] = "full"
@@ -1345,6 +1445,8 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
             end
         end
     end
+    
+    if addonTable.Profiler then addonTable.Profiler:Stop("BarMixin:UpdateFragmentedPowerDisplay") end
 end
 
 addonTable.BarMixin = BarMixin
