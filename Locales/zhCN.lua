@@ -82,6 +82,8 @@ local baseLocale = {
     ["HIDE_BLIZZARD_UI"] = "隐藏暴雪自带界面",
     ["HIDE_BLIZZARD_UI_HEALTH_BAR_TOOLTIP"] = "隐藏暴雪自带的玩家框架界面",
     ["HIDE_BLIZZARD_UI_SECONDARY_POWER_BAR_TOOLTIP"] = "隐藏暴雪自带的次要资源界面（例如死亡骑士的符文条）",
+    ["USE_BLIZZARD_BAR"] = "使用暴雪资源条",
+    ["USE_BLIZZARD_BAR_TOOLTIP"] = "用暴雪默认的次要资源条替换自定义资源条，保留所有动画和样式。资源条将根据您的设置进行定位。",
 
     -- Position & Size category - Edit Mode
     ["CATEGORY_POSITION_AND_SIZE"] = "位置与大小",

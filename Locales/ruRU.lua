@@ -83,6 +83,8 @@ local baseLocale = {
     ["HIDE_BLIZZARD_UI"] = "Скрывать интерфейс Blizzard",
     ["HIDE_BLIZZARD_UI_HEALTH_BAR_TOOLTIP"] = "Скрывает стандартный фрейм игрока Blizzard",
     ["HIDE_BLIZZARD_UI_SECONDARY_POWER_BAR_TOOLTIP"] = "Скрывает стандартный интерфейс вторичного ресурса Blizzard (например, руны рыцаря смерти)",
+    ["USE_BLIZZARD_BAR"] = "Использовать панель Blizzard",
+    ["USE_BLIZZARD_BAR_TOOLTIP"] = "Заменяет пользовательскую панель на стандартную панель вторичного ресурса Blizzard, сохраняя все анимации и стили. Панель будет расположена в соответствии с вашими настройками.",
 
     -- Position & Size category - Edit Mode
     ["CATEGORY_POSITION_AND_SIZE"] = "Позиция и размер",

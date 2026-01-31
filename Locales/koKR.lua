@@ -82,6 +82,8 @@ local baseLocale = {
     ["HIDE_BLIZZARD_UI"] = "블리자드 기본 UI 숨기기",
     ["HIDE_BLIZZARD_UI_HEALTH_BAR_TOOLTIP"] = "블리자드 기본 플레이어 프레임을 숨깁니다",
     ["HIDE_BLIZZARD_UI_SECONDARY_POWER_BAR_TOOLTIP"] = "블리자드 기본 보조 자원 UI를 숨깁니다 (예: 죽음의 기사 룬 프레임)",
+    ["USE_BLIZZARD_BAR"] = "블리자드 바 사용",
+    ["USE_BLIZZARD_BAR_TOOLTIP"] = "사용자 정의 바를 블리자드 기본 보조 자원 바로 대체합니다. 모든 애니메이션과 스타일이 유지됩니다. 바는 설정에 따라 배치됩니다.",
 
     -- Position & Size category - Edit Mode
     ["CATEGORY_POSITION_AND_SIZE"] = "위치 및 크기",
