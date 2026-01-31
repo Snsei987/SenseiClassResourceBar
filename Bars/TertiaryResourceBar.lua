@@ -7,34 +7,24 @@ local TertiaryResourceBarMixin = Mixin({}, addonTable.PowerBarMixin)
 
 function TertiaryResourceBarMixin:GetResource()
     local playerClass = select(2, UnitClass("player"))
+    if playerClass == "DRUID" then
+        local data = self:GetData()
+        if data and data.showDruidManaBar == true then
+            return Enum.PowerType.Mana
+        end
+        return nil
+    end
+
     local tertiaryResources = {
-        ["DEATHKNIGHT"] = nil,
-        ["DEMONHUNTER"] = nil,
-        ["DRUID"]       = nil,
-        ["EVOKER"]      = {
+        ["EVOKER"] = {
             [1473] = "EBON_MIGHT", -- Augmentation
         },
-        ["HUNTER"]      = nil,
-        ["MAGE"]        = nil,
-        ["MONK"]        = nil,
-        ["PALADIN"]     = nil,
-        ["PRIEST"]      = nil,
-        ["ROGUE"]       = nil,
-        ["SHAMAN"]      = nil,
-        ["WARLOCK"]     = nil,
-        ["WARRIOR"]     = nil,
     }
 
     local spec = C_SpecializationInfo.GetSpecialization()
     local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
 
     local resource = tertiaryResources[playerClass]
-
-    -- Druid: form-based
-    if playerClass == "DRUID" then
-        local formID = GetShapeshiftFormID()
-        resource = resource and resource[formID or 0]
-    end
 
     if type(resource) == "table" then
         return resource[specID]
@@ -87,20 +77,52 @@ addonTable.RegisteredBar.TertiaryResourceBar = {
         x = 0,
         y = -80,
         useResourceAtlas = false,
+        showDruidManaBar = false,
     },
     allowEditPredicate = function()
+        local playerClass = select(2, UnitClass("player"))
+        if playerClass == "DRUID" then
+            return true
+        end
+
         local spec = C_SpecializationInfo.GetSpecialization()
         local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
         return specID == 1473 -- Augmentation
     end,
     loadPredicate = function()
         local playerClass = select(2, UnitClass("player"))
-        return playerClass == "EVOKER"
+        return playerClass == "EVOKER" or playerClass == "DRUID"
     end,
     lemSettings = function(bar, defaults)
         local dbName = bar:GetConfig().dbName
 
         return {
+            {
+                parentId = L["CATEGORY_BAR_VISIBILITY"],
+                order = 106,
+                name = L["DRUID_ALWAYS_SHOW_MANA"],
+                kind = LEM.SettingType.Checkbox,
+                default = defaults.showDruidManaBar,
+                get = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    if data and data.showDruidManaBar ~= nil then
+                        return data.showDruidManaBar
+                    else
+                        return defaults.showDruidManaBar
+                    end
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].showDruidManaBar = value
+                    bar:ApplyVisibilitySettings(layoutName)
+                    bar:ApplyLayout(layoutName, true)
+                    bar:UpdateDisplay(layoutName, true)
+                end,
+                isEnabled = function()
+                    return select(2, UnitClass("player")) == "DRUID"
+                end,
+                tooltip = L["DRUID_ALWAYS_SHOW_MANA_TOOLTIP"],
+            },
             {
                 parentId = L["CATEGORY_BAR_STYLE"],
                 order = 401,
