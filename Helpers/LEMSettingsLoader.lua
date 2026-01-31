@@ -417,21 +417,50 @@ local function BuildLemSettings(bar, defaults)
                     dropdown._SCRB_Background_Dropdown_OnMenuClosed_hooked = true
                 end
 
-                dropdown:SetDefaultText(settingObject.get(layoutName))
+                -- Get current value (should be 'value', e.g., "Solid")
+                local currentValue = settingObject.get(layoutName)
+                
+                -- Find display text for current value
+                local currentText = currentValue
+                for _, opt in ipairs(addonTable.availableBackgroundStyles) do
+                     if opt.value == currentValue then
+                         currentText = opt.text
+                         break
+                     end
+                end
+                dropdown:SetDefaultText(currentText)
 
                 local textures = LSM:HashTable(LSM.MediaType.BACKGROUND)
-                local sortedTextures = CopyTable(addonTable.availableBackgroundStyles)
-                for textureName in pairs(textures) do
-                    table.insert(sortedTextures, textureName)
+                
+                -- Prepare options list
+                local options = {}
+                local seen = {}
+                
+                -- 1. Add preset styles from addonTable
+                for _, opt in ipairs(addonTable.availableBackgroundStyles) do
+                    table.insert(options, opt)
+                    seen[opt.value] = true
                 end
-                table.sort(sortedTextures)
+                
+                -- 2. Add LSM textures
+                for textureName, path in pairs(textures) do
+                    if not seen[textureName] then
+                        table.insert(options, { text = textureName, value = textureName })
+                        seen[textureName] = true
+                    end
+                end
+                
+                -- Sort
+                table.sort(options, function(a, b) return a.text < b.text end)
 
-                for index, textureName in ipairs(sortedTextures) do
-                    local texturePath = textures[textureName]
+                for index, option in ipairs(options) do
+                    local textureName = option.text
+                    local textureValue = option.value
+                    local texturePath = textures[textureValue] 
 
                     local button = rootDescription:CreateButton(textureName, function()
                         dropdown:SetDefaultText(textureName)
-                        settingObject.set(layoutName, textureName)
+                        settingObject.set(layoutName, textureValue)
                     end)
 
                     if texturePath then

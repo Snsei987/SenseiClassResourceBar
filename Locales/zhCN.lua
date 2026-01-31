@@ -137,6 +137,87 @@ local baseLocale = {
     
     -- Other
     ["POWER_COLOR_SETTINGS"] = "能量颜色设置",
+
+    -- Dropdowns
+    ["VISIBILITY_ALWAYS_VISIBLE"] = "总是显示",
+    ["VISIBILITY_IN_COMBAT"] = "战斗中",
+    ["VISIBILITY_HAS_TARGET"] = "选中目标时",
+    ["VISIBILITY_TARGET_OR_COMBAT"] = "选中目标或战斗中",
+    ["VISIBILITY_HIDDEN"] = "隐藏",
+    
+    ["STRATA_TOOLTIP"] = "提示信息 (Tooltip)",
+    ["STRATA_DIALOG"] = "对话框 (Dialog)",
+    ["STRATA_HIGH"] = "高 (High)",
+    ["STRATA_MEDIUM"] = "中 (Medium)",
+    ["STRATA_LOW"] = "低 (Low)",
+    ["STRATA_BACKGROUND"] = "背景 (Background)",
+    
+    ["ROLE_TANK"] = "坦克",
+    ["ROLE_HEALER"] = "治疗者",
+    ["ROLE_DPS"] = "伤害输出",
+    
+    ["POSITION_SELF"] = "自身",
+    ["POSITION_USE_PRB_IF_HIDDEN"] = "如果主要资源条隐藏，则使用其位置",
+    ["POSITION_USE_SRB_IF_HIDDEN"] = "如果次要资源条隐藏，则使用其位置",
+    ["POSITION_USE_HEALTH_IF_HIDDEN"] = "如果生命条隐藏，则使用其位置",
+    
+    ["FRAME_UIPARENT"] = "UIParent (屏幕)",
+    ["FRAME_HEALTH_BAR"] = "生命条",
+    ["FRAME_PRIMARY_RESOURCE_BAR"] = "主要资源条",
+    ["FRAME_SECONDARY_RESOURCE_BAR"] = "次要资源条",
+    ["FRAME_PLAYER_FRAME"] = "玩家框架",
+    ["FRAME_TARGET_FRAME"] = "目标框架",
+    ["FRAME_ESSENTIAL_COOLDOWNS"] = "重要冷却",
+    ["FRAME_UTILITY_COOLDOWNS"] = "效能冷却",
+    ["FRAME_TRACKED_BUFFS"] = "监控增益",
+    ["FRAME_ACTION_BAR"] = "动作条",
+    
+    ["ANCHOR_TOPLEFT"] = "左上",
+    ["ANCHOR_TOP"] = "上",
+    ["ANCHOR_TOPRIGHT"] = "右上",
+    ["ANCHOR_LEFT"] = "左",
+    ["ANCHOR_CENTER"] = "中",
+    ["ANCHOR_RIGHT"] = "右",
+    ["ANCHOR_BOTTOMLEFT"] = "左下",
+    ["ANCHOR_BOTTOM"] = "下",
+    ["ANCHOR_BOTTOMRIGHT"] = "右下",
+
+    -- Width Modes
+    ["WIDTH_MODE_MANUAL"] = "手动",
+    ["WIDTH_MODE_SYNC_ESSENTIAL"] = "与重要冷却同步",
+    ["WIDTH_MODE_SYNC_UTILITY"] = "与效能冷却同步",
+    ["WIDTH_MODE_SYNC_BUFFS"] = "与增益监控同步",
+
+    -- Fill Directions
+    ["FILL_DIRECTION_L2R"] = "从左到右",
+    ["FILL_DIRECTION_R2L"] = "从右到左",
+    ["FILL_DIRECTION_T2B"] = "从上到下",
+    ["FILL_DIRECTION_B2T"] = "从下到上",
+
+    -- Outline Styles
+    ["OUTLINE_NONE"] = "无",
+    ["OUTLINE_OUTLINE"] = "细描边",
+    ["OUTLINE_THICKOUTLINE"] = "粗描边",
+
+    -- Text Formats
+    ["FORMAT_CURRENT"] = "当前值",
+    ["FORMAT_CURRENT_MAX"] = "当前值 / 最大值",
+    ["FORMAT_PERCENT"] = "百分比",
+    ["FORMAT_PERCENT_SYMBOL"] = "百分比%",
+    ["FORMAT_CURRENT_PERCENT"] = "当前值 - 百分比",
+    ["FORMAT_CURRENT_PERCENT_SYMBOL"] = "当前值 - 百分比%",
+
+    -- Border Styles
+    ["BORDER_STYLE_1_PIXEL"] = "1 像素",
+    ["BORDER_STYLE_THIN"] = "细",
+    ["BORDER_STYLE_SLIGHT"] = "微细",
+    ["BORDER_STYLE_BOLD"] = "粗",
+    ["BORDER_STYLE_BLIZZARD_CLASSIC"] = "暴雪经典",
+    ["BORDER_STYLE_BLIZZARD_CLASSIC_THIN"] = "暴雪经典（细）",
+    ["BORDER_STYLE_NONE"] = "无",
+
+    -- Background Styles
+    ["BACKGROUND_STYLE_SCRB_SEMI_TRANSPARENT"] = "半透明",
 }
 
 addonTable:RegisterLocale("zhCN", baseLocale)

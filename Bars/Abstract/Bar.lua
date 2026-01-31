@@ -4,6 +4,26 @@ local LSM = addonTable.LSM or LibStub("LibSharedMedia-3.0")
 local LEM = addonTable.LEM or LibStub("LibEQOLEditMode-1.0")
 local L = addonTable.L
 
+local function ValidateOptionValue(optionsList, currentValue, defaultValue)
+    if not currentValue then return defaultValue end
+    
+    -- Check if it matches a value
+    for _, option in ipairs(optionsList) do
+        if option.value == currentValue then
+            return currentValue
+        end
+    end
+
+    -- Check if it matches a text (backward compatibility or corrupted data)
+    for _, option in ipairs(optionsList) do
+        if option.text == currentValue then
+            return option.value
+        end
+    end
+    
+    return defaultValue
+end
+
 ------------------------------------------------------------
 -- YOU SHOULD NOT USE DIRECTLY THIS MIXIN -- YOU NEED TO OVERWRITE SOME METHODS
 ------------------------------------------------------------
@@ -571,6 +591,25 @@ function BarMixin:ApplyLayout(layoutName, force)
 
     local data = self:GetData(layoutName)
     if not data then return end
+
+    local defaults = self.defaults or {}
+
+    -- Sanitize settings (fix localization issues)
+    if data.barStrata then
+        data.barStrata = ValidateOptionValue(addonTable.availableBarStrataOptions, data.barStrata, defaults.barStrata)
+    end
+    if data.widthMode then
+        data.widthMode = ValidateOptionValue(addonTable.availableWidthModes, data.widthMode, defaults.widthMode)
+    end
+    if data.fillDirection then
+        data.fillDirection = ValidateOptionValue(addonTable.availableFillDirections, data.fillDirection, defaults.fillDirection)
+    end
+    if data.maskAndBorderStyle then
+        data.maskAndBorderStyle = ValidateOptionValue(addonTable.availableMaskAndBorderStyles, data.maskAndBorderStyle, defaults.maskAndBorderStyle)
+    end
+    if data.backgroundStyle then
+        data.backgroundStyle = ValidateOptionValue(addonTable.availableBackgroundStyles, data.backgroundStyle, defaults.backgroundStyle)
+    end
 
     -- Init Fragmented Power Bars if needed
     local resource = self:GetResource()

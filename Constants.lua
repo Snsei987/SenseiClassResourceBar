@@ -4,6 +4,7 @@ SCRB = SCRB or {}
 
 addonTable.LSM = LibStub("LibSharedMedia-3.0")
 local LSM = addonTable.LSM
+local L = addonTable.L
 
 addonTable.LEM = LibStub("LibEQOLEditMode-1.0")
 addonTable.SettingsLib = LibStub("LibEQOLSettingsMode-1.0")
@@ -81,39 +82,39 @@ addonTable.commonDefaults = {
 }
 
 addonTable.availableBarVisibilityOptions = {
-    { text = "Always Visible" },
-    { text = "In Combat" },
-    { text = "Has Target Selected" },
-    { text = "Has Target Selected OR In Combat" },
-    { text = "Hidden" },
+    { text = L["VISIBILITY_ALWAYS_VISIBLE"], value = "Always Visible" },
+    { text = L["VISIBILITY_IN_COMBAT"], value = "In Combat" },
+    { text = L["VISIBILITY_HAS_TARGET"], value = "Has Target Selected" },
+    { text = L["VISIBILITY_TARGET_OR_COMBAT"], value = "Has Target Selected OR In Combat" },
+    { text = L["VISIBILITY_HIDDEN"], value = "Hidden" },
 }
 
 addonTable.availableBarStrataOptions = {
-    { text = "TOOLTIP"  },
-    { text = "DIALOG"  },
-    { text = "HIGH"  },
-    { text = "MEDIUM"  },
-    { text = "LOW"  },
-    { text = "BACKGROUND"  },
+    { text = L["STRATA_TOOLTIP"], value = "TOOLTIP" },
+    { text = L["STRATA_DIALOG"], value = "DIALOG" },
+    { text = L["STRATA_HIGH"], value = "HIGH" },
+    { text = L["STRATA_MEDIUM"], value = "MEDIUM" },
+    { text = L["STRATA_LOW"], value = "LOW" },
+    { text = L["STRATA_BACKGROUND"], value = "BACKGROUND" },
 }
 
 addonTable.availableRoleOptions = {
-    { text = "Tank", value = "TANK" },
-    { text = "Healer", value = "HEALER" },
-    { text = "DPS", value = "DAMAGER" },
+    { text = L["ROLE_TANK"], value = "TANK" },
+    { text = L["ROLE_HEALER"], value = "HEALER" },
+    { text = L["ROLE_DPS"], value = "DAMAGER" },
 }
 
 addonTable.availablePositionModeOptions = function(config)
     local positions = {
-        { text = "Self" },
+        { text = L["POSITION_SELF"], value = "Self" },
     }
 
     if config.frameName == "HealthBar" then
-        table.insert(positions, { text = "Use Primary Resource Bar Position If Hidden" })
-        table.insert(positions, { text = "Use Secondary Resource Bar Position If Hidden" })
+        table.insert(positions, { text = L["POSITION_USE_PRB_IF_HIDDEN"], value = "Use Primary Resource Bar Position If Hidden" })
+        table.insert(positions, { text = L["POSITION_USE_SRB_IF_HIDDEN"], value = "Use Secondary Resource Bar Position If Hidden" })
     elseif config.frameName == "SecondaryResourceBar" then
-        table.insert(positions, { text = "Use Primary Resource Bar Position If Hidden" })
-        table.insert(positions, { text = "Use Health Bar Position If Hidden" })
+        table.insert(positions, { text = L["POSITION_USE_PRB_IF_HIDDEN"], value = "Use Primary Resource Bar Position If Hidden" })
+        table.insert(positions, { text = L["POSITION_USE_HEALTH_IF_HIDDEN"], value = "Use Health Bar Position If Hidden" })
     end
 
     return positions;
@@ -121,31 +122,31 @@ end
 
 addonTable.availableRelativeFrames = function(config)
     local frames = {
-        { text = "UIParent" },
+        { text = L["FRAME_UIPARENT"], value = "UIParent" },
     }
 
     if config.frameName == "HealthBar" then
-        table.insert(frames, { text = "Primary Resource Bar" })
-        table.insert(frames, { text = "Secondary Resource Bar" })
+        table.insert(frames, { text = L["FRAME_PRIMARY_RESOURCE_BAR"], value = "Primary Resource Bar" })
+        table.insert(frames, { text = L["FRAME_SECONDARY_RESOURCE_BAR"], value = "Secondary Resource Bar" })
     elseif config.frameName == "PrimaryResourceBar" then
-        table.insert(frames, { text = "Health Bar" })
-        table.insert(frames, { text = "Secondary Resource Bar" })
+        table.insert(frames, { text = L["FRAME_HEALTH_BAR"], value = "Health Bar" })
+        table.insert(frames, { text = L["FRAME_SECONDARY_RESOURCE_BAR"], value = "Secondary Resource Bar" })
     elseif config.frameName == "SecondaryResourceBar" then
-        table.insert(frames, { text = "Health Bar" })
-        table.insert(frames, { text = "Primary Resource Bar" })
+        table.insert(frames, { text = L["FRAME_HEALTH_BAR"], value = "Health Bar" })
+        table.insert(frames, { text = L["FRAME_PRIMARY_RESOURCE_BAR"], value = "Primary Resource Bar" })
     else
-        table.insert(frames, { text = "Health Bar" })
-        table.insert(frames, { text = "Primary Resource Bar" })
-        table.insert(frames, { text = "Secondary Resource Bar" })
+        table.insert(frames, { text = L["FRAME_HEALTH_BAR"], value = "Health Bar" })
+        table.insert(frames, { text = L["FRAME_PRIMARY_RESOURCE_BAR"], value = "Primary Resource Bar" })
+        table.insert(frames, { text = L["FRAME_SECONDARY_RESOURCE_BAR"], value = "Secondary Resource Bar" })
     end
 
     local additionalFrames = {
-        { text = "PlayerFrame" },
-        { text = "TargetFrame" },
-        { text = "Essential Cooldowns" },
-        { text = "Utility Cooldowns" },
-        { text = "Tracked Buffs" },
-        { text = "Action Bar" },
+        { text = L["FRAME_PLAYER_FRAME"], value = "PlayerFrame" },
+        { text = L["FRAME_TARGET_FRAME"], value = "TargetFrame" },
+        { text = L["FRAME_ESSENTIAL_COOLDOWNS"], value = "Essential Cooldowns" },
+        { text = L["FRAME_UTILITY_COOLDOWNS"], value = "Utility Cooldowns" },
+        { text = L["FRAME_TRACKED_BUFFS"], value = "Tracked Buffs" },
+        { text = L["FRAME_ACTION_BAR"], value = "Action Bar" },
     }
 
     for _, frame in pairs(additionalFrames) do
@@ -153,7 +154,7 @@ addonTable.availableRelativeFrames = function(config)
     end
 
     for i = 2, 8 do
-        table.insert(frames, { text = "Action Bar " .. i })
+        table.insert(frames, { text = L["FRAME_ACTION_BAR"] .. " " .. i, value = "Action Bar " .. i })
     end
 
     return frames
@@ -183,56 +184,56 @@ addonTable.resolveRelativeFrames = function(relativeFrame)
 end
 
 addonTable.availableAnchorPoints = {
-    { text = "TOPLEFT" },
-    { text = "TOP" },
-    { text = "TOPRIGHT" },
-    { text = "LEFT" },
-    { text = "CENTER" },
-    { text = "RIGHT" },
-    { text = "BOTTOMLEFT" },
-    { text = "BOTTOM" },
-    { text = "BOTTOMRIGHT" },
+    { text = L["ANCHOR_TOPLEFT"], value = "TOPLEFT" },
+    { text = L["ANCHOR_TOP"], value = "TOP" },
+    { text = L["ANCHOR_TOPRIGHT"], value = "TOPRIGHT" },
+    { text = L["ANCHOR_LEFT"], value = "LEFT" },
+    { text = L["ANCHOR_CENTER"], value = "CENTER" },
+    { text = L["ANCHOR_RIGHT"], value = "RIGHT" },
+    { text = L["ANCHOR_BOTTOMLEFT"], value = "BOTTOMLEFT" },
+    { text = L["ANCHOR_BOTTOM"], value = "BOTTOM" },
+    { text = L["ANCHOR_BOTTOMRIGHT"], value = "BOTTOMRIGHT" },
 }
 
 addonTable.availableRelativePoints = {
-    { text = "TOPLEFT" },
-    { text = "TOP" },
-    { text = "TOPRIGHT" },
-    { text = "LEFT" },
-    { text = "CENTER" },
-    { text = "RIGHT" },
-    { text = "BOTTOMLEFT" },
-    { text = "BOTTOM" },
-    { text = "BOTTOMRIGHT" },
+    { text = L["ANCHOR_TOPLEFT"], value = "TOPLEFT" },
+    { text = L["ANCHOR_TOP"], value = "TOP" },
+    { text = L["ANCHOR_TOPRIGHT"], value = "TOPRIGHT" },
+    { text = L["ANCHOR_LEFT"], value = "LEFT" },
+    { text = L["ANCHOR_CENTER"], value = "CENTER" },
+    { text = L["ANCHOR_RIGHT"], value = "RIGHT" },
+    { text = L["ANCHOR_BOTTOMLEFT"], value = "BOTTOMLEFT" },
+    { text = L["ANCHOR_BOTTOM"], value = "BOTTOM" },
+    { text = L["ANCHOR_BOTTOMRIGHT"], value = "BOTTOMRIGHT" },
 }
 
 addonTable.availableWidthModes = {
-    { text = "Manual" },
-    { text = "Sync With Essential Cooldowns" },
-    { text = "Sync With Utility Cooldowns" },
-    { text = "Sync With Tracked Buffs" },
+    { text = L["WIDTH_MODE_MANUAL"], value = "Manual" },
+    { text = L["WIDTH_MODE_SYNC_ESSENTIAL"], value = "Sync With Essential Cooldowns" },
+    { text = L["WIDTH_MODE_SYNC_UTILITY"], value = "Sync With Utility Cooldowns" },
+    { text = L["WIDTH_MODE_SYNC_BUFFS"], value = "Sync With Tracked Buffs" },
 }
 
 addonTable.availableFillDirections = {
-    { text = "Left to Right" },
-    { text = "Right to Left" },
-    { text = "Top to Bottom" },
-    { text = "Bottom to Top" },
+    { text = L["FILL_DIRECTION_L2R"], value = "Left to Right" },
+    { text = L["FILL_DIRECTION_R2L"], value = "Right to Left" },
+    { text = L["FILL_DIRECTION_T2B"], value = "Top to Bottom" },
+    { text = L["FILL_DIRECTION_B2T"], value = "Bottom to Top" },
 }
 
 addonTable.availableOutlineStyles = {
-    { text = "NONE" },
-    { text = "OUTLINE" },
-    { text = "THICKOUTLINE" },
+    { text = L["OUTLINE_NONE"], value = "NONE" },
+    { text = L["OUTLINE_OUTLINE"], value = "OUTLINE" },
+    { text = L["OUTLINE_THICKOUTLINE"], value = "THICKOUTLINE" },
 }
 
 addonTable.availableTextFormats = {
-    { text = "Current" },
-    { text = "Current / Maximum" },
-    { text = "Percent" },
-    { text = "Percent%" },
-    { text = "Current - Percent" },
-    { text = "Current - Percent%"},
+    { text = L["FORMAT_CURRENT"], value = "Current" },
+    { text = L["FORMAT_CURRENT_MAX"], value = "Current / Maximum" },
+    { text = L["FORMAT_PERCENT"], value = "Percent" },
+    { text = L["FORMAT_PERCENT_SYMBOL"], value = "Percent%" },
+    { text = L["FORMAT_CURRENT_PERCENT"], value = "Current - Percent" },
+    { text = L["FORMAT_CURRENT_PERCENT_SYMBOL"], value = "Current - Percent%" },
 }
 
 addonTable.textPrecisionAllowedForType = {
@@ -243,18 +244,18 @@ addonTable.textPrecisionAllowedForType = {
 }
 
 addonTable.availableTextPrecisions = {
-    { text = "12" },
-    { text = "12.3" },
-    { text = "12.34" },
-    { text = "12.345" },
+    { text = "12", value = "12" },
+    { text = "12.3", value = "12.3" },
+    { text = "12.34", value = "12.34" },
+    { text = "12.345", value = "12.345" },
 }
 
 addonTable.availableTextAlignmentStyles = {
-    { text = "TOP" },
-    { text = "LEFT" },
-    { text = "CENTER" },
-    { text = "RIGHT" },
-    { text = "BOTTOM" },
+    { text = L["ANCHOR_TOP"], value = "TOP" },
+    { text = L["ANCHOR_LEFT"], value = "LEFT" },
+    { text = L["ANCHOR_CENTER"], value = "CENTER" },
+    { text = L["ANCHOR_RIGHT"], value = "RIGHT" },
+    { text = L["ANCHOR_BOTTOM"], value = "BOTTOM" },
 }
 
 addonTable.maskAndBorderStyles = {
@@ -296,7 +297,8 @@ addonTable.maskAndBorderStyles = {
 
 addonTable.availableMaskAndBorderStyles = {}
 for styleName, _ in pairs(addonTable.maskAndBorderStyles) do
-    table.insert(addonTable.availableMaskAndBorderStyles, { text = styleName })
+    local localeKey = "BORDER_STYLE_" .. styleName:upper():gsub(" ", "_"):gsub("-", "_")
+    table.insert(addonTable.availableMaskAndBorderStyles, { text = L[localeKey] or styleName, value = styleName })
 end
 
 addonTable.backgroundStyles = {
@@ -305,7 +307,8 @@ addonTable.backgroundStyles = {
 
 addonTable.availableBackgroundStyles = {}
 for name, _ in pairs(addonTable.backgroundStyles) do
-    table.insert(addonTable.availableBackgroundStyles, name)
+    local localeKey = "BACKGROUND_STYLE_" .. name:upper():gsub(" ", "_"):gsub("-", "_")
+    table.insert(addonTable.availableBackgroundStyles, { text = L[localeKey] or name, value = name })
 end
 
 -- Power types that should show discrete ticks

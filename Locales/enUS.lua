@@ -138,6 +138,87 @@ local baseLocale = {
     
     -- Other
     ["POWER_COLOR_SETTINGS"] = "Power Color Settings",
+
+    -- Dropdowns
+    ["VISIBILITY_ALWAYS_VISIBLE"] = "Always Visible",
+    ["VISIBILITY_IN_COMBAT"] = "In Combat",
+    ["VISIBILITY_HAS_TARGET"] = "Has Target Selected",
+    ["VISIBILITY_TARGET_OR_COMBAT"] = "Has Target Selected OR In Combat",
+    ["VISIBILITY_HIDDEN"] = "Hidden",
+    
+    ["STRATA_TOOLTIP"] = "TOOLTIP",
+    ["STRATA_DIALOG"] = "DIALOG",
+    ["STRATA_HIGH"] = "HIGH",
+    ["STRATA_MEDIUM"] = "MEDIUM",
+    ["STRATA_LOW"] = "LOW",
+    ["STRATA_BACKGROUND"] = "BACKGROUND",
+    
+    ["ROLE_TANK"] = "Tank",
+    ["ROLE_HEALER"] = "Healer",
+    ["ROLE_DPS"] = "DPS",
+    
+    ["POSITION_SELF"] = "Self",
+    ["POSITION_USE_PRB_IF_HIDDEN"] = "Use Primary Resource Bar Position If Hidden",
+    ["POSITION_USE_SRB_IF_HIDDEN"] = "Use Secondary Resource Bar Position If Hidden",
+    ["POSITION_USE_HEALTH_IF_HIDDEN"] = "Use Health Bar Position If Hidden",
+    
+    ["FRAME_UIPARENT"] = "UIParent",
+    ["FRAME_HEALTH_BAR"] = "Health Bar",
+    ["FRAME_PRIMARY_RESOURCE_BAR"] = "Primary Resource Bar",
+    ["FRAME_SECONDARY_RESOURCE_BAR"] = "Secondary Resource Bar",
+    ["FRAME_PLAYER_FRAME"] = "PlayerFrame",
+    ["FRAME_TARGET_FRAME"] = "TargetFrame",
+    ["FRAME_ESSENTIAL_COOLDOWNS"] = "Essential Cooldowns",
+    ["FRAME_UTILITY_COOLDOWNS"] = "Utility Cooldowns",
+    ["FRAME_TRACKED_BUFFS"] = "Tracked Buffs",
+    ["FRAME_ACTION_BAR"] = "Action Bar",
+    
+    ["ANCHOR_TOPLEFT"] = "TOPLEFT",
+    ["ANCHOR_TOP"] = "TOP",
+    ["ANCHOR_TOPRIGHT"] = "TOPRIGHT",
+    ["ANCHOR_LEFT"] = "LEFT",
+    ["ANCHOR_CENTER"] = "CENTER",
+    ["ANCHOR_RIGHT"] = "RIGHT",
+    ["ANCHOR_BOTTOMLEFT"] = "BOTTOMLEFT",
+    ["ANCHOR_BOTTOM"] = "BOTTOM",
+    ["ANCHOR_BOTTOMRIGHT"] = "BOTTOMRIGHT",
+
+    -- Width Modes
+    ["WIDTH_MODE_MANUAL"] = "Manual",
+    ["WIDTH_MODE_SYNC_ESSENTIAL"] = "Sync With Essential Cooldowns",
+    ["WIDTH_MODE_SYNC_UTILITY"] = "Sync With Utility Cooldowns",
+    ["WIDTH_MODE_SYNC_BUFFS"] = "Sync With Tracked Buffs",
+
+    -- Fill Directions
+    ["FILL_DIRECTION_L2R"] = "Left to Right",
+    ["FILL_DIRECTION_R2L"] = "Right to Left",
+    ["FILL_DIRECTION_T2B"] = "Top to Bottom",
+    ["FILL_DIRECTION_B2T"] = "Bottom to Top",
+
+    -- Outline Styles
+    ["OUTLINE_NONE"] = "NONE",
+    ["OUTLINE_OUTLINE"] = "OUTLINE",
+    ["OUTLINE_THICKOUTLINE"] = "THICKOUTLINE",
+
+    -- Text Formats
+    ["FORMAT_CURRENT"] = "Current",
+    ["FORMAT_CURRENT_MAX"] = "Current / Maximum",
+    ["FORMAT_PERCENT"] = "Percent",
+    ["FORMAT_PERCENT_SYMBOL"] = "Percent%",
+    ["FORMAT_CURRENT_PERCENT"] = "Current - Percent",
+    ["FORMAT_CURRENT_PERCENT_SYMBOL"] = "Current - Percent%",
+
+    -- Border Styles (Keys for dynamic lookup)
+    ["BORDER_STYLE_1_PIXEL"] = "1 Pixel",
+    ["BORDER_STYLE_THIN"] = "Thin",
+    ["BORDER_STYLE_SLIGHT"] = "Slight",
+    ["BORDER_STYLE_BOLD"] = "Bold",
+    ["BORDER_STYLE_BLIZZARD_CLASSIC"] = "Blizzard Classic",
+    ["BORDER_STYLE_BLIZZARD_CLASSIC_THIN"] = "Blizzard Classic Thin",
+    ["BORDER_STYLE_NONE"] = "None",
+
+    -- Background Styles
+    ["BACKGROUND_STYLE_SCRB_SEMI_TRANSPARENT"] = "SCRB Semi-transparent",
 }
 
 addonTable:RegisterLocale("enUS", baseLocale)
