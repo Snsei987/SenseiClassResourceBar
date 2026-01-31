@@ -8,9 +8,12 @@ local TertiaryResourceBarMixin = Mixin({}, addonTable.PowerBarMixin)
 function TertiaryResourceBarMixin:GetResource()
     local playerClass = select(2, UnitClass("player"))
     if playerClass == "DRUID" then
-        local data = self:GetData()
-        if (data and data.showDruidManaBar == true) or LEM:IsInEditMode() then
-            return Enum.PowerType.Mana
+        local showMana = addonTable.GetClassOption("showDruidManaInCatAndBearForm") or LEM:IsInEditMode()
+        if showMana then
+            local formID = GetShapeshiftFormID()
+            if formID == DRUID_CAT_FORM or formID == DRUID_BEAR_FORM then
+                return Enum.PowerType.Mana
+            end
         end
         return nil
     end
@@ -77,7 +80,7 @@ addonTable.RegisteredBar.TertiaryResourceBar = {
         x = 0,
         y = -80,
         useResourceAtlas = false,
-        showDruidManaBar = false,
+        -- showDruidManaBar: intentionally not in defaults; nil until user enables it. Default false.
     },
     allowEditPredicate = function()
         local playerClass = select(2, UnitClass("player"))
@@ -93,32 +96,6 @@ addonTable.RegisteredBar.TertiaryResourceBar = {
         local dbName = bar:GetConfig().dbName
 
         return {
-            {
-                parentId = L["CATEGORY_BAR_VISIBILITY"],
-                order = 106,
-                name = L["DRUID_ALWAYS_SHOW_MANA"],
-                kind = LEM.SettingType.Checkbox,
-                default = defaults.showDruidManaBar,
-                get = function(layoutName)
-                    local data = SenseiClassResourceBarDB[dbName][layoutName]
-                    if data and data.showDruidManaBar ~= nil then
-                        return data.showDruidManaBar
-                    else
-                        return defaults.showDruidManaBar
-                    end
-                end,
-                set = function(layoutName, value)
-                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
-                    SenseiClassResourceBarDB[dbName][layoutName].showDruidManaBar = value
-                    bar:ApplyVisibilitySettings(layoutName)
-                    bar:ApplyLayout(layoutName, true)
-                    bar:UpdateDisplay(layoutName, true)
-                end,
-                isEnabled = function()
-                    return select(2, UnitClass("player")) == "DRUID"
-                end,
-                tooltip = L["DRUID_ALWAYS_SHOW_MANA_TOOLTIP"],
-            },
             {
                 parentId = L["CATEGORY_BAR_STYLE"],
                 order = 401,

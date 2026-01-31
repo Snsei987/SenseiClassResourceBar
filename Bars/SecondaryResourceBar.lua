@@ -59,7 +59,7 @@ function SecondaryResourceBarMixin:GetResource()
         },
         ["WARLOCK"]     = Enum.PowerType.SoulShards,
         ["WARRIOR"]     = {
-            [72] = "WHIRLWIND",
+            [72] = "WHIRLWIND", -- Fury: only shown when showWarriorWhirlwindBar is true (checked in GetResource)
         },
     }
 
@@ -67,6 +67,14 @@ function SecondaryResourceBarMixin:GetResource()
     local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
 
     local resource = secondaryResources[playerClass]
+
+    -- Warrior: Whirlwind bar (Fury) only when class option is enabled
+    if playerClass == "WARRIOR" and type(resource) == "table" then
+        resource = resource[specID]
+        if resource == "WHIRLWIND" and not addonTable.GetClassOption("showWarriorWhirlwindBar") then
+            resource = nil
+        end
+    end
 
     -- Druid: form-based
     if playerClass == "DRUID" then

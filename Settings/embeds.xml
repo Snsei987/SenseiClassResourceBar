@@ -2,4 +2,5 @@
 ..\..\Blizzard_SharedXML\UI.xsd">
 	<Script file="HealthAndPowerColorSettings.lua"/>
 	<Script file="ImportExportSettings.lua"/>
+	<Script file="ClassOptionsSettings.lua"/>
 </Ui>
