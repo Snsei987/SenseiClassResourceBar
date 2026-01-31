@@ -59,10 +59,19 @@ function Whirlwind:OnLoad(powerBar)
         powerBar.Frame:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
         powerBar.Frame:RegisterEvent("PLAYER_DEAD")
         powerBar.Frame:RegisterEvent("PLAYER_ALIVE")
+        powerBar.Frame:RegisterEvent("PLAYER_TALENT_UPDATE")
+        powerBar.Frame:RegisterEvent("ACTIVE_PLAYER_SPECIALIZATION_CHANGED")
+        powerBar.Frame:RegisterEvent("TRAIT_CONFIG_UPDATED")
     end
 end
 
-function Whirlwind:OnEvent(_, event, ...)
+function Whirlwind:OnEvent(powerBar, event, ...)
+  if event == "PLAYER_TALENT_UPDATE" or event == "ACTIVE_PLAYER_SPECIALIZATION_CHANGED" or event == "TRAIT_CONFIG_UPDATED" then
+    powerBar:ApplyVisibilitySettings()
+    powerBar:UpdateDisplay()
+    return
+  end
+
   -- Handle Death and Resurrection Reset
     if event == "PLAYER_DEAD" or event == "PLAYER_ALIVE" then
         iwStacks = 0
@@ -124,7 +133,7 @@ function Whirlwind:GetStacks()
         iwExpiresAt = nil
     end
 
-    return self.IW_MAX_STACKS, iwStacks
+    return C_SpellBook.IsSpellKnown(REQUIRED_TALENT_ID) and self.IW_MAX_STACKS or nil, iwStacks
 end
 
 addonTable.Whirlwind = Whirlwind
