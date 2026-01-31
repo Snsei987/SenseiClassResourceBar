@@ -2,6 +2,8 @@
 ..\..\Blizzard_SharedXML\UI.xsd">
 	<Script file="API.lua"/>
 	<Script file="Color.lua"/>
+	<Script file="Profiler.lua"/>
+	<Script file="Benchmark.lua"/>
 	<Script file="LEMSettingsLoader.lua"/>
 	<Script file="TipOfTheSpear.lua"/>
 	<Script file="Whirlwind.lua"/>
