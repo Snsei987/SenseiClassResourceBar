@@ -25,6 +25,7 @@ addonTable.fullUpdateBar = function(name)
     if not bar then return end
 
     bar:InitCooldownManagerWidthHook()
+    bar:InitCustomFrameWidthHook()
     bar:ApplyVisibilitySettings()
     bar:ApplyLayout()
     bar:UpdateDisplay()
@@ -228,3 +229,18 @@ addonTable.getPixelPerfectScale = function()
     local scale = UIParent:GetEffectiveScale()
     return 768 / screenHeight / scale
 end
+
+addonTable.registerCustomFrame = function(customFrame, customFrameName)
+	if type(customFrame) == "table" then
+		customFrame = customFrame.GetName and customFrame:GetName() or nil
+	end
+
+	if customFrame and not addonTable.availableCustomFrames[customFrame] then
+		addonTable.availableCustomFrames[customFrame] = customFrameName or customFrame
+		addonTable.customFrameNamesToFrame[customFrameName or customFrame] = customFrame
+
+		tinsert(addonTable.availableWidthModes, { text = customFrameName or customFrame })
+		addonTable.fullUpdateBars()
+	end
+end
+SCRB.registerCustomFrame = addonTable.registerCustomFrame

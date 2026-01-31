@@ -153,6 +153,34 @@ function BarMixin:InitCooldownManagerWidthHook(layoutName)
     end
 end
 
+function BarMixin:InitCustomFrameWidthHook(layoutName)
+    local data = self:GetData(layoutName)
+    if not data then return nil end
+    
+    self._SCRB_Custom_Frames_hooked = self._SCRB_Custom_Frames_hooked or {}
+    self._SCRB_Custom_Frame = data.widthMode
+
+    local hookCustomFrame = function(customFrame, width)
+        if not self._SCRB_Custom_Frame or not _G[self._SCRB_Custom_Frame] or _G[self._SCRB_Custom_Frame] ~= customFrame then
+            return
+        end
+
+        if (width == nil) or (type(width) == "number" and math.floor(width) > 1) then
+            self:ApplyLayout(nil, true)
+        end
+    end
+
+    local v = _G[data.widthMode]
+    if v and not self._SCRB_Custom_Frames_hooked[v] then
+        self._SCRB_Custom_Frames_hooked[v] = true
+
+        hooksecurefunc(v, "SetSize", hookCustomFrame)
+        hooksecurefunc(v, "SetWidth", hookCustomFrame)
+        hooksecurefunc(v, "Show", hookCustomFrame)
+        hooksecurefunc(v, "Hide", hookCustomFrame)
+    end
+end
+
 ------------------------------------------------------------
 -- FRAME methods
 ------------------------------------------------------------
@@ -550,7 +578,12 @@ function BarMixin:GetSize(layoutName, data)
     if not data then return defaults.width or 200, defaults.height or 15 end
 
     local width = nil
-    if data.widthMode ~= nil and data.widthMode ~= "Manual" then
+    if data.widthMode ~= nil and addonTable.customFrameNamesToFrame[data.widthMode] then
+        width = self:GetCustomFrameWidth(layoutName) or data.width or defaults.width
+        if data.minWidth and data.minWidth > 0 then
+            width = max(width, data.minWidth)
+        end
+    elseif data.widthMode ~= nil and data.widthMode ~= "Manual" then
         width = self:GetCooldownManagerWidth(layoutName) or data.width or defaults.width
         if data.minWidth and data.minWidth > 0 then
             width = max(width, data.minWidth)
@@ -816,6 +849,18 @@ function BarMixin:GetCooldownManagerWidth(layoutName)
         if v then
             return v:IsShown() and v:GetWidth() or nil
         end
+    end
+
+    return nil
+end
+
+function BarMixin:GetCustomFrameWidth(layoutName)
+    local data = self:GetData(layoutName)
+    if not data then return nil end
+
+    local v = _G[addonTable.customFrameNamesToFrame[data.widthMode]]
+    if v then
+        return v:IsShown() and v:GetWidth() or nil
     end
 
     return nil

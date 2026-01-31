@@ -214,7 +214,8 @@ local function BuildLemSettings(bar, defaults)
             useOldStyle = true,
             values = addonTable.availableWidthModes,
             get = function(layoutName)
-                return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].widthMode) or defaults.widthMode
+                local widthMode = (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].widthMode) or defaults.widthMode
+                return addonTable.availableCustomFrames[widthMode] or widthMode
             end,
             set = function(layoutName, value)
                 SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
@@ -844,6 +845,7 @@ function LEMSettingsLoaderMixin:Init(bar, defaults)
         SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
         bar:OnLayoutChange(layoutName)
         bar:InitCooldownManagerWidthHook(layoutName)
+        bar:InitCustomFrameWidthHook(layoutName)
         bar:ApplyVisibilitySettings(layoutName)
         bar:ApplyLayout(layoutName, true)
         bar:UpdateDisplay(layoutName, true)
@@ -853,6 +855,7 @@ function LEMSettingsLoaderMixin:Init(bar, defaults)
         local original = LEM:GetLayouts()[duplicateIndices[1]].name
         SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][original] and CopyTable(SenseiClassResourceBarDB[config.dbName][original]) or CopyTable(defaults)
         bar:InitCooldownManagerWidthHook(layoutName)
+        bar:InitCustomFrameWidthHook(layoutName)
         bar:ApplyVisibilitySettings(layoutName)
         bar:ApplyLayout(layoutName, true)
         bar:UpdateDisplay(layoutName, true)
@@ -862,6 +865,7 @@ function LEMSettingsLoaderMixin:Init(bar, defaults)
         SenseiClassResourceBarDB[config.dbName][newLayoutName] = SenseiClassResourceBarDB[config.dbName][oldLayoutName] and CopyTable(SenseiClassResourceBarDB[config.dbName][oldLayoutName]) or CopyTable(defaults)
         SenseiClassResourceBarDB[config.dbName][oldLayoutName] = nil
         bar:InitCooldownManagerWidthHook(newLayoutName)
+        bar:InitCustomFrameWidthHook(newLayoutName)
         bar:ApplyVisibilitySettings()
         bar:ApplyLayout()
         bar:UpdateDisplay()

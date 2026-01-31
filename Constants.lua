@@ -213,6 +213,9 @@ addonTable.availableWidthModes = {
     { text = "Sync With Tracked Buffs" },
 }
 
+addonTable.customFrameNamesToFrame = {}
+addonTable.availableCustomFrames = {}
+
 addonTable.availableFillDirections = {
     { text = "Left to Right" },
     { text = "Right to Left" },
