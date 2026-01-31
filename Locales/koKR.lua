@@ -67,7 +67,7 @@ local baseLocale = {
     ["HEALTH_BAR_EDIT_MODE_NAME"] = "생명력 바",
     ["PRIMARY_POWER_BAR_EDIT_MODE_NAME"] = "기본 자원 바",
     ["SECONDARY_POWER_BAR_EDIT_MODE_NAME"] = "보조 자원 바",
-    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "칠흑의 힘 바",
+    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "3차 자원 바",
 
     -- Bar visibility category - Edit Mode
     ["CATEGORY_BAR_VISIBILITY"] = "바 표시",

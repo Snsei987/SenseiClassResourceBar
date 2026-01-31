@@ -34,6 +34,9 @@ function SecondaryResourceBarMixin:GetResource()
                 [102] = Enum.PowerType.Mana, -- Balance
             },
             [DRUID_CAT_FORM]        = Enum.PowerType.ComboPoints,
+            [DRUID_TRAVEL_FORM]     = { [102] = Enum.PowerType.Mana }, -- Balance: Mana as secondary
+            [DRUID_ACQUATIC_FORM]   = { [102] = Enum.PowerType.Mana },
+            [DRUID_FLIGHT_FORM]     = { [102] = Enum.PowerType.Mana },
             [DRUID_MOONKIN_FORM_1]  = Enum.PowerType.Mana,
             [DRUID_MOONKIN_FORM_2]  = Enum.PowerType.Mana,
         },

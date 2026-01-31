@@ -68,7 +68,7 @@ local baseLocale = {
     ["HEALTH_BAR_EDIT_MODE_NAME"] = "Health Bar",
     ["PRIMARY_POWER_BAR_EDIT_MODE_NAME"] = "Primary Resource Bar",
     ["SECONDARY_POWER_BAR_EDIT_MODE_NAME"] = "Secondary Resource Bar",
-    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "Ebon Might Bar",
+    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "Tertiary Resource Bar",
 
     -- Bar visibility category - Edit Mode
     ["CATEGORY_BAR_VISIBILITY"] = "Bar Visibility",

@@ -67,7 +67,7 @@ local baseLocale = {
     ["HEALTH_BAR_EDIT_MODE_NAME"] = "生命条",
     ["PRIMARY_POWER_BAR_EDIT_MODE_NAME"] = "主要资源条",
     ["SECONDARY_POWER_BAR_EDIT_MODE_NAME"] = "次要资源条",
-    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "黑檀之力条",
+    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "第三资源条",
 
     -- Bar visibility category - Edit Mode
     ["CATEGORY_BAR_VISIBILITY"] = "条形可见性",

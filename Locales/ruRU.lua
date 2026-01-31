@@ -68,7 +68,7 @@ local baseLocale = {
     ["HEALTH_BAR_EDIT_MODE_NAME"] = "Полоса здоровья",
     ["PRIMARY_POWER_BAR_EDIT_MODE_NAME"] = "Полоса основного ресурса",
     ["SECONDARY_POWER_BAR_EDIT_MODE_NAME"] = "Полоса вторичного ресурса",
-    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "Полоса Черной мощи",
+    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "Полоса третичного ресурса",
 
     -- Bar visibility category - Edit Mode
     ["CATEGORY_BAR_VISIBILITY"] = "Видимость полосы",

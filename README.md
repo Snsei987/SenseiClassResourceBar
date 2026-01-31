@@ -33,7 +33,8 @@ Mana, Rage, Energy, Focus, Fury, Runic Power, Astral Power, Maelstrom Weapon and
 *   **Demon Hunter** → Soul Fragments (Devourer, Vengeance)
 *   **Hunter** → Tip of the Spear (Survival)
 
-**Ebon Might as a standalone bar**
+**Tertiary Resource Bar**  
+Ebon Might (Augmentation Evoker), Mana in Cat/Bear form (Druid, optional), and more.
 
 **Druid Form Adaptive Support:**  
 Automatically switches to Mana, Energy, Rage, or Astral Power depending on current shapeshift form.
