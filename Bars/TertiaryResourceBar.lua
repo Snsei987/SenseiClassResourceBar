@@ -9,7 +9,7 @@ function TertiaryResourceBarMixin:GetResource()
     local playerClass = select(2, UnitClass("player"))
     if playerClass == "DRUID" then
         local data = self:GetData()
-        if data and data.showDruidManaBar == true then
+        if (data and data.showDruidManaBar == true) or LEM:IsInEditMode() then
             return Enum.PowerType.Mana
         end
         return nil
@@ -88,10 +88,6 @@ addonTable.RegisteredBar.TertiaryResourceBar = {
         local spec = C_SpecializationInfo.GetSpecialization()
         local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
         return specID == 1473 -- Augmentation
-    end,
-    loadPredicate = function()
-        local playerClass = select(2, UnitClass("player"))
-        return playerClass == "EVOKER" or playerClass == "DRUID"
     end,
     lemSettings = function(bar, defaults)
         local dbName = bar:GetConfig().dbName
