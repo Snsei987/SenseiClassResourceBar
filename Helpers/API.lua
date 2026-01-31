@@ -46,13 +46,16 @@ addonTable.GetClassOption = function(key)
 end
 
 addonTable.SetClassOption = function(key, value)
+    if not SenseiClassResourceBarDB then
+        SenseiClassResourceBarDB = {}
+    end
     if not SenseiClassResourceBarDB["_Settings"] then
         SenseiClassResourceBarDB["_Settings"] = {}
     end
     if not SenseiClassResourceBarDB["_Settings"].ClassOptions then
         SenseiClassResourceBarDB["_Settings"].ClassOptions = {}
     end
-    SenseiClassResourceBarDB["_Settings"].ClassOptions[key] = value
+    SenseiClassResourceBarDB["_Settings"].ClassOptions[key] = (value == true)
 end
 
 addonTable.decodeImportString = function(importString)

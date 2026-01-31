@@ -8,10 +8,9 @@ local featureId = "SCRB_CLASS_OPTIONS"
 addonTable.AvailableFeatures = addonTable.AvailableFeatures or {}
 table.insert(addonTable.AvailableFeatures, featureId)
 
+-- No category: add to root panel as an expandable section (like Power Colors / Health Colors)
 addonTable.FeaturesMetadata = addonTable.FeaturesMetadata or {}
-addonTable.FeaturesMetadata[featureId] = {
-    category = L["SETTINGS_CATEGORY_CLASS_OPTIONS"],
-}
+addonTable.FeaturesMetadata[featureId] = {}
 
 addonTable.SettingsPanelInitializers = addonTable.SettingsPanelInitializers or {}
 addonTable.SettingsPanelInitializers[featureId] = function(category)
@@ -22,25 +21,46 @@ addonTable.SettingsPanelInitializers[featureId] = function(category)
         SenseiClassResourceBarDB["_Settings"].ClassOptions = {}
     end
 
-    -- Druid: show mana in cat and bear form
-    SettingsLib:CreateText(category, L["DRUID_ALWAYS_SHOW_MANA"])
-    SettingsLib:CreateText(category, L["DRUID_ALWAYS_SHOW_MANA_TOOLTIP"])
-    SettingsLib:CreateButton(category, {
-        text = addonTable.GetClassOption("showDruidManaInCatAndBearForm") and L["SETTINGS_OPTION_ENABLED"] or L["SETTINGS_OPTION_DISABLED"],
-        func = function()
-            addonTable.SetClassOption("showDruidManaInCatAndBearForm", not addonTable.GetClassOption("showDruidManaInCatAndBearForm"))
-            addonTable.fullUpdateBars()
-        end,
+    local classOptionsSection = SettingsLib:CreateExpandableSection(category, {
+        name = L["SETTINGS_CATEGORY_CLASS_OPTIONS"],
+        expanded = true,
+        colorizeTitle = true,
     })
 
-    -- Warrior: show Whirlwind bar (Fury)
-    SettingsLib:CreateText(category, L["WARRIOR_SHOW_WHIRLWIND_BAR"])
-    SettingsLib:CreateText(category, L["WARRIOR_SHOW_WHIRLWIND_BAR_TOOLTIP"])
-    SettingsLib:CreateButton(category, {
-        text = addonTable.GetClassOption("showWarriorWhirlwindBar") and L["SETTINGS_OPTION_ENABLED"] or L["SETTINGS_OPTION_DISABLED"],
-        func = function()
-            addonTable.SetClassOption("showWarriorWhirlwindBar", not addonTable.GetClassOption("showWarriorWhirlwindBar"))
+    -- Helper: setter may be called as (setting, value) or (value) depending on Blizzard API
+    local function makeClassOptionSetter(key)
+        return function(arg1, arg2)
+            local value = (type(arg2) == "boolean" and arg2) or (type(arg1) == "boolean" and arg1) or false
+            addonTable.SetClassOption(key, value)
             addonTable.fullUpdateBars()
+        end
+    end
+
+    -- Druid: show mana in cat and bear form (checkbox)
+    SettingsLib:CreateCheckbox(category, {
+        key = "showDruidManaInCatAndBearForm",
+        variable = "SCRB_ClassOptions_showDruidManaInCatAndBearForm",
+        name = L["DRUID_ALWAYS_SHOW_MANA"],
+        desc = L["DRUID_ALWAYS_SHOW_MANA_TOOLTIP"],
+        default = false,
+        get = function()
+            return addonTable.GetClassOption("showDruidManaInCatAndBearForm")
         end,
+        set = makeClassOptionSetter("showDruidManaInCatAndBearForm"),
+        parentSection = classOptionsSection,
+    })
+
+    -- Warrior: show Whirlwind bar (Fury) (checkbox)
+    SettingsLib:CreateCheckbox(category, {
+        key = "showWarriorWhirlwindBar",
+        variable = "SCRB_ClassOptions_showWarriorWhirlwindBar",
+        name = L["WARRIOR_SHOW_WHIRLWIND_BAR"],
+        desc = L["WARRIOR_SHOW_WHIRLWIND_BAR_TOOLTIP"],
+        default = false,
+        get = function()
+            return addonTable.GetClassOption("showWarriorWhirlwindBar")
+        end,
+        set = makeClassOptionSetter("showWarriorWhirlwindBar"),
+        parentSection = classOptionsSection,
     })
 end
