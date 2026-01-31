@@ -7,34 +7,27 @@ local TertiaryResourceBarMixin = Mixin({}, addonTable.PowerBarMixin)
 
 function TertiaryResourceBarMixin:GetResource()
     local playerClass = select(2, UnitClass("player"))
+    if playerClass == "DRUID" then
+        local showMana = addonTable.GetClassOption("showDruidManaInCatAndBearForm") or LEM:IsInEditMode()
+        if showMana then
+            local formID = GetShapeshiftFormID()
+            if formID == DRUID_CAT_FORM or formID == DRUID_BEAR_FORM then
+                return Enum.PowerType.Mana
+            end
+        end
+        return nil
+    end
+
     local tertiaryResources = {
-        ["DEATHKNIGHT"] = nil,
-        ["DEMONHUNTER"] = nil,
-        ["DRUID"]       = nil,
-        ["EVOKER"]      = {
+        ["EVOKER"] = {
             [1473] = "EBON_MIGHT", -- Augmentation
         },
-        ["HUNTER"]      = nil,
-        ["MAGE"]        = nil,
-        ["MONK"]        = nil,
-        ["PALADIN"]     = nil,
-        ["PRIEST"]      = nil,
-        ["ROGUE"]       = nil,
-        ["SHAMAN"]      = nil,
-        ["WARLOCK"]     = nil,
-        ["WARRIOR"]     = nil,
     }
 
     local spec = C_SpecializationInfo.GetSpecialization()
     local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
 
     local resource = tertiaryResources[playerClass]
-
-    -- Druid: form-based
-    if playerClass == "DRUID" then
-        local formID = GetShapeshiftFormID()
-        resource = resource and resource[formID or 0]
-    end
 
     if type(resource) == "table" then
         return resource[specID]
@@ -87,15 +80,17 @@ addonTable.RegisteredBar.TertiaryResourceBar = {
         x = 0,
         y = -80,
         useResourceAtlas = false,
+        -- showDruidManaBar: intentionally not in defaults; nil until user enables it. Default false.
     },
     allowEditPredicate = function()
+        local playerClass = select(2, UnitClass("player"))
+        if playerClass == "DRUID" then
+            return true
+        end
+
         local spec = C_SpecializationInfo.GetSpecialization()
         local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
         return specID == 1473 -- Augmentation
-    end,
-    loadPredicate = function()
-        local playerClass = select(2, UnitClass("player"))
-        return playerClass == "EVOKER"
     end,
     lemSettings = function(bar, defaults)
         local dbName = bar:GetConfig().dbName

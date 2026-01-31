@@ -68,7 +68,7 @@ local baseLocale = {
     ["HEALTH_BAR_EDIT_MODE_NAME"] = "Health Bar",
     ["PRIMARY_POWER_BAR_EDIT_MODE_NAME"] = "Primary Resource Bar",
     ["SECONDARY_POWER_BAR_EDIT_MODE_NAME"] = "Secondary Resource Bar",
-    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "Ebon Might Bar",
+    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "Tertiary Resource Bar",
 
     -- Bar visibility category - Edit Mode
     ["CATEGORY_BAR_VISIBILITY"] = "Bar Visibility",
@@ -78,6 +78,13 @@ local baseLocale = {
     ["HIDE_WHILE_MOUNTED_OR_VEHICULE"] = "Hide While Mounted Or In Vehicule",
     ["HIDE_WHILE_MOUNTED_OR_VEHICULE_TOOLTIP"] = "Includes Druid Travel Form",
     ["HIDE_MANA_ON_ROLE"] = "Hide Mana On Role",
+    ["SETTINGS_CATEGORY_CLASS_OPTIONS"] = "Class Options",
+    ["DRUID_ALWAYS_SHOW_MANA"] = "Druid: show mana in cat and bear form.",
+    ["DRUID_ALWAYS_SHOW_MANA_TOOLTIP"] = "Show a mana bar in Cat Form and Bear Form",
+    ["WARRIOR_SHOW_WHIRLWIND_BAR"] = "Warrior: show Whirlwind bar (Fury)",
+    ["WARRIOR_SHOW_WHIRLWIND_BAR_TOOLTIP"] = "Show the Improved Whirlwind stacks bar for Fury warriors",
+    ["SETTINGS_OPTION_ENABLED"] = "Enabled",
+    ["SETTINGS_OPTION_DISABLED"] = "Disabled",
     ["HIDE_HEALTH_ON_ROLE"] = "Hide On Role",
     ["HIDE_MANA_ON_ROLE_PRIMARY_BAR_TOOLTIP"] = "Not effective on Arcane Mage",
     ["HIDE_BLIZZARD_UI"] = "Hide Blizzard UI",

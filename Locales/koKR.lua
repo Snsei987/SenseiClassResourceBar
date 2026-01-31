@@ -67,7 +67,7 @@ local baseLocale = {
     ["HEALTH_BAR_EDIT_MODE_NAME"] = "생명력 바",
     ["PRIMARY_POWER_BAR_EDIT_MODE_NAME"] = "기본 자원 바",
     ["SECONDARY_POWER_BAR_EDIT_MODE_NAME"] = "보조 자원 바",
-    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "칠흑의 힘 바",
+    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "3차 자원 바",
 
     -- Bar visibility category - Edit Mode
     ["CATEGORY_BAR_VISIBILITY"] = "바 표시",
@@ -76,6 +76,13 @@ local baseLocale = {
     ["BAR_STRATA_TOOLTIP"] = "바가 표시되는 레이어를 설정합니다",
     ["HIDE_WHILE_MOUNTED_OR_VEHICULE"] = "탈것 또는 차량 탑승 시 숨기기",
     ["HIDE_WHILE_MOUNTED_OR_VEHICULE_TOOLTIP"] = "드루이드 이동 형태 포함",
+    ["SETTINGS_CATEGORY_CLASS_OPTIONS"] = "직업 옵션",
+    ["DRUID_ALWAYS_SHOW_MANA"] = "드루이드: 표범 및 곰 변신 시 마나 표시",
+    ["DRUID_ALWAYS_SHOW_MANA_TOOLTIP"] = "표범 변신과 곰 변신 시 마나 바 표시",
+    ["WARRIOR_SHOW_WHIRLWIND_BAR"] = "전사: 회오리바람 바 표시 (격노)",
+    ["WARRIOR_SHOW_WHIRLWIND_BAR_TOOLTIP"] = "격노 전사를 위한 강화된 회오리바람 중첩 바 표시",
+    ["SETTINGS_OPTION_ENABLED"] = "사용",
+    ["SETTINGS_OPTION_DISABLED"] = "사용 안 함",
     ["HIDE_MANA_ON_ROLE"] = "역할에 따라 마나 숨기기",
     ["HIDE_HEALTH_ON_ROLE"] = "역할에 따라 숨기기",
     ["HIDE_MANA_ON_ROLE_PRIMARY_BAR_TOOLTIP"] = "비전 마법사에게는 적용되지 않습니다",

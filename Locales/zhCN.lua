@@ -67,7 +67,7 @@ local baseLocale = {
     ["HEALTH_BAR_EDIT_MODE_NAME"] = "生命条",
     ["PRIMARY_POWER_BAR_EDIT_MODE_NAME"] = "主要资源条",
     ["SECONDARY_POWER_BAR_EDIT_MODE_NAME"] = "次要资源条",
-    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "黑檀之力条",
+    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "第三资源条",
 
     -- Bar visibility category - Edit Mode
     ["CATEGORY_BAR_VISIBILITY"] = "条形可见性",
@@ -76,6 +76,13 @@ local baseLocale = {
     ["BAR_STRATA_TOOLTIP"] = "条形渲染的层级",
     ["HIDE_WHILE_MOUNTED_OR_VEHICULE"] = "在坐骑或载具中隐藏",
     ["HIDE_WHILE_MOUNTED_OR_VEHICULE_TOOLTIP"] = "包括德鲁伊旅行形态",
+    ["SETTINGS_CATEGORY_CLASS_OPTIONS"] = "职业选项",
+    ["DRUID_ALWAYS_SHOW_MANA"] = "德鲁伊：在猎豹和熊形态下显示法力值",
+    ["DRUID_ALWAYS_SHOW_MANA_TOOLTIP"] = "在猎豹形态和熊形态下显示法力条",
+    ["WARRIOR_SHOW_WHIRLWIND_BAR"] = "战士：显示旋风斩条（狂暴）",
+    ["WARRIOR_SHOW_WHIRLWIND_BAR_TOOLTIP"] = "为狂暴战士显示强化旋风斩层数条",
+    ["SETTINGS_OPTION_ENABLED"] = "启用",
+    ["SETTINGS_OPTION_DISABLED"] = "禁用",
     ["HIDE_MANA_ON_ROLE"] = "在特定职责下隐藏法力值",
     ["HIDE_HEALTH_ON_ROLE"] = "在特定职责下隐藏",
     ["HIDE_MANA_ON_ROLE_PRIMARY_BAR_TOOLTIP"] = "对奥术法师无效",

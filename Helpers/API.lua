@@ -36,6 +36,28 @@ addonTable.fullUpdateBars = function()
     end
 end
 
+-- Class options: stored in _Settings.ClassOptions, default false when nil
+addonTable.GetClassOption = function(key)
+    local opts = SenseiClassResourceBarDB and SenseiClassResourceBarDB["_Settings"] and SenseiClassResourceBarDB["_Settings"].ClassOptions
+    if opts and opts[key] ~= nil then
+        return opts[key]
+    end
+    return false
+end
+
+addonTable.SetClassOption = function(key, value)
+    if not SenseiClassResourceBarDB then
+        SenseiClassResourceBarDB = {}
+    end
+    if not SenseiClassResourceBarDB["_Settings"] then
+        SenseiClassResourceBarDB["_Settings"] = {}
+    end
+    if not SenseiClassResourceBarDB["_Settings"].ClassOptions then
+        SenseiClassResourceBarDB["_Settings"].ClassOptions = {}
+    end
+    SenseiClassResourceBarDB["_Settings"].ClassOptions[key] = (value == true)
+end
+
 addonTable.decodeImportString = function(importString)
     local prefix, version, encoded = importString:match("^([^:]+):(%d+):(.+)$")
     if prefix ~= addonName then

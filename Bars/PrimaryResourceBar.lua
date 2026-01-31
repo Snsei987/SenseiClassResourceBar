@@ -26,9 +26,24 @@ function PrimaryResourceBarMixin:GetResource()
             [DRUID_TREE_FORM]       = Enum.PowerType.Mana,
             [36]                    = Enum.PowerType.Mana, -- Tome of the Wilds: Treant Form
             [DRUID_CAT_FORM]        = Enum.PowerType.Energy,
-            [DRUID_TRAVEL_FORM]     = Enum.PowerType.Mana,
-            [DRUID_ACQUATIC_FORM]   = Enum.PowerType.Mana,
-            [DRUID_FLIGHT_FORM]     = Enum.PowerType.Mana,
+            [DRUID_TRAVEL_FORM]     = {
+                [102] = Enum.PowerType.LunarPower, -- Balance: keep Lunar Power
+                [103] = Enum.PowerType.Mana,       -- Feral
+                [104] = Enum.PowerType.Mana,       -- Guardian
+                [105] = Enum.PowerType.Mana,       -- Restoration
+            },
+            [DRUID_ACQUATIC_FORM]   = {
+                [102] = Enum.PowerType.LunarPower,
+                [103] = Enum.PowerType.Mana,
+                [104] = Enum.PowerType.Mana,
+                [105] = Enum.PowerType.Mana,
+            },
+            [DRUID_FLIGHT_FORM]     = {
+                [102] = Enum.PowerType.LunarPower,
+                [103] = Enum.PowerType.Mana,
+                [104] = Enum.PowerType.Mana,
+                [105] = Enum.PowerType.Mana,
+            },
             [DRUID_MOONKIN_FORM_1]  = Enum.PowerType.LunarPower,
             [DRUID_MOONKIN_FORM_2]  = Enum.PowerType.LunarPower,
         },

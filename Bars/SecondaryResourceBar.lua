@@ -34,6 +34,9 @@ function SecondaryResourceBarMixin:GetResource()
                 [102] = Enum.PowerType.Mana, -- Balance
             },
             [DRUID_CAT_FORM]        = Enum.PowerType.ComboPoints,
+            [DRUID_TRAVEL_FORM]     = { [102] = Enum.PowerType.Mana }, -- Balance: Mana as secondary
+            [DRUID_ACQUATIC_FORM]   = { [102] = Enum.PowerType.Mana },
+            [DRUID_FLIGHT_FORM]     = { [102] = Enum.PowerType.Mana },
             [DRUID_MOONKIN_FORM_1]  = Enum.PowerType.Mana,
             [DRUID_MOONKIN_FORM_2]  = Enum.PowerType.Mana,
         },
@@ -59,7 +62,7 @@ function SecondaryResourceBarMixin:GetResource()
         },
         ["WARLOCK"]     = Enum.PowerType.SoulShards,
         ["WARRIOR"]     = {
-            [72] = "WHIRLWIND",
+            [72] = "WHIRLWIND", -- Fury: only shown when showWarriorWhirlwindBar is true (checked in GetResource)
         },
     }
 
@@ -67,6 +70,14 @@ function SecondaryResourceBarMixin:GetResource()
     local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
 
     local resource = secondaryResources[playerClass]
+
+    -- Warrior: Whirlwind bar (Fury) only when class option is enabled
+    if playerClass == "WARRIOR" and type(resource) == "table" then
+        resource = resource[specID]
+        if resource == "WHIRLWIND" and not addonTable.GetClassOption("showWarriorWhirlwindBar") then
+            resource = nil
+        end
+    end
 
     -- Druid: form-based
     if playerClass == "DRUID" then
