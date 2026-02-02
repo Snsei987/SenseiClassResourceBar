@@ -220,7 +220,7 @@ addonTable.RegisteredBar.HealthBar = {
     dbName = "healthBarDB",
     editModeName = L["HEALTH_BAR_EDIT_MODE_NAME"],
     frameType = "Button",
-    frameTemplate = "SecureUnitButtonTemplate",
+    frameTemplate = "SecureUnitButtonTemplate,PingableUnitFrameTemplate",
     frameName = "HealthBar",
     frameLevel = 0,
     defaultValues = {
@@ -254,6 +254,7 @@ addonTable.RegisteredBar.HealthBar = {
                 set = function(layoutName, value)
                     SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
                     SenseiClassResourceBarDB[dbName][layoutName].hideHealthOnRole = value
+                    --bar:RegisterSecureVisibility()
                 end,
             },
             {
@@ -306,6 +307,7 @@ addonTable.RegisteredBar.HealthBar = {
                 set = function(layoutName, value)
                     SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
                     SenseiClassResourceBarDB[dbName][layoutName].enableHealthBarMouseInteraction = value
+                    --bar:RegisterSecureVisibility()
                     bar:ApplyMouseSettings()
                 end,
                 tooltip = L["ENABLE_HP_BAR_MOUSE_INTERACTION_TOOLTIP"],
