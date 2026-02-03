@@ -190,16 +190,29 @@ function SecondaryResourceBarMixin:GetTagValues(resource, max, current, precisio
         tagValues["[percent]"] = function() return '' end -- As the value is secret, cannot get percent for it
     end
 
+    -- Soul Shard fix by Skeletor
     if resource == Enum.PowerType.SoulShards then
-        local currentStr = string.format("%s", AbbreviateNumbers(current / 10))
-        local percentStr = string.format(pFormat, UnitPowerPercent("player", resource, true, CurveConstants.ScaleTo100))
-        local maxStr = string.format("%s", AbbreviateNumbers(max / 10))
-        tagValues = {
-            ["[current]"] = function() return currentStr end,
-            ["[percent]"] = function() return percentStr end,
-            ["[max]"] = function() return maxStr end,
-        }
+    -- Convert raw value to an integer count (0–5)
+    local shardCount = math.floor(current / 10 + 0.5)  -- rounds to nearest whole shard
+    local maxShards  = math.floor(max / 10 + 0.5)
+
+    -- Convert to strings for tag returns
+    local currentStr = tostring(shardCount)
+    local maxStr     = tostring(maxShards)
+
+    -- Percent isn’t very useful for shards, but if you still want it:
+    local percent = 0
+    if maxShards > 0 then
+        percent = (shardCount / maxShards) * 100
     end
+    local percentStr = string.format(pFormat, percent)
+
+    tagValues = {
+        ["[current]"] = function() return currentStr end,
+        ["[percent]"] = function() return percentStr end,
+        ["[max]"]     = function() return maxStr end,
+    }
+end
 
     if resource == "MAELSTROM_WEAPON" then
         local percentStr = string.format(pFormat, (current / (max * 2)) * 100)
