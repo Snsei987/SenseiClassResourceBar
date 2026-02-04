@@ -1286,6 +1286,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
         local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179) -- Maelstrom Weapon
         local current = auraData and auraData.applications or 0
         local above5MwColor = addonTable:GetOverrideResourceColor("MAELSTROM_WEAPON_ABOVE_5") or color
+        local mW10Color = addonTable:GetOverrideResourceColor("MAELSTROM_WEAPON_10") or color
 
         -- Reuse pre-allocated table for performance
         local displayOrder = self._displayOrder
@@ -1317,12 +1318,16 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
 
                 mwFrame:SetMinMaxValues(0, 1)
 
-                if idx <= current then
+                 if idx <= current then
                     mwFrame:SetValue(1, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                    if current > 5 and idx <= math.fmod(current - 1, 5) + 1 then
-                        mwFrame:SetStatusBarColor(above5MwColor.r, above5MwColor.g, above5MwColor.b, above5MwColor.a or 1)
-                    else
-                        mwFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+                    if current == 10 then
+                        mwFrame:SetStatusBarColor(mW10Color.r, mW10Color.g, mW10Color.b, mW10Color.a or 1)
+                    else 
+                        if current > 5 and idx <= math.fmod(current - 1, 5) + 1 then
+                            mwFrame:SetStatusBarColor(above5MwColor.r, above5MwColor.g, above5MwColor.b, above5MwColor.a or 1)
+                        else
+                            mwFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+                        end
                     end
                 else
                     mwFrame:SetValue(0, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)

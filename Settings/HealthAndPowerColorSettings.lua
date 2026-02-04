@@ -64,6 +64,10 @@ local PowerData = {
         label = L["MAELSTROM_WEAPON"] .. ' > 5',
         key = "MAELSTROM_WEAPON_ABOVE_5",
     },
+     {
+        label = L["MAELSTROM_WEAPON"] .. ' == 10',
+        key = "MAELSTROM_WEAPON_10",
+    },
     {
         label = L["INSANITY"],
         key = Enum.PowerType.Insanity,
