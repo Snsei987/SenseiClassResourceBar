@@ -191,28 +191,38 @@ function SecondaryResourceBarMixin:GetTagValues(resource, max, current, precisio
     end
 
     -- Soul Shard fix by Skeletor
-    if resource == Enum.PowerType.SoulShards then
-    -- Convert raw value to an integer count (0–5)
-    local shardCount = math.floor(current / 10 + 0.5)  -- rounds to nearest whole shard
-    local maxShards  = math.floor(max / 10 + 0.5)
+	if resource == Enum.PowerType.SoulShards then
+	
+		local _, _, specID = GetSpecializationInfo(GetSpecialization())
+		local currentValue = current
+		local maxValue     = max
 
-    -- Convert to strings for tag returns
-    local currentStr = tostring(shardCount)
-    local maxStr     = tostring(maxShards)
+		if maxValue > 5 then
+			currentValue = currentValue / 10
+			maxValue     = maxValue / 10
+		end
 
-    -- Percent isn’t very useful for shards, but if you still want it:
-    local percent = 0
-    if maxShards > 0 then
-        percent = (shardCount / maxShards) * 100
+		local percent = UnitPowerPercent("player", resource, true, CurveConstants.ScaleTo100)
+
+		-- Affli / Demo
+		if specID == 265 or specID == 266 then
+        
+        currentValue = addonTable.rounded(currentValue, 0)
+        maxValue     = addonTable.rounded(maxValue, 0)
+
+		-- Destro
+		elseif specID == 267 then
+        
+        currentValue = addonTable.rounded(currentValue, 1)
+        maxValue     = addonTable.rounded(maxValue, 0)
+
+        -- In some of my tests, I had a lagging between the resource bar and the final soul shard. This fixes it
+        if currentValue >= (maxValue - 0.1) and currentValue < maxValue then
+            currentValue = maxValue - 0.1
+			else
+			currentValue = maxValue
+        end
     end
-    local percentStr = string.format(pFormat, percent)
-
-    tagValues = {
-        ["[current]"] = function() return currentStr end,
-        ["[percent]"] = function() return percentStr end,
-        ["[max]"]     = function() return maxStr end,
-    }
-end
 
     if resource == "MAELSTROM_WEAPON" then
         local percentStr = string.format(pFormat, (current / (max * 2)) * 100)
