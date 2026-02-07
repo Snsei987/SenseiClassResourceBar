@@ -132,7 +132,7 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
         if not self._runeCooldownCache then
             self._runeCooldownCache = {}
         end
-        
+
         for i = 1, max do
             local start, duration, runeReady = GetRuneCooldown(i)
             self._runeCooldownCache[i] = { start = start, duration = duration, runeReady = runeReady }
@@ -229,7 +229,7 @@ function SecondaryResourceBarMixin:GetPoint(layoutName, ignorePositionMode)
             local primaryResource = addonTable.barInstances and addonTable.barInstances["PrimaryResourceBar"]
 
             if primaryResource then
-                primaryResource:ApplyVisibilitySettings(layoutName)
+                primaryResource:ApplyVisibilitySettings(layoutName, self._curEvent == "PLAYER_REGEN_DISABLED")
                 if not primaryResource:IsShown() then
                     return primaryResource:GetPoint(layoutName, true)
                 end
@@ -238,7 +238,7 @@ function SecondaryResourceBarMixin:GetPoint(layoutName, ignorePositionMode)
             local health = addonTable.barInstances and addonTable.barInstances["HealthBar"]
 
             if health then
-                health:ApplyVisibilitySettings(layoutName)
+                health:ApplyVisibilitySettings(layoutName, self._curEvent == "PLAYER_REGEN_DISABLED")
                 if not health:IsShown() then
                     return health:GetPoint(layoutName, true)
                 end

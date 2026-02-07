@@ -102,12 +102,13 @@ end
 
 function HealthBarMixin:OnEvent(event, ...)
     local unit = ...
+    self._curEvent = event
 
     if event == "PLAYER_ENTERING_WORLD"
         or (event == "PLAYER_SPECIALIZATION_CHANGED" and unit == "player") then
 
         self:ApplyVisibilitySettings()
-        self:ApplyLayout()
+        self:ApplyLayout(nil, true)
         self:UpdateDisplay()
 
     elseif event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED"
@@ -117,6 +118,7 @@ function HealthBarMixin:OnEvent(event, ...)
         or event == "PET_BATTLE_OPENING_START" or event == "PET_BATTLE_CLOSE" then
 
             self:ApplyVisibilitySettings()
+            self:ApplyLayout(nil, true)
             self:UpdateDisplay()
 
     end
@@ -186,7 +188,7 @@ function HealthBarMixin:GetPoint(layoutName, ignorePositionMode)
             local primaryResource = addonTable.barInstances and addonTable.barInstances["PrimaryResourceBar"]
 
             if primaryResource then
-                primaryResource:ApplyVisibilitySettings(layoutName)
+                primaryResource:ApplyVisibilitySettings(layoutName, self._curEvent == "PLAYER_REGEN_DISABLED")
                 if not primaryResource:IsShown() then
                     return primaryResource:GetPoint(layoutName, true)
                 end
@@ -195,7 +197,7 @@ function HealthBarMixin:GetPoint(layoutName, ignorePositionMode)
             local secondaryResource = addonTable.barInstances and addonTable.barInstances["SecondaryResourceBar"]
 
             if secondaryResource then
-                secondaryResource:ApplyVisibilitySettings(layoutName)
+                secondaryResource:ApplyVisibilitySettings(layoutName, self._curEvent == "PLAYER_REGEN_DISABLED")
                 if not secondaryResource:IsShown() then
                     return secondaryResource:GetPoint(layoutName, true)
                 end

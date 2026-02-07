@@ -146,7 +146,7 @@ function Whirlwind:OnEvent(powerBar, event, ...)
         pendingGenToken = pendingGenToken + 1
         local myToken = pendingGenToken
 
-        -- small delay 
+        -- small delay
         C_Timer.After(0.15, function()
             if myToken ~= pendingGenToken then return end
             if not (combatAtCast or hostileTargetAtCast) and not HasNearbyHostileAoE(spellID) then return end

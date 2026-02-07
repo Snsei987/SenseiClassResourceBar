@@ -28,6 +28,7 @@ end
 
 function PowerBarMixin:OnEvent(event, ...)
     local unit = ...
+    self._curEvent = event
 
     if event == "PLAYER_ENTERING_WORLD"
         or event == "UPDATE_SHAPESHIFT_FORM"
@@ -35,6 +36,7 @@ function PowerBarMixin:OnEvent(event, ...)
 
         self:ApplyVisibilitySettings()
         self:ApplyLayout(nil, true)
+        self:UpdateDisplay()
 
     elseif event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED"
         or event == "PLAYER_TARGET_CHANGED"

@@ -291,7 +291,7 @@ addonTable.maskAndBorderStyles = {
     -- Add more styles here as needed
     -- ["style-name"] = {
     --     type = "", -- texture or fixed. Other value will not be displayed (i.e hidden)
-    --     mask = "path/to/mask.png", -- Default to the whole status bar 
+    --     mask = "path/to/mask.png", -- Default to the whole status bar
     --     border = "path/to/border.png", -- Only for texture type
     --     thickness = 1, -- Only for fixed type
     -- },

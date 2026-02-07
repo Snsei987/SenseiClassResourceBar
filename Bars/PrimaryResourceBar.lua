@@ -69,7 +69,7 @@ function PrimaryResourceBarMixin:GetResource()
 
     if type(resource) == "table" then
         return resource[specID]
-    else 
+    else
         return resource
     end
 end

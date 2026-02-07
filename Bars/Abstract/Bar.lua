@@ -71,7 +71,7 @@ function BarMixin:Init(config, parent, frameLevel)
     -- Fragmented powers (Runes, Essences) specific visual elements
     self.FragmentedPowerBars = {}
     self.FragmentedPowerBarTexts = {}
-    
+
     -- Performance optimizations: pre-allocated tables
     self._displayOrder = {}
     self._cachedTextFormat = nil
@@ -156,7 +156,7 @@ end
 function BarMixin:InitCustomFrameWidthHook(layoutName)
     local data = self:GetData(layoutName)
     if not data then return nil end
-    
+
     self._SCRB_Custom_Frames_hooked = self._SCRB_Custom_Frames_hooked or {}
     self._SCRB_Custom_Frame = data.widthMode
 
@@ -309,7 +309,7 @@ function BarMixin:UpdateDisplay(layoutName, force)
 
     local data = self:GetData(layoutName)
     if not data then return end
-    
+
     -- Cache data to avoid redundant GetData() calls
 
     local resource = self:GetResource()
@@ -476,14 +476,14 @@ function BarMixin:HideBlizzardPlayerContainer(layoutName, data)
     data = data or self:GetData(layoutName)
     if not data then return end
 
-    -- InCombatLockdown() means protected frames so we cannot touch it
+    -- Blizzard Frames are protected in combat
     if data.hideBlizzardPlayerContainerUi == nil or InCombatLockdown() then return end
 
     if PlayerFrame then
         if data.hideBlizzardPlayerContainerUi == true then
             if LEM:IsInEditMode() then
                 PlayerFrame:Show()
-            else 
+            else
                 PlayerFrame:Hide()
             end
         else
@@ -496,9 +496,9 @@ function BarMixin:HideBlizzardSecondaryResource(layoutName, data)
     data = data or self:GetData(layoutName)
     if not data then return end
 
-    -- InCombatLockdown() means protected frames so we cannot touch it
+    -- Blizzard Frames are protected in combat
     if data.hideBlizzardSecondaryResourceUi == nil or InCombatLockdown() then return end
-    
+
     local playerClass = select(2, UnitClass("player"))
     local blizzardResourceFrames = {
         ["DEATHKNIGHT"] = RuneFrame,
@@ -518,7 +518,7 @@ function BarMixin:HideBlizzardSecondaryResource(layoutName, data)
                     if class ~= "DRUID" or (class == "DRUID" and GetShapeshiftFormID() == DRUID_CAT_FORM) then
                         f:Show()
                     end
-                else 
+                else
                     f:Hide()
                 end
             elseif class ~= "DRUID" or (class == "DRUID" and GetShapeshiftFormID() == DRUID_CAT_FORM) then
@@ -1216,7 +1216,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
         -- Clear previous data
         for i = #readyList, 1, -1 do readyList[i] = nil end
         for i = #cdList, 1, -1 do cdList[i] = nil end
-        
+
         local now = GetTime()
         local poolIdx = 1
         for i = 1, maxPower do
@@ -1228,7 +1228,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
             else
                 start, duration, runeReady = GetRuneCooldown(i)
             end
-            
+
             if runeReady then
                 -- Reuse pre-allocated struct
                 local info = self._runeInfoPool[poolIdx]

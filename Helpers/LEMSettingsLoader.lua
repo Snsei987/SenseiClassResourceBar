@@ -410,7 +410,7 @@ local function BuildLemSettings(bar, defaults)
                 if not data then return end
 
                 if not dropdown._SCRB_Background_Dropdown_OnMenuClosed_hooked then
-                    hooksecurefunc(dropdown, "OnMenuClosed", function() 
+                    hooksecurefunc(dropdown, "OnMenuClosed", function()
                         for _, texture in pairs(dropdown.texturePool) do
                             texture:Hide()
                         end
@@ -506,7 +506,7 @@ local function BuildLemSettings(bar, defaults)
                 if not data then return end
 
                 if not dropdown._SCRB_Foreground_Dropdown_OnMenuClosed_hooked then
-                    hooksecurefunc(dropdown, "OnMenuClosed", function() 
+                    hooksecurefunc(dropdown, "OnMenuClosed", function()
                         for _, texture in pairs(dropdown.texturePool) do
                             texture:Hide()
                         end
@@ -685,7 +685,7 @@ local function BuildLemSettings(bar, defaults)
                 if not data then return end
 
                 if not dropdown._SCRB_FontFace_Dropdown_OnMenuClosed_hooked then
-                    hooksecurefunc(dropdown, "OnMenuClosed", function() 
+                    hooksecurefunc(dropdown, "OnMenuClosed", function()
                         for _, fontDisplay in pairs(dropdown.fontPool) do
                             fontDisplay:Hide()
                         end
