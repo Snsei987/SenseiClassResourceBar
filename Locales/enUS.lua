@@ -96,7 +96,6 @@ local baseLocale = {
     ["RELATIVE_POINT"] = "Relative Point",
     ["BAR_SIZE"] = "Bar Size",
     ["WIDTH_MODE"] = "Width Mode",
-    ["CUSTOM_FRAME"] = "Custom Frame",
     ["WIDTH"] = "Width",
     ["MINIMUM_WIDTH"] = "Minimum Width",
     ["MINIMUM_WIDTH_TOOLTIP"] = "0 to disable. Only active if synced to the Cooldown Manager",
