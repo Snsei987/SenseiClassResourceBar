@@ -180,6 +180,26 @@ function HealthBarMixin:ApplyVisibilitySettings(layoutName)
     self:ApplyTextVisibilitySettings(layoutName, data)
 end
 
+function HealthBarMixin:HideBlizzardPlayerContainer(layoutName, data)
+    data = data or self:GetData(layoutName)
+    if not data then return end
+
+    -- Blizzard Frames are protected in combat
+    if data.hideBlizzardPlayerContainerUi == nil or InCombatLockdown() then return end
+
+    if PlayerFrame then
+        if data.hideBlizzardPlayerContainerUi == true then
+            if LEM:IsInEditMode() then
+                PlayerFrame:Show()
+            else
+                PlayerFrame:Hide()
+            end
+        else
+            PlayerFrame:Show()
+        end
+    end
+end
+
 addonTable.HealthBarMixin = HealthBarMixin
 
 addonTable.RegisteredBar = addonTable.RegisteredBar or {}

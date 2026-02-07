@@ -230,6 +230,42 @@ function SecondaryResourceBarMixin:ApplyVisibilitySettings(layoutName, inCombat)
     addonTable.PowerBarMixin.ApplyVisibilitySettings(self, layoutName, inCombat)
 end
 
+function SecondaryResourceBarMixin:HideBlizzardSecondaryResource(layoutName, data)
+    data = data or self:GetData(layoutName)
+    if not data then return end
+
+    -- Blizzard Frames are protected in combat
+    if data.hideBlizzardSecondaryResourceUi == nil or InCombatLockdown() then return end
+
+    local playerClass = select(2, UnitClass("player"))
+    local blizzardResourceFrames = {
+        ["DEATHKNIGHT"] = RuneFrame,
+        ["DRUID"] = DruidComboPointBarFrame,
+        ["EVOKER"] = EssencePlayerFrame,
+        ["MAGE"] = MageArcaneChargesFrame,
+        ["MONK"] = MonkHarmonyBarFrame,
+        ["PALADIN"] = PaladinPowerBarFrame,
+        ["ROGUE"] = RogueComboPointBarFrame,
+        ["WARLOCK"] = WarlockPowerFrame,
+    }
+
+    for class, f in pairs(blizzardResourceFrames) do
+        if f and playerClass == class then
+            if data.hideBlizzardSecondaryResourceUi == true then
+                if LEM:IsInEditMode() then
+                    if class ~= "DRUID" or (class == "DRUID" and GetShapeshiftFormID() == DRUID_CAT_FORM) then
+                        f:Show()
+                    end
+                else
+                    f:Hide()
+                end
+            elseif class ~= "DRUID" or (class == "DRUID" and GetShapeshiftFormID() == DRUID_CAT_FORM) then
+                f:Show()
+            end
+        end
+    end
+end
+
 addonTable.SecondaryResourceBarMixin = SecondaryResourceBarMixin
 
 addonTable.RegisteredBar = addonTable.RegisteredBar or {}
