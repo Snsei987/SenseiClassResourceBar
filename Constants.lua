@@ -48,6 +48,7 @@ addonTable.commonDefaults = {
     x = 0, -- Shared
     y = 0, -- Shared
     -- SCRB settings
+    positionMode = "Self",
     relativeFrame = "UIParent",
     relativePoint = "CENTER",
     barVisible = "Always Visible",
@@ -108,12 +109,19 @@ addonTable.availablePositionModeOptions = function(config)
         { text = "Self" },
     }
 
-    if config.frameName == "HealthBar" then
-        table.insert(positions, { text = "Use Primary Resource Bar Position If Hidden" })
+    if config.frameName == "PrimaryResourceBar" then
+        table.insert(positions, { text = "Use Health Bar Position If Hidden" })
         table.insert(positions, { text = "Use Secondary Resource Bar Position If Hidden" })
     elseif config.frameName == "SecondaryResourceBar" then
-        table.insert(positions, { text = "Use Primary Resource Bar Position If Hidden" })
         table.insert(positions, { text = "Use Health Bar Position If Hidden" })
+        table.insert(positions, { text = "Use Primary Resource Bar Position If Hidden" })
+    elseif config.frameName == "TertiaryResourceBar" then
+        table.insert(positions, { text = "Use Health Bar Position If Hidden" })
+        table.insert(positions, { text = "Use Primary Resource Bar Position If Hidden" })
+        table.insert(positions, { text = "Use Secondary Resource Bar Position If Hidden" })
+    elseif config.frameName == "HealthBar" then
+        table.insert(positions, { text = "Use Primary Resource Bar Position If Hidden" })
+        table.insert(positions, { text = "Use Secondary Resource Bar Position If Hidden" })
     end
 
     return positions;

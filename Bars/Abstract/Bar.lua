@@ -195,6 +195,22 @@ function BarMixin:Hide()
     self.Frame:Hide()
 end
 
+function BarMixin:OnShow()
+    local data = self:GetData()
+
+    if data and data.positionMode ~= nil and data.positionMode ~= "Self" then
+        self:ApplyLayout()
+    end
+end
+
+function BarMixin:OnHide()
+    local data = self:GetData()
+
+    if data and data.positionMode ~= nil and data.positionMode ~= "Self" then
+        self:ApplyLayout()
+    end
+end
+
 function BarMixin:IsShown()
     return self.Frame:IsShown()
 end
@@ -255,12 +271,6 @@ end
 function BarMixin:OnLoad()
 end
 
-function BarMixin:OnShow()
-end
-
-function BarMixin:OnHide()
-end
-
 --- @param _ string The new layout
 function BarMixin:OnLayoutChange(_)
 end
@@ -279,6 +289,7 @@ function BarMixin:EnableFasterUpdates()
             if frame.elapsed >= 0.1 then
                 frame.elapsed = 0
                 self:UpdateDisplay()
+                self._curEvent = nil
             end
         end
     end
@@ -294,6 +305,7 @@ function BarMixin:DisableFasterUpdates()
             if frame.elapsed >= 0.25 then
                 frame.elapsed = 0
                 self:UpdateDisplay()
+                self._curEvent = nil
             end
         end
     end
@@ -532,7 +544,7 @@ end
 -- LAYOUT related methods
 ------------------------------------------------------------
 
-function BarMixin:GetPoint(layoutName)
+function BarMixin:GetPoint(layoutName, ignorePositionMode)
     local defaults = self.defaults or {}
 
     local data = self:GetData(layoutName)
@@ -542,6 +554,37 @@ function BarMixin:GetPoint(layoutName)
             defaults.relativePoint or "CENTER",
             defaults.x or 0,
             defaults.y or 0
+    end
+
+    if not ignorePositionMode then
+        if data and data.positionMode == "Use Primary Resource Bar Position If Hidden" then
+            local primaryResource = addonTable.barInstances and addonTable.barInstances["PrimaryResourceBar"]
+
+            if primaryResource then
+                primaryResource:ApplyVisibilitySettings(layoutName, self._curEvent == "PLAYER_REGEN_DISABLED")
+                if not primaryResource:IsShown() then
+                    return primaryResource:GetPoint(layoutName, true)
+                end
+            end
+        elseif data and data.positionMode == "Use Secondary Resource Bar Position If Hidden" then
+            local secondaryResource = addonTable.barInstances and addonTable.barInstances["SecondaryResourceBar"]
+
+            if secondaryResource then
+                secondaryResource:ApplyVisibilitySettings(layoutName, self._curEvent == "PLAYER_REGEN_DISABLED")
+                if not secondaryResource:IsShown() then
+                    return secondaryResource:GetPoint(layoutName, true)
+                end
+            end
+        elseif data and data.positionMode == "Use Health Bar Position If Hidden" then
+            local health = addonTable.barInstances and addonTable.barInstances["HealthBar"]
+
+            if health then
+                health:ApplyVisibilitySettings(layoutName, self._curEvent == "PLAYER_REGEN_DISABLED")
+                if not health:IsShown() then
+                    return health:GetPoint(layoutName, true)
+                end
+            end
+        end
     end
 
     local x = data.x or defaults.x

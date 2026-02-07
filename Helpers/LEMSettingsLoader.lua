@@ -82,6 +82,23 @@ local function BuildLemSettings(bar, defaults)
         },
         {
             parentId = L["CATEGORY_POSITION_AND_SIZE"],
+            order = 201,
+            name = L["POSITION"],
+            kind = LEM.SettingType.Dropdown,
+            default = defaults.positionMode,
+            useOldStyle = true,
+            values = addonTable.availablePositionModeOptions(config),
+            get = function(layoutName)
+                return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].positionMode) or defaults.positionMode
+            end,
+            set = function(layoutName, value)
+                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+                SenseiClassResourceBarDB[config.dbName][layoutName].positionMode = value
+                bar:ApplyLayout(layoutName)
+            end,
+        },
+        {
+            parentId = L["CATEGORY_POSITION_AND_SIZE"],
             order = 202,
             name = L["X_POSITION"],
             kind = LEM.SettingType.Slider,
