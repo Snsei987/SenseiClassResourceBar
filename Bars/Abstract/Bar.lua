@@ -1016,7 +1016,8 @@ function BarMixin:CreateFragmentedPowerBars(layoutName, data)
     local resource = self:GetResource()
     if not resource then return end
 
-    local maxPower = resource == "MAELSTROM_WEAPON" and 5 or UnitPowerMax("player", resource) or 0
+    local maxPower, _ = self:GetResourceValue(resource)
+    if not maxPower or maxPower <= 0 then return end
 
     for i = 1, maxPower or 0 do
         if not self.FragmentedPowerBars[i] then
@@ -1050,9 +1051,11 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
 
     local resource = self:GetResource()
     if not resource then return end
-    -- Use passed maxPower to avoid redundant UnitPowerMax call
-    maxPower = maxPower or (resource == "MAELSTROM_WEAPON" and 5 or UnitPowerMax("player", resource))
-    if maxPower <= 0 then return end
+    -- Use passed maxPower to avoid redundant GetResourceValue call
+    if not maxPower then
+        maxPower, _ = self:GetResourceValue(resource)
+    end
+    if not maxPower or maxPower <= 0 then return end
 
     local buildVersion = select(4, GetBuildInfo())
     local barWidth = self.Frame:GetWidth()
@@ -1374,8 +1377,8 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
                 mwFrame:Show()
             end
         end
-    elseif resource == Enum.PowerType.ArcaneCharges or resource == Enum.PowerType.Chi or resource == Enum.PowerType.HolyPower or resource == Enum.PowerType.SoulShards then
-        local current = UnitPower("player", resource)
+    elseif resource == Enum.PowerType.ArcaneCharges or resource == Enum.PowerType.Chi or resource == Enum.PowerType.HolyPower or resource == Enum.PowerType.SoulShards or resource == "TIP_OF_THE_SPEAR" or resource == "SOUL_FRAGMENTS_VENGEANCE" or resource == "WHIRLWIND" then
+        local _, current = self:GetResourceValue(resource)
 
         local displayOrder = {}
         for i = 1, maxPower do

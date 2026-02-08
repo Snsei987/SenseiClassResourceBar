@@ -351,4 +351,7 @@ addonTable.fragmentedPowerTypes = {
     [Enum.PowerType.Runes] = true,
     [Enum.PowerType.SoulShards] = true,
     ["MAELSTROM_WEAPON"] = true,
+    ["TIP_OF_THE_SPEAR"] = true,
+    ["SOUL_FRAGMENTS_VENGEANCE"] = true,
+    ["WHIRLWIND"] = true,
 }
