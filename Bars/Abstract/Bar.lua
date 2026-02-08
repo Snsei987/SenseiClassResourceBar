@@ -1054,6 +1054,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
     maxPower = maxPower or (resource == "MAELSTROM_WEAPON" and 5 or UnitPowerMax("player", resource))
     if maxPower <= 0 then return end
 
+    local buildVersion = select(4, GetBuildInfo())
     local barWidth = self.Frame:GetWidth()
     local barHeight = self.Frame:GetHeight()
     local fragmentedBarWidth = barWidth / maxPower
