@@ -3,6 +3,18 @@ local _, addonTable = ...
 local LEM = addonTable.LEM or LibStub("LibEQOLEditMode-1.0")
 local L = addonTable.L
 
+-- If MidnightSimpleUnitFrames (MSUF) is loaded, we should never force the Blizzard PlayerFrame
+-- to be visible. MSUF replaces the player frame and expects Blizzard's PlayerFrame hidden.
+local function SCRB_IsMSUFLoaded()
+    if C_AddOns and C_AddOns.IsAddOnLoaded then
+        return C_AddOns.IsAddOnLoaded("MidnightSimpleUnitFrames")
+    end
+    if IsAddOnLoaded then
+        return IsAddOnLoaded("MidnightSimpleUnitFrames")
+    end
+    return false
+end
+
 local HealthBarMixin = Mixin({}, addonTable.BarMixin)
 
 function HealthBarMixin:GetBarColor()
@@ -188,8 +200,27 @@ function HealthBarMixin:HideBlizzardPlayerContainer(layoutName, data)
     if not data then return end
 
     if PlayerFrame then
-        RegisterAttributeDriver(PlayerFrame, "state-visibility", (data.hideBlizzardPlayerContainerUi and not LEM:IsInEditMode()) and "hide" or "show")
-        RegisterAttributeDriver(PlayerFrame, "alpha", (data.hideBlizzardPlayerContainerUi and not LEM:IsInEditMode()) and "0" or "1")
+        -- IMPORTANT:
+        -- Do NOT force the PlayerFrame to "show" when we are not hiding it.
+        -- Forcing "show" overrides other addons (e.g., MSUF) that intentionally hide/replace the Blizzard PlayerFrame.
+
+        -- If MSUF is loaded, always hide the Blizzard PlayerFrame.
+        local shouldHide = SCRB_IsMSUFLoaded() or (data.hideBlizzardPlayerContainerUi and not LEM:IsInEditMode())
+
+        if shouldHide then
+            RegisterAttributeDriver(PlayerFrame, "state-visibility", "hide")
+            RegisterAttributeDriver(PlayerFrame, "alpha", "0")
+            PlayerFrame.SCRB_forcedHidden = true
+        else
+            -- Only remove drivers if Sensei previously applied them.
+            if PlayerFrame.SCRB_forcedHidden then
+                UnregisterAttributeDriver(PlayerFrame, "state-visibility")
+                UnregisterAttributeDriver(PlayerFrame, "alpha")
+                PlayerFrame:Show()
+                PlayerFrame:SetAlpha(1)
+                PlayerFrame.SCRB_forcedHidden = nil
+            end
+        end
     end
 end
 
