@@ -5,6 +5,8 @@ local baseLocale = {
     ["OKAY"] = OKAY,
     ["CLOSE"] = CLOSE,
     ["CANCEL"] = CANCEL,
+    ["RELOADUI"] = RELOADUI,
+    ["RELOADUI_TEXT"] = "Для вступления изменений в силу необходима перезагрузка интерфейса",
 
     -- Import / Export errors
     ["EXPORT"] = "Экспорт",
