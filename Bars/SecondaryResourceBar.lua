@@ -144,18 +144,48 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
         return max, current
     end
 
-    if resource == Enum.PowerType.SoulShards then
-        local spec = C_SpecializationInfo.GetSpecialization()
-        local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
+    -- Soul Shard fix by Skeletor
+	if resource == Enum.PowerType.SoulShards then
+	
+		local specID = GetSpecializationInfo(GetSpecialization())
+		local currentValue = current
+		local maxValue     = max
 
-        -- If true, current and max will be something like 14 for 1.4 shard, instead of 1
-        local preciseResourceCount = specID == 267
+		if maxValue > 5 then
+			currentValue = currentValue / 10
+			maxValue     = maxValue / 10
+		end
 
-        local current = UnitPower("player", resource, preciseResourceCount)
-        local max = UnitPowerMax("player", resource, preciseResourceCount)
-        if max <= 0 then return nil, nil end
+		local percent = UnitPowerPercent("player", resource, true, CurveConstants.ScaleTo100)
+		
+		-- Affli / Demo
+		if specID == 265 or specID == 266 then
+        
+        currentValue = addonTable.rounded(currentValue, 0)
+        maxValue     = addonTable.rounded(maxValue, 0)
 
-        return max, current
+		-- Destro
+		elseif specID == 267 then
+        
+            currentValue = addonTable.rounded(currentValue, 1)
+            maxValue     = addonTable.rounded(maxValue, 0)
+		
+		    -- Fallback fix to ensure there is no rounding between the last tick and maxValue
+		    if currentValue > (maxValue-0.1) then
+			    currentValue = maxValue
+		    end
+		
+        end
+
+        local currentStr = tostring(currentValue)
+        local maxStr     = tostring(maxValue)
+        local percentStr = string.format(pFormat, percent)
+
+        tagValues = {
+            ["[current]"] = function() return currentStr end,
+            ["[percent]"] = function() return percentStr end,
+            ["[max]"]     = function() return maxStr end,
+        }
     end
 
     if resource == "MAELSTROM_WEAPON" then
