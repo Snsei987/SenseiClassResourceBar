@@ -10,6 +10,19 @@ local L = addonTable.L
 
 local BarMixin = {}
 
+-- Power type to localized name mapping for custom ticks
+local POWER_TYPE_LOCALIZED_NAMES = {
+    [Enum.PowerType.Mana] = L["MANA"],
+    [Enum.PowerType.Rage] = L["RAGE"],
+    [Enum.PowerType.Focus] = L["FOCUS"],
+    [Enum.PowerType.Energy] = L["ENERGY"],
+    [Enum.PowerType.RunicPower] = L["RUNIC_POWER"],
+    [Enum.PowerType.LunarPower] = L["LUNAR_POWER"],
+    [Enum.PowerType.Maelstrom] = L["MAELSTORM"],
+    [Enum.PowerType.Insanity] = L["INSANITY"],
+    [Enum.PowerType.Fury] = L["FURY"],
+}
+
 ------------------------------------------------------------
 -- BAR FACTORY
 ------------------------------------------------------------
@@ -952,7 +965,11 @@ function BarMixin:UpdateTicksLayout(layoutName, data)
     end
 
     self.Ticks = self.Ticks or {}
-    if data.showTicks == false or not addonTable.tickedPowerTypes[resource] then
+    
+    -- Check if we should use custom ticks
+    local useCustomTicks = data.customTicks and #data.customTicks > 0
+    
+    if data.showTicks == false or (not useCustomTicks and not addonTable.tickedPowerTypes[resource]) then
         for _, t in ipairs(self.Ticks) do
             t:Hide()
         end
@@ -968,8 +985,58 @@ function BarMixin:UpdateTicksLayout(layoutName, data)
     local ppScale = addonTable.getPixelPerfectScale()
     local pThickness = tickThickness * ppScale
 
-    local needed = max - 1
-    for i = 1, needed do
+    local tickPositions = {}
+    
+    if useCustomTicks then
+        -- Use custom ticks, filtered by resource type
+        local currentMax = UnitPowerMax("player", resource) or max
+        if currentMax > 0 then
+            for _, tick in ipairs(data.customTicks) do
+                -- Skip if tick is disabled
+                if tick.enabled == true then
+                    local tickResource = tick.resource
+                    local matchesResource = false
+                    
+                    -- Match resource type - tick.resource is the localized name
+                    if type(resource) == "number" then
+                        -- Map power type enum to localized name
+                        local resourceName = POWER_TYPE_LOCALIZED_NAMES[resource]
+                        matchesResource = (tickResource == resourceName)
+                    elseif type(resource) == "string" then
+                        matchesResource = (tickResource == resource)
+                    end
+                    
+                    if matchesResource and tick.value > 0 then
+                        local tickPosition
+                        if tick.mode == L["TICK_MODE_PERCENTAGE"] then
+                            -- Percentage mode: tick.value is a percentage (0-100)
+                            if tick.value < 100 then
+                                tickPosition = tick.value / 100
+                            end
+                        else
+                            -- Fixed mode: tick.value is an absolute value
+                            if tick.value < currentMax then
+                                tickPosition = tick.value / currentMax
+                            end
+                        end
+                        
+                        if tickPosition then
+                            table.insert(tickPositions, tickPosition)
+                        end
+                    end
+                end
+            end
+        end
+    else
+        -- Use default tick positions (evenly spaced)
+        local needed = max - 1
+        for i = 1, needed do
+            table.insert(tickPositions, i / max)
+        end
+    end
+    
+    -- Render ticks at calculated positions
+    for i = 1, #tickPositions do
         local t = self.Ticks[i]
         if not t then
             t = self.Frame:CreateTexture(nil, "OVERLAY")
@@ -978,12 +1045,12 @@ function BarMixin:UpdateTicksLayout(layoutName, data)
         t:SetColorTexture(tickColor.r or 0, tickColor.g or 0, tickColor.b or 0, tickColor.a or 1)
         t:ClearAllPoints()
         if self.StatusBar:GetOrientation() == "VERTICAL" then
-            local rawY = (i / max) * height
+            local rawY = tickPositions[i] * height
             local snappedY = addonTable.rounded(rawY / ppScale) * ppScale
             t:SetSize(width, pThickness)
             t:SetPoint("BOTTOM", self.StatusBar, "BOTTOM", 0, snappedY)
         else
-            local rawX = (i / max) * width
+            local rawX = tickPositions[i] * width
             local snappedX = addonTable.rounded(rawX / ppScale) * ppScale
             t:SetSize(pThickness, height)
             t:SetPoint("LEFT", self.StatusBar, "LEFT", snappedX, 0)
@@ -992,7 +1059,7 @@ function BarMixin:UpdateTicksLayout(layoutName, data)
     end
 
     -- Hide any extra ticks
-    for i = needed + 1, #self.Ticks do
+    for i = #tickPositions + 1, #self.Ticks do
         local t = self.Ticks[i]
         if t then
             t:Hide()

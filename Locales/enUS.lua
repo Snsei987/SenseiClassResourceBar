@@ -107,11 +107,19 @@ local baseLocale = {
 
     -- Bar settings category - Edit Mode
     ["CATEGORY_BAR_SETTINGS"] = "Bar Settings",
+    ["CATEGORY_TICK_SETTINGS"] = "Tick Settings",
     ["FILL_DIRECTION"] = "Fill Direction",
     ["FASTER_UPDATES"] = "Faster Updates (Higher CPU Usage)",
     ["SMOOTH_PROGRESS"] = "Smooth Progress",
     ["SHOW_TICKS_WHEN_AVAILABLE"] = "Show Ticks When Available",
     ["TICK_THICKNESS"] = "Tick Thickness",
+    ["CATEGORY_TICK_SETTINGS"] = "Tick Settings",
+    ["CUSTOM_TICK"] = "Custom Tick",
+    ["TICK_RESOURCE_TYPE"] = "Resource Type",
+    ["TICK_MODE"] = "Mode",
+    ["TICK_MODE_PERCENTAGE"] = "Percentage",
+    ["TICK_MODE_FIXED"] = "Fixed Value",
+    ["TICK_VALUE"] = "Value",
 
     -- Bar style category - Edit Mode
     ["CATEGORY_BAR_STYLE"] = "Bar Style",
