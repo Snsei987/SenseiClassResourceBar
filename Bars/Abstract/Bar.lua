@@ -932,7 +932,7 @@ function BarMixin:UpdateTicksLayout(layoutName, data)
     local resource = self:GetResource()
     local max = 0;
     if resource == "MAELSTROM_WEAPON" then
-        max = 5
+        max = data.maelstromWeaponUseTenBars and 10 or 5
     elseif resource == "TIP_OF_THE_SPEAR" then
         max = addonTable.TipOfTheSpear.TIP_MAX_STACKS
     elseif resource == "WHIRLWIND" then
@@ -1009,7 +1009,12 @@ function BarMixin:CreateFragmentedPowerBars(layoutName, data)
     local resource = self:GetResource()
     if not resource then return end
 
-    local maxPower = resource == "MAELSTROM_WEAPON" and 5 or UnitPowerMax("player", resource) or 0
+    local maxPower
+    if resource == "MAELSTROM_WEAPON" then
+        maxPower = data.maelstromWeaponUseTenBars and 10 or 5
+    else
+        maxPower = UnitPowerMax("player", resource) or 0
+    end
 
     for i = 1, maxPower or 0 do
         if not self.FragmentedPowerBars[i] then
@@ -1319,6 +1324,15 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
         local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179) -- Maelstrom Weapon
         local current = auraData and auraData.applications or 0
         local above5MwColor = addonTable:GetOverrideResourceColor("MAELSTROM_WEAPON_ABOVE_5") or color
+        
+        local isRagingMaelstromTalented = C_SpellBook.IsSpellKnown(384143) -- Raging Maelstrom
+
+        if data.maelstromWeaponUseTenBars and not isRagingMaelstromTalented then
+            data.maelstromWeaponUseTenBars = false;
+            self:ApplyLayout(layoutName)
+        end
+
+        local segmentSize = (data and data.maelstromWeaponUseTenBars) and 10 or 5
 
         -- Reuse pre-allocated table for performance
         local displayOrder = self._displayOrder
@@ -1337,6 +1351,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
             local idx = displayOrder[pos]
             local mwFrame = self.FragmentedPowerBars[idx]
             local mwText = self.FragmentedPowerBarTexts[idx]
+                  
 
             if mwFrame then
                 mwFrame:ClearAllPoints()
@@ -1352,11 +1367,11 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
 
                 if idx <= current then
                     mwFrame:SetValue(1, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                    if current > 5 and idx <= math.fmod(current - 1, 5) + 1 then
-                        mwFrame:SetStatusBarColor(above5MwColor.r, above5MwColor.g, above5MwColor.b, above5MwColor.a or 1)
-                    else
-                        mwFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
-                    end
+                    if current > 5 and idx <= math.fmod(current - 1, segmentSize) + 1 then
+                            mwFrame:SetStatusBarColor(above5MwColor.r, above5MwColor.g, above5MwColor.b, above5MwColor.a or 1)
+                        else
+                            mwFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+                        end
                 else
                     mwFrame:SetValue(0, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                     mwFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)

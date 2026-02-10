@@ -121,6 +121,7 @@ local baseLocale = {
     ["BACKGROUND"] = "Background",
     ["USE_BAR_COLOR_FOR_BACKGROUND_COLOR"] = "Use Bar Color For Background Color",
     ["BORDER"] = "Border",
+    ["USE_TEN_TICK_MAELSTROM_BAR"] = "Use Ten Tick Maelstrom Bar",
 
     -- Text settings category - Edit Mode
     ["CATEGORY_TEXT_SETTINGS"] = "Text Settings",

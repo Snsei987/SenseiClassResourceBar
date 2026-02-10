@@ -161,9 +161,9 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
     if resource == "MAELSTROM_WEAPON" then
         local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179) -- Maelstrom Weapon
         local current = auraData and auraData.applications or 0
-        local max = 10
+        local max = data.maelstromWeaponUseTenBars and 10 or 5
 
-        return max / 2, current
+        return max, current
     end
 
     if resource == "TIP_OF_THE_SPEAR" then
@@ -184,7 +184,7 @@ end
 
 function SecondaryResourceBarMixin:GetTagValues(resource, max, current, precision)
     local pFormat = "%." .. (precision or 0) .. "f"
-
+    local data = self:GetData()
     local tagValues = addonTable.PowerBarMixin.GetTagValues(self, resource, max, current, precision)
 
     if resource == "STAGGER" then
@@ -212,8 +212,11 @@ function SecondaryResourceBarMixin:GetTagValues(resource, max, current, precisio
     end
 
     if resource == "MAELSTROM_WEAPON" then
-        local percentStr = string.format(pFormat, (current / (max * 2)) * 100)
-        local maxStr = string.format("%s", AbbreviateNumbers(max * 2))
+        local isRagingMaelstromTalented = C_SpellBook.IsSpellKnown(384143)
+        local effectiveMax = (data.maelstromWeaponUseTenBars or isRagingMaelstromTalented) and 10 or 5
+
+        local percentStr = string.format(pFormat, (current / (effectiveMax)) * 100)
+        local maxStr = string.format("%s", AbbreviateNumbers(effectiveMax))
         tagValues["[percent]"] = function() return percentStr end
         tagValues["[max]"] = function() return maxStr end
     end
@@ -286,6 +289,7 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
         tickColor = {r = 0, g = 0, b = 0, a = 1},
         tickThickness = 1,
         useResourceAtlas = false,
+        maelstromWeaponUseTenBars = false,
     },
     lemSettings = function(bar, defaults)
         local config = bar:GetConfig()
@@ -406,6 +410,41 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                     SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
                     SenseiClassResourceBarDB[dbName][layoutName].useResourceAtlas = value
                     bar:ApplyLayout(layoutName)
+                end,
+            },
+            {
+                parentId = L["CATEGORY_BAR_STYLE"],
+                order = 406,
+                name = L["USE_TEN_TICK_MAELSTROM_BAR"],
+                kind = LEM.SettingType.Checkbox,
+                default = false,
+                get = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    if data and data.maelstromWeaponUseTenBars ~= nil then
+                        return data.maelstromWeaponUseTenBars
+                    else
+                        return defaults.maelstromWeaponUseTenBars
+                    end
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+
+                    local isRagingMaelstromTalented = C_SpellBook.IsSpellKnown(384143) -- Raging Maelstrom
+                    if not isRagingMaelstromTalented then
+                        value = false
+                    end
+
+                    SenseiClassResourceBarDB[dbName][layoutName].maelstromWeaponUseTenBars = value
+
+                    bar:ApplyLayout(layoutName)
+
+                end,
+                isEnabled = function(layoutName)
+                    local playerClass = select(2, UnitClass("player"))
+                    local spec = C_SpecializationInfo.GetSpecialization()
+                    local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
+                    local isRagingMaelstromTalented = C_SpellBook.IsSpellKnown(384143) -- Raging Maelstrom
+                    return playerClass == "SHAMAN" and isRagingMaelstromTalented and specID == 263 -- Enhancement
                 end,
             },
             {
