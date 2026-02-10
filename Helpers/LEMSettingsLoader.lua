@@ -286,7 +286,7 @@ local function BuildLemSettings(bar, defaults)
             tooltip = L["MINIMUM_WIDTH_TOOLTIP"],
             isEnabled = function (layoutName)
                 local data = SenseiClassResourceBarDB[config.dbName][layoutName]
-                return data ~= nil and data ~= "Manual"
+                return data ~= nil and data.widthMode ~= "Manual"
             end,
         },
         {
