@@ -152,14 +152,6 @@ local baseLocale = {
     ["HAS_TARGET_SELECTED_OR_IN_COMBAT"] = "Цель выбрана или в бою",
     ["HIDDEN"] = "Скрыто",
     
-    -- Strata Options -- Maybe keep it the same in all language ?
-    ["TOOLTIP"] = "Подсказка",
-    ["DIALOG"] = "Диалог",
-    ["HIGH"] = "Высокий",
-    ["MEDIUM"] = "Средний",
-    ["LOW"] = "Низкий",
-    ["BACKGROUND"] = "Фон",
-    
     -- Role Options
     ["TANK"] = TANK,
     ["HEALER"] = HEALER,
