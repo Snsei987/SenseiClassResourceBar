@@ -142,6 +142,83 @@ local baseLocale = {
 
     -- Other
     ["POWER_COLOR_SETTINGS"] = "Настройки цветов ресурса",
+   
+    -- Edit Mode Settings dropdown --
+
+    -- Visibility Options
+    ["ALWAYS_VISIBLE"] = "Всегда отображать",
+    ["IN_COMBAT"] = "В бою",
+    ["HAS_TARGET_SELECTED"] = "Цель выбрана",
+    ["HAS_TARGET_SELECTED_OR_IN_COMBAT"] = "Цель выбрана или в бою",
+    ["HIDDEN"] = "Скрыто",
+    
+    -- Strata Options -- Maybe keep it the same in all language ?
+    ["TOOLTIP"] = "Подсказка",
+    ["DIALOG"] = "Диалог",
+    ["HIGH"] = "Высокий",
+    ["MEDIUM"] = "Средний",
+    ["LOW"] = "Низкий",
+    ["BACKGROUND"] = "Фон",
+    
+    -- Role Options
+    ["TANK"] = TANK,
+    ["HEALER"] = HEALER,
+    ["DPS"] = "Урон",
+    
+    -- Position Options
+    ["POSITION_SELF"] = "Персонаж",
+    ["USE_HEALTH_BAR_POSITION_IF_HIDDEN"] = "Позиция панели здоровья (если скрыто)",
+    ["USE_PRIMARY_RESOURCE_BAR_POSITION_IF_HIDDEN"] = "Позиция осн. панели ресурса (если скрыто)",
+    ["USE_SECONDARY_RESOURCE_BAR_POSITION_IF_HIDDEN"] = "Позиция доп. панели ресурса (если скрыто)",
+    
+    -- Frame Names
+    ["UI_PARENT"] = "UIParent",
+    ["HEALTH_BAR"] = "Панель здоровья",
+    ["PRIMARY_RESOURCE_BAR"] = "Основной ресурс",
+    ["SECONDARY_RESOURCE_BAR"] = "Дополнительный ресурс",
+    ["PLAYER_FRAME"] = "Фрейм игрока",
+    ["TARGET_FRAME"] = "Фрейм цели",
+    ["ESSENTIAL_COOLDOWNS"] = "Важные кулдауны",
+    ["UTILITY_COOLDOWNS"] = "Вспомогат. кулдауны",
+    ["TRACKED_BUFFS"] = "Отслеживаемые баффы",
+    ["ACTION_BAR"] = "Панель команд",
+    ["ACTION_BAR_X"] = "Панель команд %d",
+    
+    -- Anchor & Relative Points -- Maybe keep it the same in all language ?
+    ["TOPLEFT"] = "Сверху слева",
+    ["TOP"] = "Сверху",
+    ["TOPRIGHT"] = "Сверху справа",
+    ["LEFT"] = "Слева",
+    ["CENTER"] = "По центру",
+    ["RIGHT"] = "Справа",
+    ["BOTTOMLEFT"] = "Снизу слева",
+    ["BOTTOM"] = "Снизу",
+    ["BOTTOMRIGHT"] = "Снизу справа",
+    
+    -- Width Modes
+    ["MANUAL"] = "Вручную",
+    ["SYNC_WITH_ESSENTIAL_COOLDOWNS"] = "Синхрон. с важными КД",
+    ["SYNC_WITH_UTILITY_COOLDOWNS"] = "Синхрон. со вспомогат. КД",
+    ["SYNC_WITH_TRACKED_BUFFS"] = "Синхрон. с баффами",
+    
+    -- Fill Directions
+    ["LEFT_TO_RIGHT"] = "Слева направо",
+    ["RIGHT_TO_LEFT"] = "Справа налево",
+    ["TOP_TO_BOTTOM"] = "Сверху вниз",
+    ["BOTTOM_TO_TOP"] = "Снизу вверх",
+    
+    -- Outline Styles -- Maybe keep it the same in all language ?
+    ["NONE"] = "Нет",
+    ["OUTLINE"] = "Контур",
+    ["THICKOUTLINE"] = "Толстый контур",
+    
+    -- Text Formats
+    ["CURRENT"] = "Текущее",
+    ["CURRENT_MAXIMUM"] = "Текущее / Максимум",
+    ["PERCENT"] = "Процент",
+    ["PERCENT_SYMBOL"] = "Процент%",
+    ["CURRENT_PERCENT"] = "Текущее - Процент",
+    ["CURRENT_PERCENT_SYMBOL"] = "Текущее - Процент%",
 }
 
 addonTable:RegisterLocale("ruRU", baseLocale)
