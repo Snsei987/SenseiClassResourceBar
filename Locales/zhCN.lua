@@ -152,14 +152,6 @@ local baseLocale = {
     ["HAS_TARGET_SELECTED_OR_IN_COMBAT"] = "目标已选择或战斗中",
     ["HIDDEN"] = "隐藏",
 
-    -- Strata Options -- Maybe keep it the same in all language ?
-    ["TOOLTIP"] = "提示层",
-    ["DIALOG"] = "对话层",
-    ["HIGH"] = "高层",
-    ["MEDIUM"] = "中层",
-    ["LOW"] = "低层",
-    ["BACKGROUND"] = "背景层",
-
     -- Role Options
     ["TANK"] = TANK,
     ["HEALER"] = HEALER,
