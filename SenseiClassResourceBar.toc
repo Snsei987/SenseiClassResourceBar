@@ -2,6 +2,7 @@
 ## Title: Sensei Class Resource Bar
 ## Title-zhCN: Sensei职业资源条
 ## Notes: Separate resource bars for all classes
+## Notes-deDE: Separate Ressourcenleisten für alle Klassen
 ## Notes-zhCN: 为所有职业提供独立的资源条
 ## Notes-ptBR: Barras de recursos separadas para todas as classes
 ## Author: Sensei
@@ -16,3 +17,4 @@
 embeds.xml
 
 SenseiClassResourceBar.xml
+
