@@ -116,7 +116,10 @@ local baseLocale = {
     -- Bar style category - Edit Mode
     ["CATEGORY_BAR_STYLE"] = "Стиль панели",
     ["USE_CLASS_COLOR"] = "Цвет класса",
+    ["BAR_TEXTURE_AND_COLOR_MODE"] = "Режим панели",
+    ["USE_CUSTOM_TEXTURE_AND_COLOR"] = "Пользовательские текстуры и цвета",
     ["USE_RESOURCE_TEXTURE_AND_COLOR"] = "Текстура и цвет ресурса",
+    ["USE_RESOURCE_TEXTURE_SPECIAL_ONLY"] = "Только особые текстуры ресурса",
     ["BAR_TEXTURE"] = "Текстура панели",
     ["BAR_BACKGROUND"] = "Фон",
     ["USE_BAR_COLOR_FOR_BACKGROUND_COLOR"] = "Цвет панели для фона",

@@ -451,7 +451,7 @@ local function BuildLemSettings(bar, defaults)
             end,
             isEnabled = function(layoutName)
                 local data = SenseiClassResourceBarDB[config.dbName][layoutName]
-                return not data.useResourceAtlas
+                return data.useResourceAtlas ~= "Resource"
             end,
         },
         {
