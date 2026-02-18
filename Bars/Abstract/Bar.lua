@@ -30,27 +30,27 @@ function BarMixin:Init(config, parent, frameLevel)
     self.defaults = defaults
 
     -- BACKGROUND
-    self.Background = CreateFrame("Frame", nil, Frame)
+    self.BackgroundFrame = CreateFrame("Frame", nil, Frame)
+    self.BackgroundFrame:SetAllPoints()
+    self.BackgroundFrame:SetClipsChildren(true)
+    self.Background = self.BackgroundFrame:CreateTexture(nil, "BACKGROUND")
     self.Background:SetAllPoints()
-    self.Background:SetClipsChildren(true)
-    self.BackgroundTex = self.Background:CreateTexture(nil, "BACKGROUND")
-    self.BackgroundTex:SetAllPoints()
-    self.BackgroundTex:SetColorTexture(0, 0, 0, 0.5)
+    self.Background:SetColorTexture(0, 0, 0, 0.5)
 
     -- STATUS BAR
-    self.StatusBar = CreateFrame("StatusBar", nil, self.Background)
+    self.StatusBar = CreateFrame("StatusBar", nil, self.BackgroundFrame)
     self.StatusBar:SetAllPoints()
     self.StatusBar:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, "SCRB FG Fade Left"))
-    self.StatusBar:SetFrameLevel(self.Background:GetFrameLevel() + 1)
+    self.StatusBar:SetFrameLevel(self.BackgroundFrame:GetFrameLevel() + 1)
     self.StatusBar:SetClipsChildren(true)
 
     -- MASK
-    self.Mask = self.StatusBar:CreateMaskTexture()
+    self.Mask = self.BackgroundFrame:CreateMaskTexture()
     self.Mask:SetAllPoints()
     self.Mask:SetTexture([[Interface\AddOns\SenseiClassResourceBar\Textures\Specials\white.png]])
 
     self.StatusBar:GetStatusBarTexture():AddMaskTexture(self.Mask)
-    self.BackgroundTex:AddMaskTexture(self.Mask)
+    self.Background:AddMaskTexture(self.Mask)
 
     -- BORDER
     self.BorderFrame = CreateFrame("Frame", nil, Frame)
@@ -752,19 +752,19 @@ function BarMixin:ApplyMaskAndBorderSettings(layoutName, data)
 
     if self.Mask then
         self.StatusBar:GetStatusBarTexture():RemoveMaskTexture(self.Mask)
-        self.BackgroundTex:RemoveMaskTexture(self.Mask)
+        self.Background:RemoveMaskTexture(self.Mask)
         self.Mask:ClearAllPoints()
     else
         self.Mask = self.StatusBar:CreateMaskTexture()
     end
 
     self.Mask:SetTexture(style.mask or [[Interface\AddOns\SenseiClassResourceBar\Textures\Specials\white.png]])
-    self.Mask:SetPoint("CENTER", self.StatusBar, "CENTER")
+    self.Mask:SetPoint("CENTER", self.BackgroundFrame, "CENTER")
     self.Mask:SetSize(verticalOrientation and height or width, verticalOrientation and width or height)
     self.Mask:SetRotation(verticalOrientation and math.rad(90) or 0)
 
     self.StatusBar:GetStatusBarTexture():AddMaskTexture(self.Mask)
-    self.BackgroundTex:AddMaskTexture(self.Mask)
+    self.Background:AddMaskTexture(self.Mask)
 
     if style.type == "fixed" then
         self._bordersInfo = self._bordersInfo or {
@@ -893,10 +893,10 @@ function BarMixin:ApplyBackgroundSettings(layoutName, data)
         local resultR = (bgConfig.r or 1) * whitenessFactor + bgColor.r * (1 - whitenessFactor)
         local resultG = (bgConfig.g or 1) * whitenessFactor + bgColor.g * (1 - whitenessFactor)
         local resultB = (bgConfig.b or 1) * whitenessFactor + bgColor.b * (1 - whitenessFactor)
-        self.BackgroundTex:SetColorTexture(resultR, resultG, resultB, (bgConfig.a or 1) * (bgColor.a or 1))
+        self.Background:SetColorTexture(resultR, resultG, resultB, (bgConfig.a or 1) * (bgColor.a or 1))
     elseif bgConfig.type == "texture" then
-        self.BackgroundTex:SetTexture(bgConfig.value)
-        self.BackgroundTex:SetVertexColor(bgColor.r or 1, bgColor.g or 1, bgColor.b or 1, bgColor.a or 1)
+        self.Background:SetTexture(bgConfig.value)
+        self.Background:SetVertexColor(bgColor.r or 1, bgColor.g or 1, bgColor.b or 1, bgColor.a or 1)
     end
 end
 
@@ -1024,7 +1024,7 @@ function BarMixin:CreateFragmentedPowerBars(layoutName, data)
     for i = 1, maxPower or 0 do
         if not self.FragmentedPowerBars[i] then
             -- Create a small status bar for each resource (behind main bar, in front of background)
-            local bar = CreateFrame("StatusBar", nil, self.Frame)
+            local bar = CreateFrame("StatusBar", nil, self.BackgroundFrame)
 
             local fgStyleName = data.foregroundStyle or defaults.foregroundStyle
             local fgTexture = LSM:Fetch(LSM.MediaType.STATUSBAR, fgStyleName)
