@@ -30,15 +30,18 @@ function BarMixin:Init(config, parent, frameLevel)
     self.defaults = defaults
 
     -- BACKGROUND
-    self.Background = Frame:CreateTexture(nil, "BACKGROUND")
+    self.Background = CreateFrame("Frame", nil, Frame)
     self.Background:SetAllPoints()
-    self.Background:SetColorTexture(0, 0, 0, 0.5)
+    self.Background:SetClipsChildren(true)
+    self.BackgroundTex = self.Background:CreateTexture(nil, "BACKGROUND")
+    self.BackgroundTex:SetAllPoints()
+    self.BackgroundTex:SetColorTexture(0, 0, 0, 0.5)
 
     -- STATUS BAR
-    self.StatusBar = CreateFrame("StatusBar", nil, Frame)
+    self.StatusBar = CreateFrame("StatusBar", nil, self.Background)
     self.StatusBar:SetAllPoints()
     self.StatusBar:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, "SCRB FG Fade Left"))
-    self.StatusBar:SetFrameLevel(Frame:GetFrameLevel() + 1)
+    self.StatusBar:SetFrameLevel(self.Background:GetFrameLevel() + 1)
     self.StatusBar:SetClipsChildren(true)
 
     -- MASK
@@ -47,12 +50,13 @@ function BarMixin:Init(config, parent, frameLevel)
     self.Mask:SetTexture([[Interface\AddOns\SenseiClassResourceBar\Textures\Specials\white.png]])
 
     self.StatusBar:GetStatusBarTexture():AddMaskTexture(self.Mask)
-    self.Background:AddMaskTexture(self.Mask)
+    self.BackgroundTex:AddMaskTexture(self.Mask)
 
     -- BORDER
     self.BorderFrame = CreateFrame("Frame", nil, Frame)
     self.BorderFrame:SetAllPoints()
     self.BorderFrame:SetFrameLevel(self.StatusBar:GetFrameLevel())
+    self.BorderFrame:SetClipsChildren(true)
     self.Border = self.BorderFrame:CreateTexture(nil, "OVERLAY")
     self.Border:SetAllPoints()
     self.Border:SetBlendMode("BLEND")
@@ -62,7 +66,7 @@ function BarMixin:Init(config, parent, frameLevel)
     -- TEXT FRAME
     self.TextFrame = CreateFrame("Frame", nil, Frame)
     self.TextFrame:SetAllPoints()
-    self.TextFrame:SetFrameLevel(self.StatusBar:GetFrameLevel())
+    self.TextFrame:SetFrameLevel(self.BorderFrame:GetFrameLevel())
 
     self.TextValue = self.TextFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     self.TextValue:SetPoint("CENTER", self.TextFrame, "CENTER", 0, 0)
@@ -748,7 +752,7 @@ function BarMixin:ApplyMaskAndBorderSettings(layoutName, data)
 
     if self.Mask then
         self.StatusBar:GetStatusBarTexture():RemoveMaskTexture(self.Mask)
-        self.Background:RemoveMaskTexture(self.Mask)
+        self.BackgroundTex:RemoveMaskTexture(self.Mask)
         self.Mask:ClearAllPoints()
     else
         self.Mask = self.StatusBar:CreateMaskTexture()
@@ -760,7 +764,7 @@ function BarMixin:ApplyMaskAndBorderSettings(layoutName, data)
     self.Mask:SetRotation(verticalOrientation and math.rad(90) or 0)
 
     self.StatusBar:GetStatusBarTexture():AddMaskTexture(self.Mask)
-    self.Background:AddMaskTexture(self.Mask)
+    self.BackgroundTex:AddMaskTexture(self.Mask)
 
     if style.type == "fixed" then
         self._bordersInfo = self._bordersInfo or {
@@ -775,7 +779,6 @@ function BarMixin:ApplyMaskAndBorderSettings(layoutName, data)
             for edge, _ in pairs(self._bordersInfo) do
                 local t = self.BorderFrame:CreateTexture(nil, "OVERLAY")
                 t:SetColorTexture(0, 0, 0, 1)
-                t:SetDrawLayer("OVERLAY")
                 self.FixedThicknessBorders[edge] = t
             end
         end
@@ -890,10 +893,10 @@ function BarMixin:ApplyBackgroundSettings(layoutName, data)
         local resultR = (bgConfig.r or 1) * whitenessFactor + bgColor.r * (1 - whitenessFactor)
         local resultG = (bgConfig.g or 1) * whitenessFactor + bgColor.g * (1 - whitenessFactor)
         local resultB = (bgConfig.b or 1) * whitenessFactor + bgColor.b * (1 - whitenessFactor)
-        self.Background:SetColorTexture(resultR, resultG, resultB, (bgConfig.a or 1) * (bgColor.a or 1))
+        self.BackgroundTex:SetColorTexture(resultR, resultG, resultB, (bgConfig.a or 1) * (bgColor.a or 1))
     elseif bgConfig.type == "texture" then
-        self.Background:SetTexture(bgConfig.value)
-        self.Background:SetVertexColor(bgColor.r or 1, bgColor.g or 1, bgColor.b or 1, bgColor.a or 1)
+        self.BackgroundTex:SetTexture(bgConfig.value)
+        self.BackgroundTex:SetVertexColor(bgColor.r or 1, bgColor.g or 1, bgColor.b or 1, bgColor.a or 1)
     end
 end
 
