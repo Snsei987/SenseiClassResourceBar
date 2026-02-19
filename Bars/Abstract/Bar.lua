@@ -1025,6 +1025,7 @@ function BarMixin:CreateFragmentedPowerBars(layoutName, data)
         if not self.FragmentedPowerBars[i] then
             -- Create a small status bar for each resource (behind main bar, in front of background)
             local bar = CreateFrame("StatusBar", nil, self.BackgroundFrame)
+            bar:SetClipsChildren(true)
 
             local fgStyleName = data.foregroundStyle or defaults.foregroundStyle
             local fgTexture = LSM:Fetch(LSM.MediaType.STATUSBAR, fgStyleName)
@@ -1038,7 +1039,7 @@ function BarMixin:CreateFragmentedPowerBars(layoutName, data)
             self.FragmentedPowerBars[i] = bar
 
             -- Create text for reload time display
-            local text = bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            local text = self.TextFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
             text:SetPoint("CENTER", bar, "CENTER", 0, 0)
             text:SetJustifyH("CENTER")
             text:SetFormattedText("")
