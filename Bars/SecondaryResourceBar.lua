@@ -285,7 +285,7 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
         showTicks = true,
         tickColor = {r = 0, g = 0, b = 0, a = 1},
         tickThickness = 1,
-        useResourceAtlas = false,
+        useResourceAtlas = "Custom",
     },
     lemSettings = function(bar, defaults)
         local config = bar:GetConfig()

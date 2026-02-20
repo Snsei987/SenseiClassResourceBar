@@ -86,7 +86,7 @@ addonTable.RegisteredBar.TertiaryResourceBar = {
         point = "CENTER",
         x = 0,
         y = -80,
-        useResourceAtlas = false,
+        useResourceAtlas = "Custom",
     },
     allowEditPredicate = function()
         local spec = C_SpecializationInfo.GetSpecialization()
