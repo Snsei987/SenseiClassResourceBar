@@ -90,6 +90,9 @@ function HealthBarMixin:OnLoad()
     self.Frame:RegisterEvent("PET_BATTLE_OPENING_START")
     self.Frame:RegisterEvent("PET_BATTLE_CLOSE")
 
+	-- Create the global click-casting registry if it doesn't exist
+    if not ClickCastFrames then ClickCastFrames = {} end
+
     self:RegisterSecureVisibility()
     self:ApplyMouseSettings()
     self._mouseUpdatePending = false
@@ -214,6 +217,11 @@ function HealthBarMixin:ApplyMouseSettings()
         self.Frame:RegisterForClicks()
     end
     self._mouseUpdatePending = false
+
+    -- register for click-casting if enabled
+    if data and data.supportClickCasting then
+        ClickCastFrames[self.Frame] = true
+    end
 end
 
 function HealthBarMixin:RegisterSecureVisibility()
@@ -466,6 +474,7 @@ addonTable.RegisteredBar.HealthBar = {
         hideBlizzardPlayerContainerUi = false,
         useClassColor = true,
         enableHealthBarMouseInteraction = false,
+        supportClickCasting = false,
         absorbBarEnabled = false,
         absorbBarPosition = "Attach To Health",
         absorbBarStyle = "SCRB FG Absorb",
@@ -542,6 +551,27 @@ addonTable.RegisteredBar.HealthBar = {
                     bar:ApplyMouseSettings()
                 end,
                 tooltip = L["ENABLE_HP_BAR_MOUSE_INTERACTION_TOOLTIP"],
+            },
+            {
+                parentId = L["CATEGORY_BAR_VISIBILITY"],
+                order = 107,
+                name = L["SUPPORT_CLICK_CASTING"],
+                kind = LEM.SettingType.Checkbox,
+                default = defaults.supportClickCasting,
+                get = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    if data and data.supportClickCasting ~= nil then
+                        return data.supportClickCasting
+                    else
+                        return defaults.supportClickCasting
+                    end
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].supportClickCasting = value
+                    bar:ApplyMouseSettings()
+                end,
+                tooltip = L["SUPPORT_CLICK_CASTING_TOOLTIP"],
             },
             {
                 parentId = L["CATEGORY_BAR_STYLE"],

@@ -87,6 +87,8 @@ local baseLocale = {
     ["HIDE_BLIZZARD_UI_SECONDARY_POWER_BAR_TOOLTIP"] = "Hides the default Blizzard secondary resource UI (e.g. Rune Frame for Death Knights)",
     ["ENABLE_HP_BAR_MOUSE_INTERACTION"] = "Clickable Health Bar",
     ["ENABLE_HP_BAR_MOUSE_INTERACTION_TOOLTIP"] = "Enable default Player Frame click behavior on the Health Bar.",
+    ["SUPPORT_CLICK_CASTING"] = "Support click-casting addons",
+    ["SUPPORT_CLICK_CASTING_TOOLTIP"] = "Register this frame with third-party click-casting addons.",
 
     -- Position & Size category - Edit Mode
     ["CATEGORY_POSITION_AND_SIZE"] = "Position & Size",
