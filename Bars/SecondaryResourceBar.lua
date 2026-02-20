@@ -391,7 +391,7 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
             {
                 parentId = L["CATEGORY_BAR_STYLE"],
                 order = 401,
-                name = L["USE_RESOURCE_TEXTURE_AND_COLOR"],
+                name = L["BAR_TEXTURE_AND_COLOR_MODE"],
                 kind = LEM.SettingType.Dropdown,
                 default = defaults.useResourceAtlas,
                 values = addonTable.availableResourceTextureOptions,

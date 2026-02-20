@@ -908,24 +908,15 @@ function BarMixin:ApplyForegroundSettings(layoutName, data)
 
     local resource = self:GetResource()
     local color = self:GetBarColor(resource)
-    local useResourceStyle = false
 
-    if data.useResourceAtlas == "Resource" then
-        useResourceStyle = color.atlasElementName or color.atlas
-    elseif data.useResourceAtlas == "SpecialOnly" then
-        useResourceStyle = color.hasClassResourceVariant and (color.atlasElementName or color.atlas)
-    end
-
-    if useResourceStyle then
-        if color.atlasElementName then
-            if color.hasClassResourceVariant then
-                fgTexture = "UI-HUD-UnitFrame-Player-PortraitOn-ClassResource-Bar-"..color.atlasElementName
-            else
-                fgTexture = "UI-HUD-UnitFrame-Player-PortraitOn-Bar-"..color.atlasElementName
-            end
-        elseif color.atlas then
-            fgTexture = color.atlas
+    if data.useResourceAtlas == "Resource" and color.atlasElementName then
+        if color.hasClassResourceVariant then
+            fgTexture = "UI-HUD-UnitFrame-Player-PortraitOn-ClassResource-Bar-"..color.atlasElementName
+        else
+            fgTexture = "UI-HUD-UnitFrame-Player-PortraitOn-Bar-"..color.atlasElementName
         end
+    elseif (data.useResourceAtlas == "Resource" or data.useResourceAtlas == "SpecialOnly") and color.atlas then
+        fgTexture = color.atlas
     end
 
     if fgTexture then

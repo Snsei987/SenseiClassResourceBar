@@ -116,7 +116,10 @@ local baseLocale = {
     -- Bar style category - Edit Mode
     ["CATEGORY_BAR_STYLE"] = "条形风格",
     ["USE_CLASS_COLOR"] = "使用职业颜色",
+    ["BAR_TEXTURE_AND_COLOR_MODE"] = "条形模式",
+    ["USE_CUSTOM_TEXTURE_AND_COLOR"] = "使用自定义纹理和颜色",
     ["USE_RESOURCE_TEXTURE_AND_COLOR"] = "使用资源纹理和颜色",
+    ["USE_RESOURCE_TEXTURE_SPECIAL_ONLY"] = "仅使用特殊资源纹理",
     ["BAR_TEXTURE"] = "条形纹理",
     ["BAR_BACKGROUND"] = "背景",
     ["USE_BAR_COLOR_FOR_BACKGROUND_COLOR"] = "使用条形颜色作为背景颜色",

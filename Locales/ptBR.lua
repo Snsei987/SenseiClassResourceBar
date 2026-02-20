@@ -116,7 +116,10 @@ local baseLocale = {
     -- Bar style category - Edit Mode
     ["CATEGORY_BAR_STYLE"] = "Estilo da Barra",
     ["USE_CLASS_COLOR"] = "Usar Cor da Classe",
+    ["BAR_TEXTURE_AND_COLOR_MODE"] = "Modo da Barra",
+    ["USE_CUSTOM_TEXTURE_AND_COLOR"] = "Usar Texturas e Cores Personalizadas",
     ["USE_RESOURCE_TEXTURE_AND_COLOR"] = "Usar Textura e Cor do Recurso",
+    ["USE_RESOURCE_TEXTURE_SPECIAL_ONLY"] = "Usar Apenas Texturas Especiais de Recursos",
     ["BAR_TEXTURE"] = "Textura da Barra",
     ["BAR_BACKGROUND"] = "Fundo",
     ["USE_BAR_COLOR_FOR_BACKGROUND_COLOR"] = "Usar Cor da Barra para a Cor de Fundo",
