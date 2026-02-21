@@ -336,6 +336,12 @@ addonTable.availableHealAbsorbBarPositions = {
     { text = L["BAR_POSITION_ATTACH_HEALTH"], value = "Attach To Health" },
 }
 
+addonTable.availableResourceTextureOptions = {
+    { text = L["USE_CUSTOM_TEXTURE_AND_COLOR"], value = "Custom" },
+    { text = L["USE_RESOURCE_TEXTURE_AND_COLOR"], value = "Resource" },
+    { text = L["USE_RESOURCE_TEXTURE_SPECIAL_ONLY"], value = "SpecialOnly" },
+}
+
 -- Power types that should show discrete ticks
 addonTable.tickedPowerTypes = {
     [Enum.PowerType.ArcaneCharges] = true,

@@ -113,7 +113,10 @@ local baseLocale = {
     -- Bar style category - Edit Mode
     ["CATEGORY_BAR_STYLE"] = "바 스타일",
     ["USE_CLASS_COLOR"] = "직업 색상 사용",
+    ["BAR_TEXTURE_AND_COLOR_MODE"] = "바 모드",
+    ["USE_CUSTOM_TEXTURE_AND_COLOR"] = "사용자 정의 텍스처 및 색상 사용",
     ["USE_RESOURCE_TEXTURE_AND_COLOR"] = "자원 텍스처 및 색상 사용",
+    ["USE_RESOURCE_TEXTURE_SPECIAL_ONLY"] = "특수 자원 텍스처만 사용",
     ["BAR_TEXTURE"] = "바 텍스처",
     ["BAR_BACKGROUND"] = "배경",
     ["USE_BAR_COLOR_FOR_BACKGROUND_COLOR"] = "바 색상을 배경 색상으로 사용",
