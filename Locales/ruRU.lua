@@ -87,6 +87,8 @@ local baseLocale = {
     ["HIDE_BLIZZARD_UI_SECONDARY_POWER_BAR_TOOLTIP"] = "Скрывает стандартный интерфейс вторичных ресурсов (напр. руны ДК)",
     ["ENABLE_HP_BAR_MOUSE_INTERACTION"] = "Кликабельная панель здоровья",
     ["ENABLE_HP_BAR_MOUSE_INTERACTION_TOOLTIP"] = "Включает стандартное взаимодействие с рамкой персонажа при нажатии на панель здоровья.",
+    ["USE_BLIZZARD_BAR"] = "Использовать панель Blizzard",
+    ["USE_BLIZZARD_BAR_TOOLTIP"] = "Заменяет пользовательскую панель на стандартную панель вторичного ресурса Blizzard, сохраняя все анимации и стили. Панель будет расположена в соответствии с вашими настройками.",
 
     -- Position & Size category - Edit Mode
     ["CATEGORY_POSITION_AND_SIZE"] = "Положение и размер",

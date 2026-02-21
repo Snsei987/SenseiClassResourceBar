@@ -19,6 +19,22 @@ function SecondaryResourceBarMixin:OnEvent(event, ...)
     -- Modules for the special cases requiring more work
     addonTable.TipOfTheSpear:OnEvent(self, event, ...)
     addonTable.Whirlwind:OnEvent(self, event, ...)
+
+    -- Update Blizzard bar mode on relevant events
+    if event == "PLAYER_ENTERING_WORLD"
+        or event == "UPDATE_SHAPESHIFT_FORM"
+        or event == "PLAYER_SPECIALIZATION_CHANGED"
+        or event == "PLAYER_REGEN_ENABLED"
+        or event == "PLAYER_REGEN_DISABLED" then
+        -- Use a slight delay for combat events to ensure Blizzard's frame setup completes first
+        if event == "PLAYER_REGEN_DISABLED" then
+            C_Timer.After(0, function()
+                self:UseBlizzardBarMode(nil, true)
+            end)
+        else
+            self:UseBlizzardBarMode()
+        end
+    end
 end
 
 function SecondaryResourceBarMixin:GetResource()
@@ -225,9 +241,32 @@ function SecondaryResourceBarMixin:ApplyVisibilitySettings(layoutName, inCombat)
     local data = self:GetData(layoutName)
     if not data then return end
 
+    -- If using Blizzard bar, delegate to UseBlizzardBarMode which handles
+    -- both compatible and incompatible specs (falling back to custom bar)
+    if data.useBlizzardBar then
+        self:UseBlizzardBarMode(layoutName, inCombat)
+        return
+    end
+
     self:HideBlizzardSecondaryResource(layoutName, data)
 
     addonTable.PowerBarMixin.ApplyVisibilitySettings(self, layoutName, inCombat)
+end
+
+function SecondaryResourceBarMixin:OnShow()
+    local data = self:GetData()
+
+    if data and data.positionMode ~= nil and data.positionMode ~= "Self" then
+        self:ApplyLayout()
+    end
+end
+
+function SecondaryResourceBarMixin:OnHide()
+    local data = self:GetData()
+
+    if data and data.positionMode ~= nil and data.positionMode ~= "Self" then
+        self:ApplyLayout()
+    end
 end
 
 function SecondaryResourceBarMixin:HideBlizzardSecondaryResource(layoutName, data)
@@ -266,6 +305,249 @@ function SecondaryResourceBarMixin:HideBlizzardSecondaryResource(layoutName, dat
     end
 end
 
+-- Map of Blizzard frames and the resource types they display
+local blizzardResourceFrames = {
+    ["DEATHKNIGHT"] = { frame = RuneFrame, resource = Enum.PowerType.Runes },
+    ["DRUID"] = { frame = DruidComboPointBarFrame, resource = Enum.PowerType.ComboPoints },
+    ["EVOKER"] = { frame = EssencePlayerFrame, resource = Enum.PowerType.Essence },
+    ["MAGE"] = { frame = MageArcaneChargesFrame, resource = Enum.PowerType.ArcaneCharges },
+    ["MONK"] = { frame = MonkHarmonyBarFrame, resource = Enum.PowerType.Chi },
+    ["PALADIN"] = { frame = PaladinPowerBarFrame, resource = Enum.PowerType.HolyPower },
+    ["ROGUE"] = { frame = RogueComboPointBarFrame, resource = Enum.PowerType.ComboPoints },
+    ["WARLOCK"] = { frame = WarlockPowerFrame, resource = Enum.PowerType.SoulShards },
+}
+
+-- Returns the Blizzard frame for the class (regardless of spec compatibility)
+function SecondaryResourceBarMixin:GetBlizzardFrameForClass()
+    local playerClass = select(2, UnitClass("player"))
+    local frameData = blizzardResourceFrames[playerClass]
+    return frameData and frameData.frame
+end
+
+-- Returns the Blizzard frame only if it matches the current spec's resource
+function SecondaryResourceBarMixin:GetBlizzardResourceFrame()
+    local playerClass = select(2, UnitClass("player"))
+    local frameData = blizzardResourceFrames[playerClass]
+    if not frameData then
+        return nil
+    end
+
+    -- Check if the current spec's resource matches what the Blizzard bar displays
+    -- If not, return nil to fall back to the custom bar
+    local currentResource = self:GetResource()
+    if currentResource ~= frameData.resource then
+        return nil
+    end
+
+    return frameData.frame
+end
+
+-- Returns the screen-space offset between the frame's center and the
+-- average center of its visible children, plus the ratio of visual content
+-- size to frame size. For frames like RogueComboPointBarFrame where the content
+-- extends beyond the frame bounds (e.g. 7 combo points in a 5-CP-wide frame),
+-- this lets us position and size the placeholder accurately.
+-- Returns: offsetX, offsetY, widthRatio, heightRatio
+function SecondaryResourceBarMixin:GetBlizzardFrameContentOffset(blizzardFrame)
+    local frameCX, frameCY = blizzardFrame:GetCenter()
+    if not frameCX or not frameCY then return 0, 0, 1, 1 end
+
+    local children = {blizzardFrame:GetChildren()}
+    if #children == 0 then return 0, 0, 1, 1 end
+
+    local sumCX, sumCY, count = 0, 0, 0
+    local minLeft, maxRight = math.huge, -math.huge
+    local minBottom, maxTop = math.huge, -math.huge
+
+    for _, child in ipairs(children) do
+        if child:IsShown() then
+            local cx, cy = child:GetCenter()
+            local left, right = child:GetLeft(), child:GetRight()
+            local bottom, top = child:GetBottom(), child:GetTop()
+            if cx and cy and left and right and bottom and top then
+                sumCX = sumCX + cx
+                sumCY = sumCY + cy
+                count = count + 1
+                minLeft = math.min(minLeft, left)
+                maxRight = math.max(maxRight, right)
+                minBottom = math.min(minBottom, bottom)
+                maxTop = math.max(maxTop, top)
+            end
+        end
+    end
+
+    if count == 0 then return 0, 0, 1, 1 end
+
+    local offsetX = (sumCX / count) - frameCX
+    local offsetY = (sumCY / count) - frameCY
+
+    -- Only return offset if significant (avoids floating point noise on centered frames)
+    if math.abs(offsetX) < 0.5 then offsetX = 0 end
+    if math.abs(offsetY) < 0.5 then offsetY = 0 end
+
+    -- Compute ratio of visual content size to frame size
+    local frameLeft, frameRight = blizzardFrame:GetLeft(), blizzardFrame:GetRight()
+    local frameBottom, frameTop = blizzardFrame:GetBottom(), blizzardFrame:GetTop()
+    local widthRatio, heightRatio = 1, 1
+
+    if frameLeft and frameRight and frameBottom and frameTop then
+        local frameScreenW = frameRight - frameLeft
+        local frameScreenH = frameTop - frameBottom
+        if frameScreenW > 0 then
+            local visualScreenW = maxRight - minLeft
+            local r = visualScreenW / frameScreenW
+            if math.abs(r - 1) > 0.05 then widthRatio = r end
+        end
+        if frameScreenH > 0 then
+            local visualScreenH = maxTop - minBottom
+            local r = visualScreenH / frameScreenH
+            if math.abs(r - 1) > 0.05 then heightRatio = r end
+        end
+    end
+
+    return offsetX, offsetY, widthRatio, heightRatio
+end
+
+-- Determine if bar should be visible based on visibility settings.
+-- Uses the parent's ApplyVisibilitySettings to decide, then reads the result
+-- from self.Frame:IsShown(). This avoids duplicating the parent's visibility logic.
+function SecondaryResourceBarMixin:ShouldBeVisible(layoutName, inCombat)
+    if LEM:IsInEditMode() then
+        return true
+    end
+
+    addonTable.PowerBarMixin.ApplyVisibilitySettings(self, layoutName, inCombat)
+    local visible = self.Frame:IsShown()
+    self.Frame:Hide()
+    return visible
+end
+
+function SecondaryResourceBarMixin:UseBlizzardBarMode(layoutName, inCombat)
+    local data = self:GetData(layoutName)
+    if not data then return end
+
+    local blizzardFrame = self:GetBlizzardResourceFrame()
+    if not blizzardFrame then
+        -- No compatible Blizzard bar for current spec, fall back to custom bar
+        -- Hide the class's Blizzard bar if it exists (e.g., Chi bar for Brewmaster)
+        local classBlizzardFrame = self:GetBlizzardFrameForClass()
+        if classBlizzardFrame and data.useBlizzardBar and not InCombatLockdown() then
+            classBlizzardFrame:Hide()
+        end
+        -- Use the custom bar as if useBlizzardBar wasn't enabled
+        self.Frame:Show()
+        self.Frame:SetAlpha(1.0)
+        addonTable.PowerBarMixin.ApplyLayout(self, layoutName)
+        addonTable.PowerBarMixin.ApplyVisibilitySettings(self, layoutName, inCombat)
+        self:UpdateDisplay(true)
+        return
+    end
+
+    if data.useBlizzardBar then
+        local shouldBeVisible = self:ShouldBeVisible(layoutName, inCombat)
+
+        -- Show the Blizzard frame and use SetAlpha for visibility control
+        -- to avoid triggering Blizzard's repositioning logic on Show()/Hide()
+        self._repositioningBlizzardFrame = true
+        blizzardFrame:Show()
+        self._repositioningBlizzardFrame = false
+        blizzardFrame:SetAlpha(shouldBeVisible and 1 or 0)
+
+        -- Get the saved position
+        local point, relativeFrame, relativePoint, x, y = self:GetPoint(layoutName, true)
+
+        -- Apply scale
+        local scale = data.scale or self.defaults.scale or 1
+        blizzardFrame:SetScale(scale)
+
+        -- Compute content offset and size ratio for frames where visual content
+        -- isn't centered or extends beyond the frame (e.g. Rogue combo points with talents)
+        local contentOffsetX, contentOffsetY, widthRatio, heightRatio = self:GetBlizzardFrameContentOffset(blizzardFrame)
+
+        -- In Edit Mode, show our custom bar as a placeholder for positioning
+        if LEM:IsInEditMode() then
+            self.Frame:Show()
+            self.Frame:SetAlpha(0.5)
+
+            -- Match placeholder size to Blizzard bar's visual content size
+            local blizzardWidth, blizzardHeight = blizzardFrame:GetSize()
+            if blizzardWidth and blizzardHeight and blizzardWidth > 0 and blizzardHeight > 0 then
+                self.Frame:SetSize(blizzardWidth * scale * widthRatio, blizzardHeight * scale * heightRatio)
+            end
+
+            -- Position the placeholder at the saved location
+            self.Frame:ClearAllPoints()
+            self.Frame:SetPoint(point, relativeFrame, relativePoint, x, y)
+
+            -- Anchor Blizzard bar to placeholder, adjusted for content center offset
+            self._repositioningBlizzardFrame = true
+            blizzardFrame:ClearAllPoints()
+            blizzardFrame:SetPoint("CENTER", self.Frame, "CENTER", -contentOffsetX, -contentOffsetY)
+            self._repositioningBlizzardFrame = false
+        else
+            self.Frame:Hide()
+
+            -- Position Blizzard bar at the saved location, adjusted for content center offset
+            self._repositioningBlizzardFrame = true
+            blizzardFrame:ClearAllPoints()
+            blizzardFrame:SetPoint(point, relativeFrame, relativePoint, x - contentOffsetX, y - contentOffsetY)
+            self._repositioningBlizzardFrame = false
+        end
+
+        -- Hook OnShow and SetPoint to re-apply positioning when Blizzard
+        -- re-shows or repositions the frame (e.g., after Toggle User Interface,
+        -- or when buffs like Abomination add/remove UI elements that trigger
+        -- Blizzard's layout system to reposition the frame). Only hook once.
+        if not self._blizzardFrameHooked then
+            blizzardFrame:HookScript("OnShow", function()
+                if self._repositioningBlizzardFrame then return end
+                C_Timer.After(0, function()
+                    self:UseBlizzardBarMode()
+                end)
+            end)
+            hooksecurefunc(blizzardFrame, "SetPoint", function()
+                if self._repositioningBlizzardFrame then return end
+                C_Timer.After(0, function()
+                    self:UseBlizzardBarMode()
+                end)
+            end)
+            self._blizzardFrameHooked = true
+        end
+
+        if blizzardFrame.SetIgnoreParentScale then
+            blizzardFrame:SetIgnoreParentScale(false)
+        end
+    else
+        -- Restore Blizzard bar to default behavior
+        self._repositioningBlizzardFrame = true
+        blizzardFrame:ClearAllPoints()
+        blizzardFrame:SetPoint("TOP", PlayerFrame, "BOTTOM", 0, 16)
+        self._repositioningBlizzardFrame = false
+        blizzardFrame:SetScale(1)
+
+        self:HideBlizzardSecondaryResource(layoutName)
+
+        -- Show our custom bar
+        self.Frame:Show()
+        self.Frame:SetAlpha(1.0)
+        self:ApplyVisibilitySettings(layoutName)
+        self:ApplyLayout(layoutName)
+    end
+end
+
+function SecondaryResourceBarMixin:ApplyLayout(layoutName, force)
+    local data = self:GetData(layoutName)
+
+    -- If using Blizzard bar, delegate to UseBlizzardBarMode which handles
+    -- both compatible and incompatible specs (falling back to custom bar)
+    if data and data.useBlizzardBar then
+        self:UseBlizzardBarMode(layoutName)
+        return
+    end
+
+    addonTable.PowerBarMixin.ApplyLayout(self, layoutName, force)
+end
+
 addonTable.SecondaryResourceBarMixin = SecondaryResourceBarMixin
 
 addonTable.RegisteredBar = addonTable.RegisteredBar or {}
@@ -280,6 +562,7 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
         x = 0,
         y = -40,
         hideBlizzardSecondaryResourceUi = false,
+        useBlizzardBar = false,
         hideManaOnRole = {},
         showManaAsPercent = false,
         showTicks = true,
@@ -329,6 +612,31 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                     bar:HideBlizzardSecondaryResource(layoutName)
                 end,
                 tooltip = L["HIDE_BLIZZARD_UI_SECONDARY_POWER_BAR_TOOLTIP"],
+                isEnabled = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    return not (data and data.useBlizzardBar)
+                end,
+            },
+            {
+                parentId = L["CATEGORY_BAR_VISIBILITY"],
+                order = 106,
+                name = L["USE_BLIZZARD_BAR"],
+                kind = LEM.SettingType.Checkbox,
+                default = defaults.useBlizzardBar,
+                get = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    if data and data.useBlizzardBar ~= nil then
+                        return data.useBlizzardBar
+                    else
+                        return defaults.useBlizzardBar
+                    end
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].useBlizzardBar = value
+                    bar:UseBlizzardBarMode(layoutName)
+                end,
+                tooltip = L["USE_BLIZZARD_BAR_TOOLTIP"],
             },
             {
                 parentId = L["CATEGORY_BAR_SETTINGS"],
