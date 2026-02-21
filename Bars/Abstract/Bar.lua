@@ -30,19 +30,22 @@ function BarMixin:Init(config, parent, frameLevel)
     self.defaults = defaults
 
     -- BACKGROUND
-    self.Background = Frame:CreateTexture(nil, "BACKGROUND")
+    self.BackgroundFrame = CreateFrame("Frame", nil, Frame)
+    self.BackgroundFrame:SetAllPoints()
+    self.BackgroundFrame:SetClipsChildren(true)
+    self.Background = self.BackgroundFrame:CreateTexture(nil, "BACKGROUND")
     self.Background:SetAllPoints()
     self.Background:SetColorTexture(0, 0, 0, 0.5)
 
     -- STATUS BAR
-    self.StatusBar = CreateFrame("StatusBar", nil, Frame)
+    self.StatusBar = CreateFrame("StatusBar", nil, self.BackgroundFrame)
     self.StatusBar:SetAllPoints()
     self.StatusBar:SetStatusBarTexture(LSM:Fetch(LSM.MediaType.STATUSBAR, "SCRB FG Fade Left"))
-    self.StatusBar:SetFrameLevel(Frame:GetFrameLevel() + 1)
+    self.StatusBar:SetFrameLevel(self.BackgroundFrame:GetFrameLevel() + 1)
     self.StatusBar:SetClipsChildren(true)
 
     -- MASK
-    self.Mask = self.StatusBar:CreateMaskTexture()
+    self.Mask = self.BackgroundFrame:CreateMaskTexture()
     self.Mask:SetAllPoints()
     self.Mask:SetTexture([[Interface\AddOns\SenseiClassResourceBar\Textures\Specials\white.png]])
 
@@ -53,6 +56,7 @@ function BarMixin:Init(config, parent, frameLevel)
     self.BorderFrame = CreateFrame("Frame", nil, Frame)
     self.BorderFrame:SetAllPoints()
     self.BorderFrame:SetFrameLevel(self.StatusBar:GetFrameLevel())
+    self.BorderFrame:SetClipsChildren(true)
     self.Border = self.BorderFrame:CreateTexture(nil, "OVERLAY")
     self.Border:SetAllPoints()
     self.Border:SetBlendMode("BLEND")
@@ -62,7 +66,7 @@ function BarMixin:Init(config, parent, frameLevel)
     -- TEXT FRAME
     self.TextFrame = CreateFrame("Frame", nil, Frame)
     self.TextFrame:SetAllPoints()
-    self.TextFrame:SetFrameLevel(self.StatusBar:GetFrameLevel())
+    self.TextFrame:SetFrameLevel(self.BorderFrame:GetFrameLevel())
 
     self.TextValue = self.TextFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     self.TextValue:SetPoint("CENTER", self.TextFrame, "CENTER", 0, 0)
@@ -631,7 +635,7 @@ function BarMixin:ApplyLayout(layoutName, force)
 
     self:UpdateTicksLayout(layoutName, data)
 
-    if data.fasterUpdates then
+    if data.fasterUpdates or defaults.fasterUpdates then
         self:EnableFasterUpdates()
     else
         self:DisableFasterUpdates()
@@ -755,7 +759,7 @@ function BarMixin:ApplyMaskAndBorderSettings(layoutName, data)
     end
 
     self.Mask:SetTexture(style.mask or [[Interface\AddOns\SenseiClassResourceBar\Textures\Specials\white.png]])
-    self.Mask:SetPoint("CENTER", self.StatusBar, "CENTER")
+    self.Mask:SetPoint("CENTER", self.BackgroundFrame, "CENTER")
     self.Mask:SetSize(verticalOrientation and height or width, verticalOrientation and width or height)
     self.Mask:SetRotation(verticalOrientation and math.rad(90) or 0)
 
@@ -775,7 +779,6 @@ function BarMixin:ApplyMaskAndBorderSettings(layoutName, data)
             for edge, _ in pairs(self._bordersInfo) do
                 local t = self.BorderFrame:CreateTexture(nil, "OVERLAY")
                 t:SetColorTexture(0, 0, 0, 1)
-                t:SetDrawLayer("OVERLAY")
                 self.FixedThicknessBorders[edge] = t
             end
         end
@@ -1020,7 +1023,8 @@ function BarMixin:CreateFragmentedPowerBars(layoutName, data)
     for i = 1, maxPower or 0 do
         if not self.FragmentedPowerBars[i] then
             -- Create a small status bar for each resource (behind main bar, in front of background)
-            local bar = CreateFrame("StatusBar", nil, self.Frame)
+            local bar = CreateFrame("StatusBar", nil, self.BackgroundFrame)
+            bar:SetClipsChildren(true)
 
             local fgStyleName = data.foregroundStyle or defaults.foregroundStyle
             local fgTexture = LSM:Fetch(LSM.MediaType.STATUSBAR, fgStyleName)
@@ -1034,7 +1038,7 @@ function BarMixin:CreateFragmentedPowerBars(layoutName, data)
             self.FragmentedPowerBars[i] = bar
 
             -- Create text for reload time display
-            local text = bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+            local text = self.TextFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
             text:SetPoint("CENTER", bar, "CENTER", 0, 0)
             text:SetJustifyH("CENTER")
             text:SetFormattedText("")
