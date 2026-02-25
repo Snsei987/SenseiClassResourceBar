@@ -90,6 +90,9 @@ function HealthBarMixin:OnLoad()
     self.Frame:RegisterEvent("PET_BATTLE_OPENING_START")
     self.Frame:RegisterEvent("PET_BATTLE_CLOSE")
 
+	-- Create the global click-casting registry if it doesn't exist
+    if not ClickCastFrames then ClickCastFrames = {} end
+
     self:RegisterSecureVisibility()
     self:ApplyMouseSettings()
     self._mouseUpdatePending = false
@@ -214,6 +217,13 @@ function HealthBarMixin:ApplyMouseSettings()
         self.Frame:RegisterForClicks()
     end
     self._mouseUpdatePending = false
+
+    -- Enable click-casting or not, this is for third-party and not Blizzard one
+    if shouldEnable then
+        ClickCastFrames[self.Frame] = true
+    else
+        ClickCastFrames[self.Frame] = nil
+    end
 end
 
 function HealthBarMixin:RegisterSecureVisibility()
