@@ -702,7 +702,7 @@ function BarMixin:ApplyFontSettings(layoutName, data)
     elseif align == "BOTTOM" then
         self.TextValue:SetPoint("BOTTOM", self.TextFrame, "BOTTOM", 0, -4)
     else -- Center
-        self.TextValue:SetPoint("CENTER", self.TextFrame, "CENTER", 0, 0)
+        self.TextValue:SetPoint("CENTER", self.TextFrame, "CENTER", addonTable.getNearestPixel(1, scale), 0)
     end
 end
 
