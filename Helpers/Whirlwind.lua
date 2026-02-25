@@ -7,7 +7,6 @@ local iwExpiresAt = nil
 
 local playerInCombat     = false
 local pendingGenToken    = 0
-local noConsumeUntil     = 0
 local seenCastGUID       = {}
 
 Whirlwind.IW_MAX_STACKS = 4
@@ -130,17 +129,6 @@ function Whirlwind:OnEvent(powerBar, event, ...)
     if castGUID and seenCastGUID[castGUID] then return end
     if castGUID then seenCastGUID[castGUID] = true end
 
-    -- Unhinged “no-consume window” Very important
-    if HasUnhingedTalent() and (
-        spellID == 50622
-        or spellID == 46924
-        or spellID == 227847
-        or spellID == 184362
-        or spellID == 446035
-    ) then
-        noConsumeUntil = GetTime() + 2
-    end
-
     -- Generator -> award stacks
     if GENERATOR_IDS[spellID] then
         if (spellID == 6343 or spellID == 435222) and not HasCrashingThunderTalent() then
@@ -169,8 +157,8 @@ function Whirlwind:OnEvent(powerBar, event, ...)
 
     -- Spender -> consume stack
     if SPENDER_IDS[spellID] then
-        -- Bloodthirst special case (Unhinged protection)
-        if (GetTime() < noConsumeUntil) and (spellID == 23881) then return end
+        -- Bloodthirst/Bloodbath
+        if HasUnhingedTalent() and not select(1, C_Spell.IsSpellUsable(446035)) and (spellID == 23881 or spellID == 335096) then return end
         if (iwStacks or 0) <= 0 then return end
 
         iwStacks = math.max(0, (iwStacks or 0) - 1)
