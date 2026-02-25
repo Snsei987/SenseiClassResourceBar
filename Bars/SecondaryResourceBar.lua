@@ -90,6 +90,11 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
         local stagger = UnitStagger("player") or 0
         local maxHealth = UnitHealthMax("player") or 1
 
+        -- Sometimes the stagger is secret (even though Blizzard said it's not), so just skip the computation if secret
+        if issecretvalue(stagger) then
+            return maxHealth, stagger
+        end
+
         self._lastStaggerPercent = self._lastStaggerPercent or ((stagger / maxHealth) * 100)
         local staggerPercent = (stagger / maxHealth) * 100
         if (staggerPercent >= 30 and self._lastStaggerPercent < 30)

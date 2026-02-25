@@ -62,14 +62,19 @@ function addonTable:GetResourceColor(resource)
             local stagger = UnitStagger("player") or 0
             local maxHealth = UnitHealthMax("player") or 1
 
-            local staggerPercent = (stagger / maxHealth) * 100
-
-            if staggerPercent < 30 then
+            -- Sometimes the stagger is secret (even though Blizzard said it's not), so just skip the computation if secret
+            if issecretvalue(stagger) then
                 resource = "STAGGER_LOW"
-            elseif staggerPercent < 60 then
-                resource = "STAGGER_MEDIUM"
             else
-                resource = "STAGGER_HEAVY"
+                local staggerPercent = (stagger / maxHealth) * 100
+
+                if staggerPercent < 30 then
+                    resource = "STAGGER_LOW"
+                elseif staggerPercent < 60 then
+                    resource = "STAGGER_MEDIUM"
+                else
+                    resource = "STAGGER_HEAVY"
+                end
             end
         end
 
