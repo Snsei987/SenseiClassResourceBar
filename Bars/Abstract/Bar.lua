@@ -369,13 +369,15 @@ function BarMixin:UpdateDisplay(layoutName, force)
         return
     end
 
-    self.StatusBar:SetMinMaxValues(0, max, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-    self.StatusBar:SetValue(current, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+    local defaults = self.defaults or {}
+
+    self.StatusBar:SetMinMaxValues(0, max, (data.smoothProgress or defaults.smoothProgress) and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+    self.StatusBar:SetValue(current, (data.smoothProgress or defaults.smoothProgress) and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
 
     -----------
 
     if data.showText == true then
-        local precision = data.textPrecision and math.max(0, string.len(data.textPrecision) - 3) or 0
+        local precision = data.textPrecision and math.max(0, string.len(data.textPrecision or defaults.textPrecision or "") - 3)
         local tagValues = self:GetTagValues(resource, max, current, precision)
 
         local textFormat = self:GetTextFormat(data, resource)
@@ -1058,6 +1060,8 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
     maxPower = maxPower or (resource == "MAELSTROM_WEAPON" and 5 or UnitPowerMax("player", resource))
     if maxPower <= 0 then return end
 
+    local defaults = self.defaults or {}
+
     local barWidth = self.Frame:GetWidth()
     local barHeight = self.Frame:GetHeight()
     local fragmentedBarWidth = barWidth / maxPower
@@ -1177,7 +1181,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
 
         self.StatusBar:SetValue(current)
 
-        local precision = data.fragmentedPowerBarTextPrecision and math.max(0, string.len(data.fragmentedPowerBarTextPrecision) - 3) or 0
+        local precision = math.max(0, string.len(data.fragmentedPowerBarTextPrecision or defaults.fragmentedPowerBarTextPrecision or "") - 3)
         for pos = 1, #displayOrder do
             local idx = displayOrder[pos]
             local essFrame = self.FragmentedPowerBars[idx]
@@ -1289,7 +1293,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
 
         self.StatusBar:SetValue(#readyList)
 
-        local precision = data.fragmentedPowerBarTextPrecision and math.max(0, string.len(data.fragmentedPowerBarTextPrecision) - 3) or 0
+        local precision = math.max(0, string.len(data.fragmentedPowerBarTextPrecision or defaults.fragmentedPowerBarTextPrecision or "") - 3)
         for pos = 1, totalRunes do
             local runeIndex = displayOrder[pos]
             local runeFrame = self.FragmentedPowerBars[runeIndex]
