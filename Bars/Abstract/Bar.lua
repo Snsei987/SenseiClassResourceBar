@@ -499,7 +499,7 @@ function BarMixin:ApplyTextVisibilitySettings(layoutName, data)
     data = data or self:GetData(layoutName)
     if not data then return end
 
-    self.TextFrame:SetShown(data.showText ~= false)
+    self.TextValue:SetShown(data.showText ~= false)
 
     for _, fragmentedPowerBarText in ipairs(self.FragmentedPowerBarTexts) do
         fragmentedPowerBarText:SetShown(data.showFragmentedPowerBarText ~= false)
