@@ -105,7 +105,7 @@ addonTable.RegisteredBar.PrimaryResourceBar = {
         showTicks = true,
         tickColor = {r = 0, g = 0, b = 0, a = 1},
         tickThickness = 1,
-        useResourceAtlas = false,
+        useResourceAtlas = "Custom",
     },
     lemSettings = function(bar, defaults)
         local dbName = bar:GetConfig().dbName
@@ -132,9 +132,11 @@ addonTable.RegisteredBar.PrimaryResourceBar = {
             {
                 parentId = L["CATEGORY_BAR_STYLE"],
                 order = 401,
-                name = L["USE_RESOURCE_TEXTURE_AND_COLOR"],
-                kind = LEM.SettingType.Checkbox,
+                name = L["BAR_TEXTURE_AND_COLOR_MODE"],
+                kind = LEM.SettingType.Dropdown,
                 default = defaults.useResourceAtlas,
+                values = addonTable.availableResourceTextureOptions,
+                useOldStyle = true,
                 get = function(layoutName)
                     local data = SenseiClassResourceBarDB[dbName][layoutName]
                     if data and data.useResourceAtlas ~= nil then

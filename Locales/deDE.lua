@@ -116,7 +116,10 @@ local baseLocale = {
     -- Bar style category - Edit Mode
     ["CATEGORY_BAR_STYLE"] = "Stil der Leiste",
     ["USE_CLASS_COLOR"] = "Klassenfarbe nutzen",
+    ["BAR_TEXTURE_AND_COLOR_MODE"] = "Leistenmodus",
+    ["USE_CUSTOM_TEXTURE_AND_COLOR"] = "Eigene Textur und Farbe verwenden",
     ["USE_RESOURCE_TEXTURE_AND_COLOR"] = "Ressourcentextur und -farbe verwenden",
+    ["USE_RESOURCE_TEXTURE_SPECIAL_ONLY"] = "Nur spezielle Ressourcentexturen verwenden",
     ["BAR_TEXTURE"] = "Leistentextur",
     ["BAR_BACKGROUND"] = "Hintergrund",
     ["USE_BAR_COLOR_FOR_BACKGROUND_COLOR"] = "Leistenfarbe als Hintergrundfarbe nutzen",
