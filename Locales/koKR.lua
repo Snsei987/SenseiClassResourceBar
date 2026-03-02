@@ -84,6 +84,8 @@ local baseLocale = {
     ["HIDE_BLIZZARD_UI_SECONDARY_POWER_BAR_TOOLTIP"] = "블리자드 기본 보조 자원 UI를 숨깁니다 (예: 죽음의 기사 룬 프레임)",
     ["ENABLE_HP_BAR_MOUSE_INTERACTION"] = "생명력 바 마우스 상호작용",
     ["ENABLE_HP_BAR_MOUSE_INTERACTION_TOOLTIP"] = "생명력 바에서 기본 플레이어 프레임 클릭 동작을 활성화합니다.",
+    ["USE_BLIZZARD_BAR"] = "블리자드 바 사용",
+    ["USE_BLIZZARD_BAR_TOOLTIP"] = "사용자 정의 바를 블리자드 기본 보조 자원 바로 대체합니다. 모든 애니메이션과 스타일이 유지됩니다. 바는 설정에 따라 배치됩니다.",
 
     -- Position & Size category - Edit Mode
     ["CATEGORY_POSITION_AND_SIZE"] = "위치 및 크기",

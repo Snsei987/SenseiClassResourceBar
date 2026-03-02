@@ -87,6 +87,8 @@ local baseLocale = {
     ["HIDE_BLIZZARD_UI_SECONDARY_POWER_BAR_TOOLTIP"] = "Hides the default Blizzard secondary resource UI (e.g. Rune Frame for Death Knights)",
     ["ENABLE_HP_BAR_MOUSE_INTERACTION"] = "Clickable Health Bar",
     ["ENABLE_HP_BAR_MOUSE_INTERACTION_TOOLTIP"] = "Enable default Player Frame click behavior on the Health Bar.",
+    ["USE_BLIZZARD_BAR"] = "Use Blizzard Bar",
+    ["USE_BLIZZARD_BAR_TOOLTIP"] = "Replace the custom bar with Blizzard's default secondary resource bar, preserving all animations and styling. The bar will be positioned according to your settings.",
 
     -- Position & Size category - Edit Mode
     ["CATEGORY_POSITION_AND_SIZE"] = "Position & Size",

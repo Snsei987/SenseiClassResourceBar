@@ -351,6 +351,18 @@ addonTable.tickedPowerTypes = {
     ["WHIRLWIND"] = true,
 }
 
+-- Map of Blizzard frames and the resource types they display
+addonTable.blizzardResourceFrames = {
+    ["DEATHKNIGHT"] = { frame = RuneFrame, resource = Enum.PowerType.Runes },
+    ["DRUID"] = { frame = DruidComboPointBarFrame, resource = Enum.PowerType.ComboPoints },
+    ["EVOKER"] = { frame = EssencePlayerFrame, resource = Enum.PowerType.Essence },
+    ["MAGE"] = { frame = MageArcaneChargesFrame, resource = Enum.PowerType.ArcaneCharges },
+    ["MONK"] = { frame = MonkHarmonyBarFrame, resource = Enum.PowerType.Chi },
+    ["PALADIN"] = { frame = PaladinPowerBarFrame, resource = Enum.PowerType.HolyPower },
+    ["ROGUE"] = { frame = RogueComboPointBarFrame, resource = Enum.PowerType.ComboPoints },
+    ["WARLOCK"] = { frame = WarlockPowerFrame, resource = Enum.PowerType.SoulShards },
+}
+
 -- Power types that are fragmented (multiple independent segments)
 addonTable.fragmentedPowerTypes = {
     [Enum.PowerType.ComboPoints] = true,
