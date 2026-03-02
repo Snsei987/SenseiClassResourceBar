@@ -76,6 +76,7 @@ local baseLocale = {
     ["CATEGORY_BAR_VISIBILITY"] = "Bar Visibility",
     ["BAR_VISIBLE"] = "Bar Visible",
     ["BAR_STRATA"] = "Bar Strata",
+    ["BAR_ALPHA"] = "Bar Opacity",
     ["BAR_STRATA_TOOLTIP"] = "The layer the bar is rendered on",
     ["HIDE_WHILE_MOUNTED_OR_VEHICULE"] = "Hide While Mounted Or In Vehicule",
     ["HIDE_WHILE_MOUNTED_OR_VEHICULE_TOOLTIP"] = "Includes Druid Travel Form",
