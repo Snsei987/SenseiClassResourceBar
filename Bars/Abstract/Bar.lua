@@ -371,8 +371,8 @@ function BarMixin:UpdateDisplay(layoutName, force)
 
     local defaults = self.defaults or {}
 
-    self.StatusBar:SetMinMaxValues(0, max, (data.smoothProgress or defaults.smoothProgress) and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-    self.StatusBar:SetValue(current, (data.smoothProgress or defaults.smoothProgress) and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+    self.StatusBar:SetMinMaxValues(0, max, (data.smoothProgress == nil and defaults.smoothProgress or data.smoothProgress) and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+    self.StatusBar:SetValue(current, (data.smoothProgress == nil and defaults.smoothProgress or data.smoothProgress) and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
 
     -----------
 
