@@ -627,6 +627,7 @@ function BarMixin:ApplyLayout(layoutName, force)
         LEM:SetFrameDragEnabled(self.Frame, relativeTo == UIParent)
 
         self:SetFrameStrata(data.barStrata or defaults.barStrata)
+        self.Frame:SetAlpha(data.alpha or self.defaults.alpha)
     end
 
     self:ApplyFontSettings(layoutName, data)

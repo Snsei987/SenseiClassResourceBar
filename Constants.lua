@@ -56,6 +56,7 @@ addonTable.commonDefaults = {
     barVisible = "Always Visible",
     hideWhileMountedOrVehicule = false,
     barStrata = "MEDIUM",
+    alpha = 1,
     scale = 1,
     width = 200,
     minWidth = 0,
