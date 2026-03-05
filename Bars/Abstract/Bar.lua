@@ -913,16 +913,15 @@ function BarMixin:ApplyForegroundSettings(layoutName, data)
 
     local resource = self:GetResource()
     local color = self:GetBarColor(resource)
-    if data.useResourceAtlas == true and (color.atlasElementName or color.atlas) then
-        if color.atlasElementName then
-            if color.hasClassResourceVariant then
-                fgTexture = "UI-HUD-UnitFrame-Player-PortraitOn-ClassResource-Bar-"..color.atlasElementName
-            else
-                fgTexture = "UI-HUD-UnitFrame-Player-PortraitOn-Bar-"..color.atlasElementName
-            end
-        elseif color.atlas then
-            fgTexture = color.atlas
+
+    if data.useResourceAtlas == "Resource" and color.atlasElementName then
+        if color.hasClassResourceVariant then
+            fgTexture = "UI-HUD-UnitFrame-Player-PortraitOn-ClassResource-Bar-"..color.atlasElementName
+        else
+            fgTexture = "UI-HUD-UnitFrame-Player-PortraitOn-Bar-"..color.atlasElementName
         end
+    elseif (data.useResourceAtlas == "Resource" or data.useResourceAtlas == "SpecialOnly") and color.atlas then
+        fgTexture = color.atlas
     end
 
     if fgTexture then
@@ -933,7 +932,7 @@ function BarMixin:ApplyForegroundSettings(layoutName, data)
         end
     end
 
-    if data.useResourceAtlas == true and (color.atlasElementName or color.atlas) then
+    if (data.useResourceAtlas == "Resource" and (color.atlasElementName or color.atlas)) or (data.useResourceAtlas == "SpecialOnly" and color.atlas) then
         self.StatusBar:SetStatusBarColor(1, 1, 1, color.a or 1);
     else
         self.StatusBar:SetStatusBarColor(color.r or 1, color.g or 1, color.b or 1, color.a or 1);
