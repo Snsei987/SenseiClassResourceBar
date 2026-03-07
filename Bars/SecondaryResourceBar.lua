@@ -302,6 +302,7 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
         tickColor = {r = 0, g = 0, b = 0, a = 1},
         tickThickness = 1,
         useResourceAtlas = false,
+        forceFourComboPointsForFeral = true,
     },
     lemSettings = function(bar, defaults)
         local config = bar:GetConfig()
@@ -403,6 +404,32 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                     local data = SenseiClassResourceBarDB[dbName][layoutName]
                     return data.showTicks == true
                 end,
+            },
+            {
+                parentId = L["CATEGORY_BAR_SETTINGS"],
+                order = 307,
+                name = L["FORCE_4_CP_FERAL"],
+                kind = LEM.SettingType.Checkbox,
+                default = defaults.forceFourComboPointsForFeral,
+                get = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    if data and data.forceFourComboPointsForFeral ~= nil then
+                        return data.forceFourComboPointsForFeral
+                    else
+                        return defaults.forceFourComboPointsForFeral
+                    end
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].forceFourComboPointsForFeral = value
+                    bar:ApplyLayout(layoutName)
+                    bar:UpdateDisplay(layoutName)
+                end,
+                isEnabled = function()
+                    local playerClass = select(2, UnitClass("player"))
+                    return playerClass == "DRUID"
+                end,
+                tooltip = L["FORCE_4_CP_FERAL_TOOLTIP"],
             },
             {
                 parentId = L["CATEGORY_BAR_STYLE"],

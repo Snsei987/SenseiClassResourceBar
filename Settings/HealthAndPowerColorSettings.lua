@@ -88,6 +88,10 @@ local PowerData = {
         label = L["COMBO_POINTS"],
         key = Enum.PowerType.ComboPoints,
     },
+        {
+        label = L["COMBO_POINTS"] .. ' > 3',
+        key = "COMBO_POINTS_ABOVE_3",
+    },
     {
         label = L["OVERCHARGED_COMBO_POINTS"],
         key = "OVERCHARGED_COMBO_POINTS",

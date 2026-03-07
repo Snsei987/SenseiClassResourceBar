@@ -113,6 +113,8 @@ local baseLocale = {
     ["SMOOTH_PROGRESS"] = "Smooth Progress",
     ["SHOW_TICKS_WHEN_AVAILABLE"] = "Show Ticks When Available",
     ["TICK_THICKNESS"] = "Tick Thickness",
+    ["FORCE_4_CP_FERAL"] = "Force 4 Slots (Feral Druid)",
+    ["FORCE_4_CP_FERAL_TOOLTIP"] = "When enabled, the combo point bar will show exactly 4 slots for Feral Druids in Cat Form. The 5th point (and beyond) will overlap with a different color.",
 
     -- Bar style category - Edit Mode
     ["CATEGORY_BAR_STYLE"] = "Bar Style",
