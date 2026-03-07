@@ -117,6 +117,8 @@ function addonTable:GetResourceColor(resource)
         color = GetPowerBarColor("FUEL")
     elseif resource == Enum.PowerType.ComboPoints then
         color = { r = 0.878, g = 0.176, b = 0.180 }
+    elseif resource == "COMBO_POINTS_ABOVE_3" then
+        color = { r = 1, g = 0.647, b = 0 }
     elseif resource == "OVERCHARGED_COMBO_POINTS" then
         color = { r = 0.169, g = 0.733, b = 0.992 }
     elseif resource == Enum.PowerType.Chi then

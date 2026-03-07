@@ -948,6 +948,18 @@ function BarMixin:UpdateTicksLayout(layoutName, data)
     local max = 0;
     if resource == "MAELSTROM_WEAPON" then
         max = 5
+    elseif resource == Enum.PowerType.ComboPoints then
+        local playerClass = select(2, UnitClass("player"))
+        local spec = C_SpecializationInfo.GetSpecialization()
+        local specID = spec and C_SpecializationInfo.GetSpecializationInfo(spec)
+        local formID = GetShapeshiftFormID()
+        local isFeralCat = (playerClass == "DRUID" and specID == 103 and formID == 1) -- DRUID_CAT_FORM is 1
+        
+        if isFeralCat and (data.forceFourComboPointsForFeral ~= false) then 
+            max = 4
+        else
+            max = UnitPowerMax("player", resource)
+        end
     elseif resource == "TIP_OF_THE_SPEAR" then
         max = 3
     elseif resource == "ICICLES" then
@@ -1074,10 +1086,23 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
 
     if resource == Enum.PowerType.ComboPoints then
         local current = UnitPower("player", resource)
-        -- Reuse cached maxPower to avoid redundant API call
-        local maxCP = maxPower
+        
+        local playerClass = select(2, UnitClass("player"))
+        local spec = C_SpecializationInfo.GetSpecialization()
+        local specID = spec and C_SpecializationInfo.GetSpecializationInfo(spec)
+        local formID = GetShapeshiftFormID()
+        local isFeralCat = (playerClass == "DRUID" and specID == 103 and formID == 1) -- DRUID_CAT_FORM is 1
+
+        -- Visual segments: forced to 4 for Feral druid in cat form
+        local visualMax = (isFeralCat and data.forceFourComboPointsForFeral ~= false) and 4 or (maxPower or UnitPowerMax("player", resource))
+        if isFeralCat and data.forceFourComboPointsForFeral ~= false then
+            maxPower = 4 -- used for hiding extra bars at the end
+            fragmentedBarWidth = barWidth / 4
+            fragmentedBarHeight = barHeight / 4
+        end
 
         local overchargedCpColor = addonTable:GetOverrideResourceColor("OVERCHARGED_COMBO_POINTS") or color
+        local above3CpColor = addonTable:GetOverrideResourceColor("COMBO_POINTS_ABOVE_3") or color
         local charged = GetUnitChargedPowerPoints("player") or {}
         local chargedLookup = {}
         for _, index in ipairs(charged) do
@@ -1086,19 +1111,19 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
 
         -- Reuse pre-allocated table for performance
         local displayOrder = self._displayOrder
-        for i = 1, maxCP do
+        for i = 1, visualMax do
             displayOrder[i] = i
         end
 
         -- Reverse if needed
         if data.fillDirection == "Right to Left" or data.fillDirection == "Top to Bottom" then
-            for i = 1, math.floor(maxCP / 2) do
-                displayOrder[i], displayOrder[maxCP - i + 1] = displayOrder[maxCP - i + 1], displayOrder[i]
+            for i = 1, math.floor(visualMax / 2) do
+                displayOrder[i], displayOrder[visualMax - i + 1] = displayOrder[visualMax - i + 1], displayOrder[i]
             end
         end
 
         self.StatusBar:SetAlpha(0)
-        for pos = 1, #displayOrder do
+        for pos = 1, visualMax do
             local idx = displayOrder[pos]
             local cpFrame = self.FragmentedPowerBars[idx]
             local cpText  = self.FragmentedPowerBarTexts[idx]
@@ -1123,9 +1148,19 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
                         cpFrame:SetStatusBarColor(overchargedCpColor.r * 0.5, overchargedCpColor.g * 0.5, overchargedCpColor.b * 0.5, overchargedCpColor.a or 1)
                     end
                 else
-                    if idx <= current then
+                    local isFilled = idx <= current or (isFeralCat and current > visualMax and idx <= math.fmod(current - 1, visualMax) + 1)
+                    
+                    if isFilled then
                         cpFrame:SetValue(1, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                        cpFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+                        
+                        local isOverlapping = isFeralCat and current > visualMax and idx <= math.fmod(current - 1, visualMax) + 1
+                        local isAbove3 = idx > 3
+                        
+                        if isAbove3 or isOverlapping then
+                            cpFrame:SetStatusBarColor(above3CpColor.r, above3CpColor.g, above3CpColor.b, above3CpColor.a or 1)
+                        else
+                            cpFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+                        end
                     else
                         cpFrame:SetValue(0, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                         cpFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
