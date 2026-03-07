@@ -1148,15 +1148,22 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
                         cpFrame:SetStatusBarColor(overchargedCpColor.r * 0.5, overchargedCpColor.g * 0.5, overchargedCpColor.b * 0.5, overchargedCpColor.a or 1)
                     end
                 else
-                    local isFilled = idx <= current or (isFeralCat and current > visualMax and idx <= math.fmod(current - 1, visualMax) + 1)
+                    local isOverlapping = isFeralCat and current > visualMax and idx <= math.fmod(current - 1, visualMax) + 1
+                    local isFilled = idx <= current or isOverlapping
                     
                     if isFilled then
                         cpFrame:SetValue(1, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                         
-                        local isOverlapping = isFeralCat and current > visualMax and idx <= math.fmod(current - 1, visualMax) + 1
-                        local isAbove3 = idx > 3
-                        
-                        if isAbove3 or isOverlapping then
+                        local useAbove3Color = false
+                        if isFeralCat and (data.forceFourComboPointsForFeral ~= false) then
+                            -- 4-slot mode: Only overlapping points (5+) get the special color
+                            useAbove3Color = isOverlapping
+                        else
+                            -- Standard mode: Any point above 3 (4, 5...) gets the special color
+                            useAbove3Color = (idx > 3)
+                        end
+
+                        if useAbove3Color then
                             cpFrame:SetStatusBarColor(above3CpColor.r, above3CpColor.g, above3CpColor.b, above3CpColor.a or 1)
                         else
                             cpFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
