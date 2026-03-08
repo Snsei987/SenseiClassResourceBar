@@ -60,6 +60,7 @@ local baseLocale = {
     ["STAGGER_MEDIUM"] ="中度醉拳",
     ["STAGGER_HIGH"] = "重度醉拳",
     ["ARCANE_CHARGES"] = POWER_TYPE_ARCANE_CHARGES,
+    ["ICICLES"] = "冰柱",
     ["SOUL_FRAGMENTS_VENGEANCE"] = "复仇灵魂残片",
     ["SOUL_FRAGMENTS_DDH"] = "吞噬者灵魂残片",
     ["SOUL_FRAGMENTS_VOID_META"] = "吞噬者灵魂残片（虚空形态）",
@@ -114,13 +115,20 @@ local baseLocale = {
     ["TICK_THICKNESS"] = "刻度粗细",
 
     -- Bar style category - Edit Mode
-    ["CATEGORY_BAR_STYLE"] = "条形风格",
+    ["CATEGORY_BAR_STYLE"] = "条形样式",
     ["USE_CLASS_COLOR"] = "使用职业颜色",
     ["USE_RESOURCE_TEXTURE_AND_COLOR"] = "使用资源纹理和颜色",
     ["BAR_TEXTURE"] = "条形纹理",
     ["BAR_BACKGROUND"] = "背景",
     ["USE_BAR_COLOR_FOR_BACKGROUND_COLOR"] = "使用条形颜色作为背景颜色",
     ["BAR_BORDER"] = "边框",
+
+    --  (Heal) Absorb bar style category - Edit Mode
+    ["CATEGORY_ABSORB_BAR_STYLE"] = "吸收条样式",
+    ["CATEGORY_HEAL_ABSORB_BAR_STYLE"] = "治疗吸收条样式",
+    ["ENABLE"] = "启用",
+    ["ABSORB_BAR_POSITION"] = "样式",
+    ["HEAL_ABSORB_BAR_POSITION"] = "样式",
 
     -- Text settings category - Edit Mode
     ["CATEGORY_TEXT_SETTINGS"] = "文本设置",
@@ -151,6 +159,14 @@ local baseLocale = {
     ["HAS_TARGET_SELECTED"] = "目标已选择",
     ["HAS_TARGET_SELECTED_OR_IN_COMBAT"] = "目标已选择或战斗中",
     ["HIDDEN"] = "隐藏",
+
+    -- Strata Options -- Maybe keep it the same in all language ?
+    ["TOOLTIP"] = "提示层",
+    ["DIALOG"] = "对话层",
+    ["HIGH"] = "高层",
+    ["MEDIUM"] = "中层",
+    ["LOW"] = "低层",
+    ["BACKGROUND"] = "背景层",
 
     -- Role Options
     ["TANK"] = TANK,
@@ -198,6 +214,11 @@ local baseLocale = {
     ["RIGHT_TO_LEFT"] = "从右到左",
     ["TOP_TO_BOTTOM"] = "从顶部到底部",
     ["BOTTOM_TO_TOP"] = "从底部到顶部",
+
+    -- (Heal) Absorb Bar Styles
+    ["BAR_POSITION_FIXED"] = "固定位置",
+    ["BAR_POSITION_REVERSED"] = "反转位置",
+    ["BAR_POSITION_ATTACH_HEALTH"] = "绑定到生命条",
 
     -- Outline Styles -- Maybe keep it the same in all language ?
     ["NONE"] = "无",

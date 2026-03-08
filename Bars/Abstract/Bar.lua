@@ -371,8 +371,8 @@ function BarMixin:UpdateDisplay(layoutName, force)
 
     local defaults = self.defaults or {}
 
-    self.StatusBar:SetMinMaxValues(0, max, (data.smoothProgress or defaults.smoothProgress) and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-    self.StatusBar:SetValue(current, (data.smoothProgress or defaults.smoothProgress) and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+    self.StatusBar:SetMinMaxValues(0, max, (data.smoothProgress == nil and defaults.smoothProgress or data.smoothProgress) and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+    self.StatusBar:SetValue(current, (data.smoothProgress == nil and defaults.smoothProgress or data.smoothProgress) and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
 
     -----------
 
@@ -637,7 +637,7 @@ function BarMixin:ApplyLayout(layoutName, force)
 
     self:UpdateTicksLayout(layoutName, data)
 
-    if data.fasterUpdates or defaults.fasterUpdates then
+    if data.fasterUpdates == nil and defaults.fasterUpdates or data.fasterUpdates then
         self:EnableFasterUpdates()
     else
         self:DisableFasterUpdates()
@@ -949,7 +949,9 @@ function BarMixin:UpdateTicksLayout(layoutName, data)
     if resource == "MAELSTROM_WEAPON" then
         max = 5
     elseif resource == "TIP_OF_THE_SPEAR" then
-        max = addonTable.TipOfTheSpear.TIP_MAX_STACKS
+        max = 3
+    elseif resource == "ICICLES" then
+        max = 5
     elseif resource == "WHIRLWIND" then
         max = addonTable.Whirlwind.IW_MAX_STACKS
     elseif resource == "SOUL_FRAGMENTS_VENGEANCE" then

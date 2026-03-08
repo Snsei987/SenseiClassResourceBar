@@ -60,6 +60,7 @@ local baseLocale = {
     ["STAGGER_MEDIUM"] = "Среднее пошатывание",
     ["STAGGER_HIGH"] = "Сильное пошатывание",
     ["ARCANE_CHARGES"] = POWER_TYPE_ARCANE_CHARGES,
+    ["ICICLES"] = "кристаллы льда",
     ["SOUL_FRAGMENTS_VENGEANCE"] = "Фрагменты души (Месть)",
     ["SOUL_FRAGMENTS_DDH"] = "Фрагменты души (Пожиратель)",
     ["SOUL_FRAGMENTS_VOID_META"] = "Фрагменты души (Пожиратель - Метаморфоза Бездны)",

@@ -60,6 +60,7 @@ local baseLocale = {
     ["STAGGER_MEDIUM"] ="Mittleres Staffeln",
     ["STAGGER_HIGH"] = "Hohes Staffeln",
     ["ARCANE_CHARGES"] = POWER_TYPE_ARCANE_CHARGES,
+    ["ICICLES"] = "Eiszapfen",
     ["SOUL_FRAGMENTS_VENGEANCE"] = "Rachsucht Seelenfragmente",
     ["SOUL_FRAGMENTS_DDH"] = "Verschlinger Seelenfragmente",
     ["SOUL_FRAGMENTS_VOID_META"] = "Verschl. Seelenfragm. Metamorphose",

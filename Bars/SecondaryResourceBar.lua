@@ -9,7 +9,6 @@ function SecondaryResourceBarMixin:OnLoad()
     addonTable.PowerBarMixin.OnLoad(self)
 
     -- Modules for the special cases requiring more work
-    addonTable.TipOfTheSpear:OnLoad(self)
     addonTable.Whirlwind:OnLoad(self)
 end
 
@@ -17,7 +16,6 @@ function SecondaryResourceBarMixin:OnEvent(event, ...)
     addonTable.PowerBarMixin.OnEvent(self, event, ...)
 
     -- Modules for the special cases requiring more work
-    addonTable.TipOfTheSpear:OnEvent(self, event, ...)
     addonTable.Whirlwind:OnEvent(self, event, ...)
 end
 
@@ -43,6 +41,7 @@ function SecondaryResourceBarMixin:GetResource()
         },
         ["MAGE"]        = {
             [62]   = Enum.PowerType.ArcaneCharges, -- Arcane
+            [64]   = "ICICLES", -- Frost
         },
         ["MONK"]        = {
             [268]  = "STAGGER", -- Brewmaster
@@ -172,7 +171,19 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
     end
 
     if resource == "TIP_OF_THE_SPEAR" then
-        return addonTable.TipOfTheSpear:GetStacks()
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(260286) -- Tip of the Spear
+        local current = auraData and auraData.applications or 0
+        local max = 3
+
+        return max, current
+    end
+
+    if resource == "ICICLES" then
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(205473) -- Icicles
+        local current = auraData and auraData.applications or 0
+        local max = 5
+
+        return max, current
     end
 
     if resource == "WHIRLWIND" then

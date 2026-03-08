@@ -60,6 +60,7 @@ local baseLocale = {
     ["STAGGER_MEDIUM"] ="Cambalear Médio",
     ["STAGGER_HIGH"] = "Cambalear Alto",
     ["ARCANE_CHARGES"] = POWER_TYPE_ARCANE_CHARGES,
+    ["ICICLES"] = "Sincelos",
     ["SOUL_FRAGMENTS_VENGEANCE"] = "Fragmentos de Alma Vingança",
     ["SOUL_FRAGMENTS_DDH"] = "Fragmentos de Alma Devorador",
     ["SOUL_FRAGMENTS_VOID_META"] = "Fragmentos de Alma Mt. Devorador",
