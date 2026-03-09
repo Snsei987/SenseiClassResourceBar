@@ -930,8 +930,8 @@ function BarMixin:ApplyForegroundSettings(layoutName, data)
 
         for _, fragmentedPowerBar in ipairs(self.FragmentedPowerBars) do
             fragmentedPowerBar:SetStatusBarTexture(fgTexture)
-            fragmentedPowerBar:GetStatusBarTexture():SetHorizTile(self.StatusBar:GetHorizTile())
-            fragmentedPowerBar:GetStatusBarTexture():SetVertTile(self.StatusBar:GetVertTile())
+            fragmentedPowerBar:GetStatusBarTexture():SetHorizTile(self.StatusBar:GetStatusBarTexture():GetHorizTile())
+            fragmentedPowerBar:GetStatusBarTexture():SetVertTile(self.StatusBar:GetStatusBarTexture():GetVertTile())
         end
     end
 
