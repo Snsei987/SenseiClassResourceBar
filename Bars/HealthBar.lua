@@ -144,7 +144,7 @@ function HealthBarMixin:OnEvent(event, ...)
         or event == "PLAYER_MOUNT_DISPLAY_CHANGED"
         or event == "PET_BATTLE_OPENING_START" or event == "PET_BATTLE_CLOSE" then
 
-            self:ApplyVisibilitySettings()
+            self:ApplyVisibilitySettings(nil, event == "PLAYER_REGEN_DISABLED")
             self:ApplyLayout(nil, true)
             self:UpdateDisplay()
 
@@ -198,7 +198,7 @@ end
 -- VISIBILITY related methods
 ------------------------------------------------------------
 
-function HealthBarMixin:ApplyVisibilitySettings(layoutName)
+function HealthBarMixin:ApplyVisibilitySettings(layoutName, inCombat)
     local data = self:GetData(layoutName)
     if not data then return end
 
@@ -207,7 +207,7 @@ function HealthBarMixin:ApplyVisibilitySettings(layoutName)
     if self.Frame:IsProtected() then
         self:RegisterSecureVisibility()
     else
-        addonTable.BarMixin.ApplyVisibilitySettings(self, layoutName)
+        addonTable.BarMixin.ApplyVisibilitySettings(self, layoutName, inCombat)
     end
 
     self:ApplyTextVisibilitySettings(layoutName, data)
@@ -364,6 +364,8 @@ function HealthBarMixin:ApplyAbsorbBarSettings(layoutName, data)
 
     if absorbBarTexture then
         self.AbsorbBar:SetStatusBarTexture(absorbBarTexture)
+        self.StatusBar:GetStatusBarTexture():SetHorizTile(absorbBarTexture == [[Interface\Buttons\WHITE8X8]])
+        self.StatusBar:GetStatusBarTexture():SetVertTile(absorbBarTexture == [[Interface\Buttons\WHITE8X8]])
     end
 
 	self.AbsorbBar:ClearAllPoints()
@@ -428,6 +430,8 @@ function HealthBarMixin:ApplyHealAbsorbBarSettings(layoutName, data)
 
     if healAbsorbBarTexture then
         self.HealAbsorbBar:SetStatusBarTexture(healAbsorbBarTexture)
+        self.StatusBar:GetStatusBarTexture():SetHorizTile(healAbsorbBarTexture == [[Interface\Buttons\WHITE8X8]])
+        self.StatusBar:GetStatusBarTexture():SetVertTile(healAbsorbBarTexture == [[Interface\Buttons\WHITE8X8]])
     end
 
 	self.HealAbsorbBar:ClearAllPoints()
