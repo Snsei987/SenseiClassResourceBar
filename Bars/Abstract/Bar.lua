@@ -205,19 +205,9 @@ function BarMixin:Hide()
 end
 
 function BarMixin:OnShow()
-    local data = self:GetData()
-
-    if data and data.positionMode ~= nil and data.positionMode ~= "Self" then
-        self:ApplyLayout()
-    end
 end
 
 function BarMixin:OnHide()
-    local data = self:GetData()
-
-    if data and data.positionMode ~= nil and data.positionMode ~= "Self" then
-        self:ApplyLayout()
-    end
 end
 
 function BarMixin:IsShown()
