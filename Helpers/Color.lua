@@ -119,6 +119,8 @@ function addonTable:GetResourceColor(resource)
         color = { r = 0.878, g = 0.176, b = 0.180 }
     elseif resource == "OVERCHARGED_COMBO_POINTS" then
         color = { r = 0.169, g = 0.733, b = 0.992 }
+    elseif resource == "FERAL_FINISHER_COMBO_POINTS" then
+        color = { r = 1.0, g = 0.5, b = 0.0 }
     elseif resource == Enum.PowerType.Chi then
         color = { r = 0.024, g = 0.741, b = 0.784 }
     elseif resource == "MAELSTROM_WEAPON" then
