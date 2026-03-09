@@ -924,8 +924,14 @@ function BarMixin:ApplyForegroundSettings(layoutName, data)
     if fgTexture then
         self.StatusBar:SetStatusBarTexture(fgTexture)
 
+        -- The engine cannot stretch white8x8 when it is hidden on the first render, so use tiling instead
+        self.StatusBar:GetStatusBarTexture():SetHorizTile(fgTexture == [[Interface\Buttons\WHITE8X8]])
+        self.StatusBar:GetStatusBarTexture():SetVertTile(fgTexture == [[Interface\Buttons\WHITE8X8]])
+
         for _, fragmentedPowerBar in ipairs(self.FragmentedPowerBars) do
             fragmentedPowerBar:SetStatusBarTexture(fgTexture)
+            fragmentedPowerBar:GetStatusBarTexture():SetHorizTile(self.StatusBar:GetHorizTile())
+            fragmentedPowerBar:GetStatusBarTexture():SetVertTile(self.StatusBar:GetVertTile())
         end
     end
 

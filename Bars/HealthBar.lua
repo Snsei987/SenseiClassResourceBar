@@ -364,6 +364,8 @@ function HealthBarMixin:ApplyAbsorbBarSettings(layoutName, data)
 
     if absorbBarTexture then
         self.AbsorbBar:SetStatusBarTexture(absorbBarTexture)
+        self.StatusBar:GetStatusBarTexture():SetHorizTile(absorbBarTexture == [[Interface\Buttons\WHITE8X8]])
+        self.StatusBar:GetStatusBarTexture():SetVertTile(absorbBarTexture == [[Interface\Buttons\WHITE8X8]])
     end
 
 	self.AbsorbBar:ClearAllPoints()
@@ -428,6 +430,8 @@ function HealthBarMixin:ApplyHealAbsorbBarSettings(layoutName, data)
 
     if healAbsorbBarTexture then
         self.HealAbsorbBar:SetStatusBarTexture(healAbsorbBarTexture)
+        self.StatusBar:GetStatusBarTexture():SetHorizTile(healAbsorbBarTexture == [[Interface\Buttons\WHITE8X8]])
+        self.StatusBar:GetStatusBarTexture():SetVertTile(healAbsorbBarTexture == [[Interface\Buttons\WHITE8X8]])
     end
 
 	self.HealAbsorbBar:ClearAllPoints()
