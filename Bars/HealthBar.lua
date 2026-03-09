@@ -134,7 +134,7 @@ function HealthBarMixin:OnEvent(event, ...)
         or event == "UPDATE_SHAPESHIFT_FORM"
         or (event == "PLAYER_SPECIALIZATION_CHANGED" and unit == "player") then
 
-        self:ApplyVisibilitySettings()
+        RunNextFrame(function() self:ApplyVisibilitySettings() end)
         self:ApplyLayout(nil, true)
         self:UpdateDisplay()
 
@@ -364,8 +364,6 @@ function HealthBarMixin:ApplyAbsorbBarSettings(layoutName, data)
 
     if absorbBarTexture then
         self.AbsorbBar:SetStatusBarTexture(absorbBarTexture)
-        self.StatusBar:GetStatusBarTexture():SetHorizTile(absorbBarTexture == [[Interface\Buttons\WHITE8X8]])
-        self.StatusBar:GetStatusBarTexture():SetVertTile(absorbBarTexture == [[Interface\Buttons\WHITE8X8]])
     end
 
 	self.AbsorbBar:ClearAllPoints()
@@ -430,8 +428,6 @@ function HealthBarMixin:ApplyHealAbsorbBarSettings(layoutName, data)
 
     if healAbsorbBarTexture then
         self.HealAbsorbBar:SetStatusBarTexture(healAbsorbBarTexture)
-        self.StatusBar:GetStatusBarTexture():SetHorizTile(healAbsorbBarTexture == [[Interface\Buttons\WHITE8X8]])
-        self.StatusBar:GetStatusBarTexture():SetVertTile(healAbsorbBarTexture == [[Interface\Buttons\WHITE8X8]])
     end
 
 	self.HealAbsorbBar:ClearAllPoints()

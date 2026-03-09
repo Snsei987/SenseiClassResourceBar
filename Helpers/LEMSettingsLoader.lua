@@ -860,10 +860,12 @@ function LEMSettingsLoaderMixin:Init(bar, defaults)
 
     LEM:RegisterCallback("layout", function(layoutName)
         SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+
         bar:OnLayoutChange(layoutName)
         bar:InitCooldownManagerWidthHook(layoutName)
         bar:InitCustomFrameWidthHook(layoutName)
-        bar:ApplyVisibilitySettings(layoutName)
+
+        RunNextFrame(function() bar:ApplyVisibilitySettings(layoutName) end)
         bar:ApplyLayout(layoutName, true)
         bar:UpdateDisplay(layoutName, true)
     end)
@@ -871,8 +873,10 @@ function LEMSettingsLoaderMixin:Init(bar, defaults)
     LEM:RegisterCallback("layoutduplicate", function(_, duplicateIndices, _, _, layoutName)
         local original = LEM:GetLayouts()[duplicateIndices[1]].name
         SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][original] and CopyTable(SenseiClassResourceBarDB[config.dbName][original]) or CopyTable(defaults)
+
         bar:InitCooldownManagerWidthHook(layoutName)
         bar:InitCustomFrameWidthHook(layoutName)
+
         bar:ApplyVisibilitySettings(layoutName)
         bar:ApplyLayout(layoutName, true)
         bar:UpdateDisplay(layoutName, true)
@@ -885,8 +889,10 @@ function LEMSettingsLoaderMixin:Init(bar, defaults)
 
         SenseiClassResourceBarDB[config.dbName][newLayoutName] = SenseiClassResourceBarDB[config.dbName][oldLayoutName] and CopyTable(SenseiClassResourceBarDB[config.dbName][oldLayoutName]) or CopyTable(defaults)
         SenseiClassResourceBarDB[config.dbName][oldLayoutName] = nil
+
         bar:InitCooldownManagerWidthHook(newLayoutName)
         bar:InitCustomFrameWidthHook(newLayoutName)
+
         bar:ApplyVisibilitySettings()
         bar:ApplyLayout()
         bar:UpdateDisplay()
@@ -895,6 +901,7 @@ function LEMSettingsLoaderMixin:Init(bar, defaults)
     LEM:RegisterCallback("layoutdeleted", function(_, layoutName)
         SenseiClassResourceBarDB[config.dbName] = SenseiClassResourceBarDB[config.dbName] or {}
         SenseiClassResourceBarDB[config.dbName][layoutName] = nil
+
         bar:ApplyVisibilitySettings()
         bar:ApplyLayout()
         bar:UpdateDisplay()

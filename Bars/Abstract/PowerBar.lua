@@ -34,7 +34,7 @@ function PowerBarMixin:OnEvent(event, ...)
         or event == "UPDATE_SHAPESHIFT_FORM"
         or (event == "PLAYER_SPECIALIZATION_CHANGED" and unit == "player") then
 
-        self:ApplyVisibilitySettings()
+        RunNextFrame(function() self:ApplyVisibilitySettings() end)
         self:ApplyLayout(nil, true)
         self:UpdateDisplay()
 
