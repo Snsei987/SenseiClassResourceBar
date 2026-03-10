@@ -129,6 +129,8 @@ function addonTable:GetResourceColor(resource)
         color = { r = 0.6, g = 0.8, b = 0.2 }
     elseif resource == "WHIRLWIND" then
         color = { r = 0.2, b = 0.8, g = 0.2 }
+    elseif resource == "ICICLES" then
+        color = { r = 0.020, g = 0.714, b = 0.910 }
     end
 
     -- If not custom, try with power name or id

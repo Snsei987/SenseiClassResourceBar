@@ -90,28 +90,35 @@ function HealthBarMixin:OnLoad()
     self.Frame:RegisterEvent("PET_BATTLE_OPENING_START")
     self.Frame:RegisterEvent("PET_BATTLE_CLOSE")
 
+    local playerClass = select(2, UnitClass("player"))
+
+    if playerClass == "DRUID" then
+        self.Frame:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
+    end
+
 	-- Create the global click-casting registry if it doesn't exist
     if not ClickCastFrames then ClickCastFrames = {} end
 
-    self:RegisterSecureVisibility()
-    self:ApplyMouseSettings()
-    self._mouseUpdatePending = false
-    self.Frame:SetAttribute("unit", "player")
-    self.Frame:SetAttribute("*type1", "target")
-    self.Frame:SetAttribute("*type2", "togglemenu")
-    self.Frame.menu = function(frame)
-        UnitPopup_ShowMenu(frame, "PLAYER", "player")
-    end
+    if self.Frame:IsProtected() then
+        self:ApplyMouseSettings()
+        self._mouseUpdatePending = false
+        self.Frame:SetAttribute("unit", "player")
+        self.Frame:SetAttribute("*type1", "target")
+        self.Frame:SetAttribute("*type2", "togglemenu")
+        self.Frame.menu = function(frame)
+            UnitPopup_ShowMenu(frame, "PLAYER", "player")
+        end
 
-    if not self._registerFrameOnShowAndHide then
-        self.Frame:HookScript("OnShow", function()
-            self:OnShow()
-        end)
+        if not self._registerFrameOnShowAndHide then
+            self.Frame:HookScript("OnShow", function()
+                self:OnShow()
+            end)
 
-        self.Frame:HookScript("OnHide", function()
-            self:OnHide()
-        end)
-        self._registerFrameOnShowAndHide = true
+            self.Frame:HookScript("OnHide", function()
+                self:OnHide()
+            end)
+            self._registerFrameOnShowAndHide = true
+        end
     end
 end
 
@@ -124,9 +131,10 @@ function HealthBarMixin:OnEvent(event, ...)
     self._curEvent = event
 
     if event == "PLAYER_ENTERING_WORLD"
+        or event == "UPDATE_SHAPESHIFT_FORM"
         or (event == "PLAYER_SPECIALIZATION_CHANGED" and unit == "player") then
 
-        self:ApplyVisibilitySettings()
+        RunNextFrame(function() self:ApplyVisibilitySettings() end)
         self:ApplyLayout(nil, true)
         self:UpdateDisplay()
 
@@ -136,16 +144,18 @@ function HealthBarMixin:OnEvent(event, ...)
         or event == "PLAYER_MOUNT_DISPLAY_CHANGED"
         or event == "PET_BATTLE_OPENING_START" or event == "PET_BATTLE_CLOSE" then
 
-            self:ApplyVisibilitySettings()
+            self:ApplyVisibilitySettings(nil, event == "PLAYER_REGEN_DISABLED")
             self:ApplyLayout(nil, true)
             self:UpdateDisplay()
 
     end
 
-    if event == "PLAYER_ENTERING_WORLD" then
-        self:ApplyMouseSettings()
-    elseif event == "PLAYER_REGEN_ENABLED" and self._mouseUpdatePending then
-        self:ApplyMouseSettings()
+    if self.Frame:IsProtected() then
+        if event == "PLAYER_ENTERING_WORLD" then
+            self:ApplyMouseSettings()
+        elseif event == "PLAYER_REGEN_ENABLED" and self._mouseUpdatePending then
+            self:ApplyMouseSettings()
+        end
     end
 end
 
@@ -188,21 +198,26 @@ end
 -- VISIBILITY related methods
 ------------------------------------------------------------
 
-function HealthBarMixin:ApplyVisibilitySettings(layoutName)
+function HealthBarMixin:ApplyVisibilitySettings(layoutName, inCombat)
     local data = self:GetData(layoutName)
     if not data then return end
 
-    if not InCombatLockdown() then
-        self:HideBlizzardPlayerContainer(layoutName, data)
+    self:HideBlizzardPlayerContainer(layoutName, data)
+
+    if self.Frame:IsProtected() then
         self:RegisterSecureVisibility()
+    else
+        addonTable.BarMixin.ApplyVisibilitySettings(self, layoutName, inCombat)
     end
 
     self:ApplyTextVisibilitySettings(layoutName, data)
 end
 
 function HealthBarMixin:ApplyMouseSettings()
+    if not self.Frame:IsProtected() then return end
+
     local data = self:GetData()
-    local shouldEnable = data and data.enableHealthBarMouseInteraction
+    local shouldEnable = data.enableHealthBarMouseInteraction == nil and self.defaults.enableHealthBarMouseInteraction or data.enableHealthBarMouseInteraction
 
     if InCombatLockdown() then
         self._mouseUpdatePending = true
@@ -227,6 +242,9 @@ function HealthBarMixin:ApplyMouseSettings()
 end
 
 function HealthBarMixin:RegisterSecureVisibility()
+    if not self.Frame:IsProtected() then return end
+    if InCombatLockdown() then return end
+
     -- Don't hide in Edit Mode, unless config disables it
     if LEM:IsInEditMode() then
         local conditional = "show"
@@ -463,8 +481,6 @@ addonTable.RegisteredBar.HealthBar = {
     mixin = addonTable.HealthBarMixin,
     dbName = "healthBarDB",
     editModeName = L["HEALTH_BAR_EDIT_MODE_NAME"],
-    frameType = "Button",
-    frameTemplate = "SecureUnitButtonTemplate,PingableUnitFrameTemplate",
     frameName = "HealthBar",
     frameLevel = 0,
     defaultValues = {
@@ -505,7 +521,7 @@ addonTable.RegisteredBar.HealthBar = {
                 set = function(layoutName, value)
                     SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
                     SenseiClassResourceBarDB[dbName][layoutName].hideHealthOnRole = value
-                    bar:RegisterSecureVisibility()
+                    bar:ApplyVisibilitySettings(layoutName)
                 end,
             },
             {
@@ -531,28 +547,27 @@ addonTable.RegisteredBar.HealthBar = {
                 end,
                 tooltip = L["HIDE_BLIZZARD_UI_HEALTH_BAR_TOOLTIP"],
             },
-            {
-                parentId = L["CATEGORY_BAR_VISIBILITY"],
-                order = 106,
-                name = L["ENABLE_HP_BAR_MOUSE_INTERACTION"],
-                kind = LEM.SettingType.Checkbox,
-                default = defaults.enableHealthBarMouseInteraction,
-                get = function(layoutName)
-                    local data = SenseiClassResourceBarDB[dbName][layoutName]
-                    if data and data.enableHealthBarMouseInteraction ~= nil then
-                        return data.enableHealthBarMouseInteraction
-                    else
-                        return defaults.enableHealthBarMouseInteraction
-                    end
-                end,
-                set = function(layoutName, value)
-                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
-                    SenseiClassResourceBarDB[dbName][layoutName].enableHealthBarMouseInteraction = value
-                    bar:RegisterSecureVisibility()
-                    bar:ApplyMouseSettings()
-                end,
-                tooltip = L["ENABLE_HP_BAR_MOUSE_INTERACTION_TOOLTIP"],
-            },
+            -- {
+            --     parentId = L["CATEGORY_BAR_VISIBILITY"],
+            --     order = 106,
+            --     name = L["ENABLE_HP_BAR_MOUSE_INTERACTION"],
+            --     kind = LEM.SettingType.Checkbox,
+            --     default = defaults.enableHealthBarMouseInteraction,
+            --     get = function(layoutName)
+            --         local data = SenseiClassResourceBarDB[dbName][layoutName]
+            --         if data and data.enableHealthBarMouseInteraction ~= nil then
+            --             return data.enableHealthBarMouseInteraction
+            --         else
+            --             return defaults.enableHealthBarMouseInteraction
+            --         end
+            --     end,
+            --     set = function(layoutName, value)
+            --         SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+            --         SenseiClassResourceBarDB[dbName][layoutName].enableHealthBarMouseInteraction = value
+            --         bar:ApplyVisibilitySettings(layoutName)
+            --     end,
+            --     tooltip = L["ENABLE_HP_BAR_MOUSE_INTERACTION_TOOLTIP"],
+            -- },
             {
                 parentId = L["CATEGORY_BAR_STYLE"],
                 order = 401,

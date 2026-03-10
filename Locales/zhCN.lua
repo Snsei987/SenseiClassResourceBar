@@ -60,6 +60,7 @@ local baseLocale = {
     ["STAGGER_MEDIUM"] ="中度醉拳",
     ["STAGGER_HIGH"] = "重度醉拳",
     ["ARCANE_CHARGES"] = POWER_TYPE_ARCANE_CHARGES,
+    ["ICICLES"] = "冰柱",
     ["SOUL_FRAGMENTS_VENGEANCE"] = "复仇灵魂残片",
     ["SOUL_FRAGMENTS_DDH"] = "吞噬者灵魂残片",
     ["SOUL_FRAGMENTS_VOID_META"] = "吞噬者灵魂残片（虚空形态）",

@@ -205,19 +205,9 @@ function BarMixin:Hide()
 end
 
 function BarMixin:OnShow()
-    local data = self:GetData()
-
-    if data and data.positionMode ~= nil and data.positionMode ~= "Self" then
-        self:ApplyLayout()
-    end
 end
 
 function BarMixin:OnHide()
-    local data = self:GetData()
-
-    if data and data.positionMode ~= nil and data.positionMode ~= "Self" then
-        self:ApplyLayout()
-    end
 end
 
 function BarMixin:IsShown()
@@ -371,8 +361,8 @@ function BarMixin:UpdateDisplay(layoutName, force)
 
     local defaults = self.defaults or {}
 
-    self.StatusBar:SetMinMaxValues(0, max, (data.smoothProgress or defaults.smoothProgress) and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-    self.StatusBar:SetValue(current, (data.smoothProgress or defaults.smoothProgress) and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+    self.StatusBar:SetMinMaxValues(0, max, (data.smoothProgress == nil and defaults.smoothProgress or data.smoothProgress) and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+    self.StatusBar:SetValue(current, (data.smoothProgress == nil and defaults.smoothProgress or data.smoothProgress) and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
 
     -----------
 
@@ -450,6 +440,12 @@ function BarMixin:ApplyVisibilitySettings(layoutName, inCombat)
 
     -- Not on arcane mage!
     if resource == Enum.PowerType.Mana and data.hideManaOnRole and data.hideManaOnRole[role] and specID ~= 62 then
+        self:Hide()
+        return
+    end
+
+    -- Hide based on role
+    if data.hideHealthOnRole and data.hideHealthOnRole[role] then
         self:Hide()
         return
     end
@@ -638,7 +634,7 @@ function BarMixin:ApplyLayout(layoutName, force)
 
     self:UpdateTicksLayout(layoutName, data)
 
-    if data.fasterUpdates or defaults.fasterUpdates then
+    if data.fasterUpdates == nil and defaults.fasterUpdates or data.fasterUpdates then
         self:EnableFasterUpdates()
     else
         self:DisableFasterUpdates()
@@ -950,7 +946,9 @@ function BarMixin:UpdateTicksLayout(layoutName, data)
     if resource == "MAELSTROM_WEAPON" then
         max = 5
     elseif resource == "TIP_OF_THE_SPEAR" then
-        max = addonTable.TipOfTheSpear.TIP_MAX_STACKS
+        max = 3
+    elseif resource == "ICICLES" then
+        max = 5
     elseif resource == "WHIRLWIND" then
         max = addonTable.Whirlwind.IW_MAX_STACKS
     elseif resource == "SOUL_FRAGMENTS_VENGEANCE" then

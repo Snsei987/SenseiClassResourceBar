@@ -121,6 +121,10 @@ local PowerData = {
         key = Enum.PowerType.ArcaneCharges,
     },
     {
+        label = L["ICICLES"],
+        key = "ICICLES",
+    },
+    {
         label = L["SOUL_FRAGMENTS_VENGEANCE"],
         key = "SOUL_FRAGMENTS_VENGEANCE",
     },

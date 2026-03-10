@@ -57,6 +57,7 @@ local baseLocale = {
     ["STAGGER_MEDIUM"] = "중간 시간차",
     ["STAGGER_HIGH"] = "높은 시간차",
     ["ARCANE_CHARGES"] = "비전 충전",
+    ["ICICLES"] = "고드름",
     ["SOUL_FRAGMENTS_VENGEANCE"] = "복수 영혼 파편",
     ["SOUL_FRAGMENTS_DDH"] = "영혼 포식자 파편",
     ["SOUL_FRAGMENTS_VOID_META"] = "영혼 포식자 파편 (공허 변신)",
