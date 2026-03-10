@@ -93,6 +93,10 @@ local PowerData = {
         key = "OVERCHARGED_COMBO_POINTS",
     },
     {
+        label = L["FERAL_FINISHER_COMBO_POINTS"],
+        key = "FERAL_FINISHER_COMBO_POINTS",
+    },
+    {
         label = L["SOUL_SHARDS"],
         key = Enum.PowerType.SoulShards,
     },

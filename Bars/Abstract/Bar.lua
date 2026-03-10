@@ -1070,10 +1070,57 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
 
     if resource == Enum.PowerType.ComboPoints then
         local current = UnitPower("player", resource)
-        -- Reuse cached maxPower to avoid redundant API call
         local maxCP = maxPower
 
-        local overchargedCpColor = addonTable:GetOverrideResourceColor("OVERCHARGED_COMBO_POINTS") or color
+        local baseCPColor = self:GetBarColor(resource) or color
+        local overchargedCpColor = addonTable:GetOverrideResourceColor("OVERCHARGED_COMBO_POINTS") or baseCPColor
+
+        -- ---------------------------------------------------------------
+        -- FERAL FINISHER HIGHLIGHT
+        -- Detect Feral spec (103) and Berserk/Incarnation aura state to
+        -- decide which CP slots should use the finisher highlight color.
+        -- ---------------------------------------------------------------
+        local isFeral = false
+        local spec = C_SpecializationInfo.GetSpecialization()
+        if spec then
+            local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
+            isFeral = specID == 103
+        end
+
+        local feralFinisherColor = addonTable:GetOverrideResourceColor("FERAL_FINISHER_COMBO_POINTS") or baseCPColor
+
+        -- Normal rotation: CP4+CP5 highlighted.
+        -- Berserk / Incarnation active: only CP5 highlighted.
+        -- Berserk/Incarnation auras are fully secret in Midnight: both GetPlayerAuraBySpellID
+        -- and COMBAT_LOG_EVENT_UNFILTERED are blocked for these buffs.
+        -- Durations are fixed in Midnight 12.0 (no talents extend them):
+        --   Berserk: 15 seconds
+        --   Incarnation: Avatar of Ashamane: 20 seconds
+        -- We detect the cast via UNIT_SPELLCAST_SUCCEEDED on a dedicated frame to avoid
+        -- conflicting with the bar's existing OnEvent handler.
+        if isFeral and not self._feralCooldownHooked then
+            self._feralCooldownExpiry = 0
+            self._feralCooldownHooked = true
+
+            local tracker = CreateFrame("Frame")
+            tracker:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+            tracker:SetScript("OnEvent", function(_, event, unit, _, spellID)
+                if event == "UNIT_SPELLCAST_SUCCEEDED" and unit == "player" then
+                    if spellID == 106951 then
+                        self._feralCooldownExpiry = GetTime() + 15 -- Berserk: 15s
+                    elseif spellID == 102543 then
+                        self._feralCooldownExpiry = GetTime() + 20 -- Incarnation: 20s
+                    end
+                end
+            end)
+        end
+
+        local finisherStartIndex = 4
+        if isFeral and GetTime() < (self._feralCooldownExpiry or 0) then
+            finisherStartIndex = 5
+        end
+        -- ---------------------------------------------------------------
+
         local charged = GetUnitChargedPowerPoints("player") or {}
         local chargedLookup = {}
         for _, index in ipairs(charged) do
@@ -1112,6 +1159,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
                 cpFrame:SetMinMaxValues(0, 1)
 
                 if chargedLookup[idx] then
+                    -- Overcharged takes full precedence, unchanged
                     cpFrame:SetValue(1, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                     if idx <= current then
                         cpFrame:SetStatusBarColor(overchargedCpColor.r, overchargedCpColor.g, overchargedCpColor.b, overchargedCpColor.a or 1)
@@ -1119,12 +1167,15 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
                         cpFrame:SetStatusBarColor(overchargedCpColor.r * 0.5, overchargedCpColor.g * 0.5, overchargedCpColor.b * 0.5, overchargedCpColor.a or 1)
                     end
                 else
+                    local useFeralFinisherColor = isFeral and idx >= finisherStartIndex
+                    local baseColor = useFeralFinisherColor and feralFinisherColor or baseCPColor
+
                     if idx <= current then
                         cpFrame:SetValue(1, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                        cpFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+                        cpFrame:SetStatusBarColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a or 1)
                     else
                         cpFrame:SetValue(0, data.smoothProgress and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                        cpFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
+                        cpFrame:SetStatusBarColor(baseColor.r * 0.5, baseColor.g * 0.5, baseColor.b * 0.5, baseColor.a or 1)
                     end
                 end
                 cpText:SetFormattedText("")
