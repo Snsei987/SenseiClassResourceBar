@@ -56,6 +56,28 @@ local function BuildLemSettings(bar, defaults)
         },
         {
             parentId = L["CATEGORY_BAR_VISIBILITY"],
+            order = 103,
+            name = L["BAR_ALPHA"],
+            kind = LEM.SettingType.Slider,
+            default = defaults.alpha,
+            minValue = 0.00,
+            maxValue = 1,
+            valueStep = 0.01,
+            formatter = function(value)
+                return string.format("%d%%", addonTable.rounded(value, 2) * 100)
+            end,
+            get = function(layoutName)
+                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
+                return data and addonTable.rounded(data.alpha, 2) or defaults.alpha
+            end,
+            set = function(layoutName, value)
+                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+                SenseiClassResourceBarDB[config.dbName][layoutName].alpha = addonTable.rounded(value, 2)
+                bar:ApplyLayout(layoutName)
+            end,
+        },
+        {
+            parentId = L["CATEGORY_BAR_VISIBILITY"],
             order = 104,
             name = L["HIDE_WHILE_MOUNTED_OR_VEHICULE"],
             kind = LEM.SettingType.Checkbox,
