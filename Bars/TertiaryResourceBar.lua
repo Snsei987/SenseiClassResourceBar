@@ -86,7 +86,7 @@ addonTable.RegisteredBar.TertiaryResourceBar = {
         point = "CENTER",
         x = 0,
         y = -80,
-        useResourceAtlas = false,
+        useResourceAtlas = "Custom",
     },
     allowEditPredicate = function()
         local spec = C_SpecializationInfo.GetSpecialization()
@@ -104,9 +104,11 @@ addonTable.RegisteredBar.TertiaryResourceBar = {
             {
                 parentId = L["CATEGORY_BAR_STYLE"],
                 order = 401,
-                name = L["USE_RESOURCE_TEXTURE_AND_COLOR"],
-                kind = LEM.SettingType.Checkbox,
+                name = L["BAR_TEXTURE_AND_COLOR_MODE"],
+                kind = LEM.SettingType.Dropdown,
                 default = defaults.useResourceAtlas,
+                values = addonTable.availableResourceTextureOptions,
+                useOldStyle = true,
                 get = function(layoutName)
                     local data = SenseiClassResourceBarDB[dbName][layoutName]
                     if data and data.useResourceAtlas ~= nil then
