@@ -438,8 +438,7 @@ function BarMixin:ApplyVisibilitySettings(layoutName, inCombat)
     local role = select(5, C_SpecializationInfo.GetSpecializationInfo(spec))
     local formID = GetShapeshiftFormID()
 
-    -- Not on arcane mage!
-    if resource == Enum.PowerType.Mana and data.hideManaOnRole and data.hideManaOnRole[role] and specID ~= 62 then
+    if resource == Enum.PowerType.Mana and data.hideManaOnRole and data.hideManaOnRole[role] then
         self:Hide()
         return
     end
