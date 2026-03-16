@@ -526,7 +526,7 @@ addonTable.RegisteredBar.HealthBar = {
             },
             {
                 parentId = L["CATEGORY_BAR_VISIBILITY"],
-                order = 105,
+                order = 106,
                 name = L["HIDE_BLIZZARD_UI"],
                 kind = LEM.SettingType.Checkbox,
                 default = defaults.hideBlizzardPlayerContainerUi,
@@ -549,7 +549,7 @@ addonTable.RegisteredBar.HealthBar = {
             },
             -- {
             --     parentId = L["CATEGORY_BAR_VISIBILITY"],
-            --     order = 106,
+            --     order = 107,
             --     name = L["ENABLE_HP_BAR_MOUSE_INTERACTION"],
             --     kind = LEM.SettingType.Checkbox,
             --     default = defaults.enableHealthBarMouseInteraction,

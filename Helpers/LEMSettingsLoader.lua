@@ -56,7 +56,7 @@ local function BuildLemSettings(bar, defaults)
         },
         {
             parentId = L["CATEGORY_BAR_VISIBILITY"],
-            order = 104,
+            order = 105,
             name = L["HIDE_WHILE_MOUNTED_OR_VEHICULE"],
             kind = LEM.SettingType.Checkbox,
             default = defaults.hideWhileMountedOrVehicule,

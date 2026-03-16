@@ -439,13 +439,21 @@ function BarMixin:ApplyVisibilitySettings(layoutName, inCombat)
     local formID = GetShapeshiftFormID()
 
     -- Not on arcane mage!
+    -- Hide mana based on role
     if resource == Enum.PowerType.Mana and data.hideManaOnRole and data.hideManaOnRole[role] and specID ~= 62 then
         self:Hide()
         return
     end
 
-    -- Hide based on role
+    -- Hide health based on role
     if data.hideHealthOnRole and data.hideHealthOnRole[role] then
+        self:Hide()
+        return
+    end
+
+    -- Hide custom resources (defined as one not represented in the default PlayerFrame)
+    if data.hideCustomResources and data.hideCustomResources[resource] then
+
         self:Hide()
         return
     end
