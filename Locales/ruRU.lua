@@ -53,6 +53,7 @@ local baseLocale = {
     ["UNHOLY_RUNE"] = COMBAT_TEXT_RUNE_UNHOLY,
     ["COMBO_POINTS"] = COMBO_POINTS,
     ["OVERCHARGED_COMBO_POINTS"] = "Перегруженные комбо очки",
+    ["FERAL_FINISHER_COMBO_POINTS"] = "Завершающие комбо (Ферал)",
     ["SOUL_SHARDS"] = SOUL_SHARDS,
     ["HOLY_POWER"] = HOLY_POWER,
     ["CHI"] = CHI,
