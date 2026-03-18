@@ -5,9 +5,12 @@ local Freeze = {}
 -- Debufs are secrets now, so we will have to hook into the CDM to display the Freeze stacks.
 Freeze.FREEZE_MAX_STACKS = 20
 
-local _auraInstanceID = nil
-local _cdmFrame       = nil
-local _hooked         = false
+local FREEZE_SPELL_ID = 1246769
+
+local _auraInstanceID    = nil
+local _cdmFrame          = nil
+local _hooked            = false
+local _lastKnownStacks   = 0
 
 local function HasAuraInstanceID(value)
     if value == nil then return false end
@@ -18,7 +21,7 @@ end
 function Freeze:OnLoad(powerBar)
     local playerClass = select(2, UnitClass("player"))
     if playerClass == "MAGE" then
-        powerBar.Frame:RegisterUnitEvent("UNIT_AURA", "target")
+        self:SetupCDMHooks(powerBar)
     end
 end
 
@@ -28,11 +31,6 @@ function Freeze:OnEvent(powerBar, event, ...)
 
     if event == "PLAYER_ENTERING_WORLD" or event == "PLAYER_SPECIALIZATION_CHANGED" then
         self:SetupCDMHooks(powerBar)
-    elseif event == "PLAYER_TARGET_CHANGED" then
-        _auraInstanceID = nil
-        _cdmFrame = nil
-    elseif event == "UNIT_AURA" and (...) == "target" then
-        powerBar:UpdateDisplay()
     end
 end
 
@@ -45,6 +43,11 @@ function Freeze:SetupCDMHooks(powerBar)
             for _, frame in ipairs({viewer:GetChildren()}) do
                 if frame.SetAuraInstanceInfo then
                     hooksecurefunc(frame, "SetAuraInstanceInfo", function(f)
+                        -- Re-validate at call time: CDM may have reassigned this frame to a different spell
+                        local cdID = f.cooldownID
+                        local info = cdID and C_CooldownViewer and C_CooldownViewer.GetCooldownViewerCooldownInfo(cdID)
+                        if not (info and info.spellID == FREEZE_SPELL_ID) then return end
+
                         if f.auraDataUnit == "target" and HasAuraInstanceID(f.auraInstanceID) then
                             _auraInstanceID = f.auraInstanceID
                             _cdmFrame = f
@@ -57,6 +60,7 @@ function Freeze:SetupCDMHooks(powerBar)
                         if f == _cdmFrame then
                             _auraInstanceID = nil
                             _cdmFrame = nil
+                            _lastKnownStacks = 0
                             powerBar:UpdateDisplay()
                         end
                     end)
@@ -67,9 +71,16 @@ function Freeze:SetupCDMHooks(powerBar)
 end
 
 function Freeze:GetStacks()
-    local auraData = HasAuraInstanceID(_auraInstanceID)
-        and C_UnitAuras.GetAuraDataByAuraInstanceID("target", _auraInstanceID)
-    return self.FREEZE_MAX_STACKS, auraData and auraData.applications or 0
+    if not HasAuraInstanceID(_auraInstanceID) then
+        return self.FREEZE_MAX_STACKS, 0
+    end
+    local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID("target", _auraInstanceID)
+    if auraData then
+        _lastKnownStacks = auraData.applications or 0
+        return self.FREEZE_MAX_STACKS, _lastKnownStacks
+    end
+    -- Return last known stacks to avoid a brief flash to 0.
+    return self.FREEZE_MAX_STACKS, _lastKnownStacks
 end
 
 addonTable.Freeze = Freeze
