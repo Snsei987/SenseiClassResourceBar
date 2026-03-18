@@ -71,7 +71,7 @@ local baseLocale = {
     ["HEALTH_BAR_EDIT_MODE_NAME"] = "Панель здоровья",
     ["PRIMARY_POWER_BAR_EDIT_MODE_NAME"] = "Панель основного ресурса",
     ["SECONDARY_POWER_BAR_EDIT_MODE_NAME"] = "Панель вторичного ресурса",
-    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "Панель Черной мощи",
+    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "Панель третичного ресурса",
 
     -- Bar visibility category - Edit Mode
     ["CATEGORY_BAR_VISIBILITY"] = "Видимость панели",

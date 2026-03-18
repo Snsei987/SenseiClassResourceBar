@@ -71,7 +71,7 @@ local baseLocale = {
     ["HEALTH_BAR_EDIT_MODE_NAME"] = "Barra de Vida",
     ["PRIMARY_POWER_BAR_EDIT_MODE_NAME"] = "Barra de Recurso Primário",
     ["SECONDARY_POWER_BAR_EDIT_MODE_NAME"] = "Barra de Recurso Secundário",
-    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "Barra de Poder de Ébano",
+    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "Barra de Recurso Terciário",
 
     -- Bar visibility category - Edit Mode
     ["CATEGORY_BAR_VISIBILITY"] = "Visibilidade da Barra",

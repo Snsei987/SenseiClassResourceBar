@@ -71,7 +71,7 @@ local baseLocale = {
     ["HEALTH_BAR_EDIT_MODE_NAME"] = "Lebensleiste",
     ["PRIMARY_POWER_BAR_EDIT_MODE_NAME"] = "Primäre Ressourcenleiste",
     ["SECONDARY_POWER_BAR_EDIT_MODE_NAME"] = "Sekundäre Ressourcenleiste",
-    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "Schwarzmachtleiste",
+    ["TERNARY_POWER_BAR_EDIT_MODE_NAME"] = "Tertiäre Ressourcenleiste",
 
     -- Bar visibility category - Edit Mode
     ["CATEGORY_BAR_VISIBILITY"] = "Sichtbarkeit der Leiste",
