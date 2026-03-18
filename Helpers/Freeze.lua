@@ -23,6 +23,9 @@ function Freeze:OnLoad(powerBar)
 end
 
 function Freeze:OnEvent(powerBar, event, ...)
+    local playerClass = select(2, UnitClass("player"))
+    if playerClass ~= "MAGE" then return end
+
     if event == "PLAYER_ENTERING_WORLD" or event == "PLAYER_SPECIALIZATION_CHANGED" then
         self:SetupCDMHooks(powerBar)
     elseif event == "PLAYER_TARGET_CHANGED" then
