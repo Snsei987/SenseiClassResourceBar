@@ -66,6 +66,7 @@ local baseLocale = {
     ["SOUL_FRAGMENTS_VOID_META"] = "噬灭灵魂残片（虚空变形）",
     ["ESSENCE"]= POWER_TYPE_ESSENCE,
     ["EBON_MIGHT"] = "黑檀之力",
+    ["FREEZE"] = "冻结",
 
     -- Bar names
     ["HEALTH_BAR_EDIT_MODE_NAME"] = "生命条",
@@ -81,8 +82,9 @@ local baseLocale = {
     ["HIDE_WHILE_MOUNTED_OR_VEHICULE"] = "在坐骑或载具中隐藏",
     ["HIDE_WHILE_MOUNTED_OR_VEHICULE_TOOLTIP"] = "包括德鲁伊旅行形态",
     ["HIDE_MANA_ON_ROLE"] = "在特定职责下隐藏法力值",
-    ["HIDE_HEALTH_ON_ROLE"] = "在特定职责下隐藏",
     ["HIDE_MANA_ON_ROLE_PRIMARY_BAR_TOOLTIP"] = "对奥术法师无效",
+    ["HIDE_CUSTOM_RESOURCES"] = "隐藏自定义资源",
+    ["HIDE_HEALTH_ON_ROLE"] = "在特定职责下隐藏",
     ["HIDE_BLIZZARD_UI"] = "隐藏暴雪自带界面",
     ["HIDE_BLIZZARD_UI_HEALTH_BAR_TOOLTIP"] = "隐藏暴雪自带的玩家框架界面",
     ["HIDE_BLIZZARD_UI_SECONDARY_POWER_BAR_TOOLTIP"] = "隐藏暴雪自带的次要资源界面（例如死亡骑士的符文条）",
