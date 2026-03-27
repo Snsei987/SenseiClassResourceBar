@@ -34,7 +34,10 @@ Mana, Rage, Energy, Focus, Fury, Runic Power, Astral Power, Maelstrom Weapon and
 *   **Hunter** → Tip of the Spear (Survival)
 *   **Warrior** → Whirlwind (Fury)
 
-**Ebon Might as a standalone bar**
+**Tertiary Resources Supported**
+
+*   **Evoker** → Ebon Might
+*   **Mage(Frost)** → Freeze Stacks
 
 **Druid Form Adaptive Support:**  
 Automatically switches to Mana, Energy, Rage, or Astral Power depending on current shapeshift form.

@@ -358,6 +358,7 @@ addonTable.tickedPowerTypes = {
     ["TIP_OF_THE_SPEAR"] = true,
     ["SOUL_FRAGMENTS_VENGEANCE"] = true,
     ["WHIRLWIND"] = true,
+    ["FREEZE"] = true,
 }
 
 -- Power types that are fragmented (multiple independent segments)

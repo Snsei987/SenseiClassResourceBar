@@ -12,6 +12,16 @@ local L = addonTable.L
 
 local TertiaryResourceBarMixin = Mixin({}, addonTable.PowerBarMixin)
 
+function TertiaryResourceBarMixin:OnLoad()
+    addonTable.PowerBarMixin.OnLoad(self)
+    addonTable.Freeze:OnLoad(self)
+end
+
+function TertiaryResourceBarMixin:OnEvent(event, ...)
+    addonTable.PowerBarMixin.OnEvent(self, event, ...)
+    addonTable.Freeze:OnEvent(self, event, ...)
+end
+
 function TertiaryResourceBarMixin:GetResource()
     local playerClass = select(2, UnitClass("player"))
     self._resourceTable = self._resourceTable or {
@@ -22,7 +32,9 @@ function TertiaryResourceBarMixin:GetResource()
             [1473] = "EBON_MIGHT", -- Augmentation
         },
         ["HUNTER"]      = nil,
-        ["MAGE"]        = nil,
+        ["MAGE"]        = {
+            [64] = "FREEZE", -- Frost
+        },
         ["MONK"]        = nil,
         ["PALADIN"]     = nil,
         ["PRIEST"]      = nil,
@@ -70,6 +82,10 @@ function TertiaryResourceBarMixin:GetResourceValue(resource)
         return max, current
     end
 
+    if resource == "FREEZE" then
+        return addonTable.Freeze:GetStacks()
+    end
+
     local current = UnitPower("player", resource)
     local max = UnitPowerMax("player", resource)
     if max <= 0 then return nil, nil, nil, nil end
@@ -101,20 +117,82 @@ addonTable.RegisteredBar.TertiaryResourceBar = {
         x = 0,
         y = -80,
         useResourceAtlas = false,
+        tickColor = {r = 0, g = 0, b = 0, a = 1},
+        tickThickness = 1,
     },
     allowEditPredicate = function()
         local spec = C_SpecializationInfo.GetSpecialization()
         local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
-        return specID == 1473 or select(2, UnitClass("player")) == "HUNTER"
+        return specID == 1473 -- Augmentation
+            or specID == 64   -- Frost Mage
+            or select(2, UnitClass("player")) == "HUNTER"
     end,
     loadPredicate = function()
         local playerClass = select(2, UnitClass("player"))
-        return playerClass == "EVOKER" or playerClass == "HUNTER"
+        return playerClass == "EVOKER" or playerClass == "MAGE" or playerClass == "HUNTER"
     end,
     lemSettings = function(bar, defaults)
         local dbName = bar:GetConfig().dbName
 
         return {
+            {
+                parentId = L["CATEGORY_BAR_SETTINGS"],
+                order = 304,
+                kind = LEM.SettingType.Divider,
+            },
+            {
+                parentId = L["CATEGORY_BAR_SETTINGS"],
+                order = 305,
+                name = L["SHOW_TICKS_WHEN_AVAILABLE"],
+                kind = LEM.SettingType.CheckboxColor,
+                default = defaults.showTicks,
+                colorDefault = defaults.tickColor,
+                get = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    if data and data.showTicks ~= nil then
+                        return data.showTicks
+                    else
+                        return defaults.showTicks
+                    end
+                end,
+                colorGet = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    return data and data.tickColor or defaults.tickColor
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].showTicks = value
+                    bar:UpdateTicksLayout(layoutName)
+                end,
+                colorSet = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].tickColor = value
+                    bar:UpdateTicksLayout(layoutName)
+                end,
+            },
+            {
+                parentId = L["CATEGORY_BAR_SETTINGS"],
+                order = 306,
+                name = L["TICK_THICKNESS"],
+                kind = LEM.SettingType.Slider,
+                default = defaults.tickThickness,
+                minValue = 1,
+                maxValue = 5,
+                valueStep = 1,
+                get = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    return data and addonTable.rounded(data.tickThickness) or defaults.tickThickness
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].tickThickness = addonTable.rounded(value)
+                    bar:UpdateTicksLayout(layoutName)
+                end,
+                isEnabled = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    return data.showTicks == true
+                end,
+            },
             {
                 parentId = L["CATEGORY_BAR_STYLE"],
                 order = 401,
