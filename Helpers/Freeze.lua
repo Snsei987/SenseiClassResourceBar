@@ -9,7 +9,6 @@ local FREEZE_SPELL_ID = 1246769
 
 local _auraInstanceID    = nil
 local _cdmFrame          = nil
-local _hooked            = false
 local _lastKnownStacks   = 0
 
 local function HasAuraInstanceID(value)
@@ -18,30 +17,18 @@ local function HasAuraInstanceID(value)
     return type(value) == "number" and value ~= 0
 end
 
-function Freeze:OnLoad(powerBar)
-    local playerClass = select(2, UnitClass("player"))
-    if playerClass == "MAGE" then
-        self:SetupCDMHooks(powerBar)
-    end
+function Freeze:OnLoad()
 end
 
-function Freeze:OnEvent(powerBar, event, ...)
-    local playerClass = select(2, UnitClass("player"))
-    if playerClass ~= "MAGE" then return end
-
-    if event == "PLAYER_ENTERING_WORLD" or event == "PLAYER_SPECIALIZATION_CHANGED" then
-        self:SetupCDMHooks(powerBar)
-    end
+function Freeze:OnEvent(_, event, ...)
 end
 
-function Freeze:SetupCDMHooks(powerBar)
-    if _hooked then return end
-    _hooked = true
-
+function Freeze:GetStacks()
     for _, viewer in ipairs({BuffIconCooldownViewer, BuffBarCooldownViewer}) do
         if viewer then
             for _, frame in ipairs({viewer:GetChildren()}) do
-                if frame.SetAuraInstanceInfo then
+                if frame.SetAuraInstanceInfo and not frame._hook_scrb_SetAuraInstanceInfo then
+                    frame._hook_scrb_SetAuraInstanceInfo = true
                     hooksecurefunc(frame, "SetAuraInstanceInfo", function(f)
                         -- Re-validate at call time: CDM may have reassigned this frame to a different spell
                         local cdID = f.cooldownID
@@ -51,26 +38,23 @@ function Freeze:SetupCDMHooks(powerBar)
                         if f.auraDataUnit == "target" and HasAuraInstanceID(f.auraInstanceID) then
                             _auraInstanceID = f.auraInstanceID
                             _cdmFrame = f
-                            powerBar:UpdateDisplay()
                         end
                     end)
                 end
-                if frame.ClearAuraInstanceInfo then
+                if frame.ClearAuraInstanceInfo and not frame._hook_scrb_ClearAuraInstanceInfo then
+                    frame._hook_scrb_ClearAuraInstanceInfo = true
                     hooksecurefunc(frame, "ClearAuraInstanceInfo", function(f)
                         if f == _cdmFrame then
                             _auraInstanceID = nil
                             _cdmFrame = nil
                             _lastKnownStacks = 0
-                            powerBar:UpdateDisplay()
                         end
                     end)
                 end
             end
         end
     end
-end
 
-function Freeze:GetStacks()
     if not HasAuraInstanceID(_auraInstanceID) then
         return self.FREEZE_MAX_STACKS, 0
     end
