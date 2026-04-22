@@ -1146,6 +1146,11 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName, data, maxPower)
         local current = UnitPower("player", resource)
         local maxEssence = UnitPowerMax("player", resource)
         local regenRate = GetPowerRegenForPowerType(resource) or 0.2
+        if not issecretvalue(regenRate) then
+            self._cachedRegenRate = regenRate
+        else
+            regenRate = self._cachedRegenRate or 0.2
+        end
         local tickDuration = 5 / (5 / (1 / regenRate))
         local now = GetTime()
 
