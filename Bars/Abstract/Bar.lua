@@ -672,6 +672,10 @@ function BarMixin:ApplyFontSettings(layoutName, data)
     local font = data.font or defaults.font
     local size = data.fontSize or defaults.fontSize
     local outline = data.fontOutline or defaults.fontOutline
+    -- Since 12.0.5, "NONE" is not valid
+    if outline == "NONE" then
+        outline = ""
+    end
 
     self.TextValue:SetFont(font, size * scale, outline)
     self.TextValue:SetShadowColor(0, 0, 0, 0.8)
