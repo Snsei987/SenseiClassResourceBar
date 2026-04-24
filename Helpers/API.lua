@@ -41,6 +41,12 @@ addonTable.fullUpdateBars = function()
     end
 end
 
+addonTable.setFontStringFont = function(fontString, fontFace, size, flags)
+	if not (fontString and fontString.SetFont and fontFace) then return false end
+	local ok, applied = pcall(fontString.SetFont, fontString, fontFace, size, flags)
+	return ok and applied ~= false
+end
+
 addonTable.decodeImportString = function(importString)
     local prefix, version, encoded = importString:match("^([^:]+):(%d+):(.+)$")
     if prefix ~= addonName then

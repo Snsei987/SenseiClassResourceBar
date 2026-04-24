@@ -741,7 +741,10 @@ local function BuildLemSettings(bar, defaults)
 
                         fontDisplay:SetParent(self)
                         fontDisplay:SetPoint("LEFT", self.fontString, "LEFT", 0, 0)
-                        fontDisplay:SetFont(fontPath, 12)
+                        local ok = addonTable.setFontStringFont(fontDisplay, fontPath, 12)
+                        if not ok then
+                            addonTable.setFontStringFont(fontDisplay, defaults.font, 12)
+                        end
                         fontDisplay:SetText(fontName)
                         fontDisplay:Show()
                     end)
