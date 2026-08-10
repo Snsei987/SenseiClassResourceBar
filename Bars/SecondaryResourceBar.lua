@@ -248,6 +248,7 @@ function SecondaryResourceBarMixin:ApplyVisibilitySettings(layoutName, inCombat)
         return
     end
 
+    self:SetCustomBarVisualsShown(true)
     self:HideBlizzardSecondaryResource(layoutName, data)
 
     addonTable.PowerBarMixin.ApplyVisibilitySettings(self, layoutName, inCombat)
@@ -387,6 +388,19 @@ function SecondaryResourceBarMixin:GetBlizzardFrameContentOffset(blizzardFrame)
     return offsetX, offsetY, widthRatio, heightRatio
 end
 
+-- Show/hide the custom bar's visual elements (background, foreground, border,
+-- ticks, texts) without hiding self.Frame itself. Used while Blizzard bar mode
+-- is active: self.Frame must stay usable as an Edit Mode placeholder (the LEM
+-- selection overlay is a child of self.Frame), but its own visuals must not
+-- render behind the Blizzard bar.
+function SecondaryResourceBarMixin:SetCustomBarVisualsShown(shown)
+    if self._customBarVisualsShown == shown then return end
+    self._customBarVisualsShown = shown
+    self.BackgroundFrame:SetShown(shown)
+    self.BorderFrame:SetShown(shown)
+    self.TextFrame:SetShown(shown)
+end
+
 -- Determine if bar should be visible based on visibility settings.
 -- Uses the parent's ApplyVisibilitySettings to decide, then reads the result
 -- from self.Frame:IsShown(). This avoids duplicating the parent's visibility logic.
@@ -408,12 +422,14 @@ function SecondaryResourceBarMixin:UseBlizzardBarMode(layoutName, inCombat)
     local blizzardFrame = self:GetBlizzardResourceFrame()
     if not blizzardFrame then
         -- No compatible Blizzard bar for current spec, fall back to custom bar
-        -- Hide the class's Blizzard bar if it exists (e.g., Chi bar for Brewmaster)
+        -- Hide the class's Blizzard bar if it exists (e.g., Chi bar for Brewmaster).
+        -- The Show interceptor prevents Blizzard from re-showing it.
         local classBlizzardFrame = self:GetBlizzardFrameForClass()
         if classBlizzardFrame and data.useBlizzardBar and not InCombatLockdown() then
             classBlizzardFrame:Hide()
         end
         -- Use the custom bar as if useBlizzardBar wasn't enabled
+        self:SetCustomBarVisualsShown(true)
         self.Frame:Show()
         self.Frame:SetAlpha(1.0)
         addonTable.PowerBarMixin.ApplyLayout(self, layoutName)
@@ -423,15 +439,17 @@ function SecondaryResourceBarMixin:UseBlizzardBarMode(layoutName, inCombat)
     end
 
     if data.useBlizzardBar then
-        -- One-time setup: intercept SetPoint and ClearAllPoints so that Blizzard's
-        -- layout system and other addons cannot move the frame while active.
-        -- Intercepts are installed once and never removed; behavior is controlled
-        -- by _useBlizzardBarActive (block/passthrough) and _allowBlizzardFramePositioning.
+        -- One-time setup: intercept SetPoint, ClearAllPoints, and Show so that
+        -- Blizzard's layout system and other addons cannot move or re-show the
+        -- frame while active. Intercepts are installed once and never removed;
+        -- behavior is controlled by _useBlizzardBarActive (block/passthrough)
+        -- and per-operation flags (_allowBlizzardFramePositioning, _allowBlizzardFrameVisibility).
         if not self._blizzardFrameIntercepted then
             self._blizzardFrameIntercepted = true
 
             local originalSetPoint = blizzardFrame.SetPoint
             local originalClearAllPoints = blizzardFrame.ClearAllPoints
+            local originalShow = blizzardFrame.Show
             blizzardFrame.SetPoint = function(frame, ...)
                 if not self._useBlizzardBarActive or self._allowBlizzardFramePositioning then
                     originalSetPoint(frame, ...)
@@ -442,9 +460,12 @@ function SecondaryResourceBarMixin:UseBlizzardBarMode(layoutName, inCombat)
                     originalClearAllPoints(frame, ...)
                 end
             end
+            blizzardFrame.Show = function(frame, ...)
+                if not self._useBlizzardBarActive or self._allowBlizzardFrameVisibility then
+                    originalShow(frame, ...)
+                end
+            end
 
-            -- Reparent to UIParent so the frame renders independently of
-            -- PlayerFrame (which addons like ElvUI may hide or reparent)
             self._originalParent = blizzardFrame:GetParent()
 
             -- OnShow hook: re-apply positioning when the frame is re-shown
@@ -457,13 +478,17 @@ function SecondaryResourceBarMixin:UseBlizzardBarMode(layoutName, inCombat)
         end
 
         self._useBlizzardBarActive = true
+        -- The placeholder must never render its own bar visuals while the
+        -- Blizzard bar is active (they would show behind it, e.g. in Edit Mode)
+        self:SetCustomBarVisualsShown(false)
         blizzardFrame:SetParent(UIParent)
 
         local shouldBeVisible = self:ShouldBeVisible(layoutName, inCombat)
 
-        -- Show the Blizzard frame and use SetAlpha for visibility control
+        self._allowBlizzardFrameVisibility = true
         blizzardFrame:Show()
         blizzardFrame:SetAlpha(shouldBeVisible and 1 or 0)
+        self._allowBlizzardFrameVisibility = false
 
         -- Get the saved position
         local point, relativeFrame, relativePoint, x, y = self:GetPoint(layoutName, true)
@@ -489,20 +514,16 @@ function SecondaryResourceBarMixin:UseBlizzardBarMode(layoutName, inCombat)
         self.Frame:ClearAllPoints()
         self.Frame:SetPoint(point, relativeFrame, relativePoint, x, y)
 
-        -- Anchor Blizzard bar CENTER-to-CENTER with the placeholder, compensating
-        -- for content offset so the visual content aligns with the placeholder.
-        -- Using the placeholder as an anchor in both modes ensures Edit Mode and
-        -- normal mode always produce the same position regardless of anchor point.
+        -- Anchor Blizzard bar CENTER-to-CENTER with the placeholder
         blizzardFrame:ClearAllPoints()
         blizzardFrame:SetPoint("CENTER", self.Frame, "CENTER", -contentOffsetX, -contentOffsetY)
 
         if LEM:IsInEditMode() then
-            -- In Edit Mode, show the placeholder for drag-and-drop positioning
+            -- Show the placeholder for drag-and-drop; its own visuals are hidden
+            -- so only the Edit Mode selection overlay renders over the Blizzard bar
             self.Frame:Show()
-            self.Frame:SetAlpha(0.5)
-            self.TextFrame:Hide()
+            self.Frame:SetAlpha(1)
         else
-            -- In normal mode, hide the placeholder (it still serves as a position anchor)
             self.Frame:Hide()
         end
 
@@ -526,6 +547,7 @@ function SecondaryResourceBarMixin:UseBlizzardBarMode(layoutName, inCombat)
         self:HideBlizzardSecondaryResource(layoutName)
 
         -- Show our custom bar
+        self:SetCustomBarVisualsShown(true)
         self.Frame:Show()
         self.Frame:SetAlpha(1.0)
         self:ApplyVisibilitySettings(layoutName)
@@ -543,6 +565,7 @@ function SecondaryResourceBarMixin:ApplyLayout(layoutName, force)
         return
     end
 
+    self:SetCustomBarVisualsShown(true)
     addonTable.PowerBarMixin.ApplyLayout(self, layoutName, force)
 end
 
