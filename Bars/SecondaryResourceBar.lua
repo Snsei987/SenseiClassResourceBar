@@ -58,6 +58,7 @@ function SecondaryResourceBarMixin:GetResource()
         },
         ["WARLOCK"]     = Enum.PowerType.SoulShards,
         ["WARRIOR"]     = {
+            [71] = "SWEEPING_STRIKES", -- Arms
             [72] = "WHIRLWIND", -- Fury
         },
     }
@@ -182,6 +183,13 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
         local auraData = C_UnitAuras.GetPlayerAuraBySpellID(205473) -- Icicles
         local current = auraData and auraData.applications or 0
         local max = 5
+
+        return max, current
+    end
+
+    if resource == "SWEEPING_STRIKES" then
+        local current = C_Spell.GetSpellCastCount(260708) or 0 -- Sweeping Strikes
+        local max = 12
 
         return max, current
     end
