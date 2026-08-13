@@ -109,6 +109,7 @@ addonTable.availableRoleOptions = {
 addonTable.availableCustomResources = {
     { text = L["TIP_OF_THE_SPEAR"], value = "TIP_OF_THE_SPEAR" },
     { text = L["ICICLES"], value = "ICICLES" },
+    { text = L["SWEEPING_STRIKES"], value = "SWEEPING_STRIKES" },
     { text = L["WHIRLWIND"], value = "WHIRLWIND" },
     { text = L["SOUL_FRAGMENTS_VENGEANCE"], value = "SOUL_FRAGMENTS_VENGEANCE" },
     { text = L["MAELSTROM_WEAPON"], value = "MAELSTROM_WEAPON" },
@@ -357,6 +358,7 @@ addonTable.tickedPowerTypes = {
     ["MAELSTROM_WEAPON"] = true,
     ["TIP_OF_THE_SPEAR"] = true,
     ["SOUL_FRAGMENTS_VENGEANCE"] = true,
+    ["SWEEPING_STRIKES"] = true,
     ["WHIRLWIND"] = true,
 }
 

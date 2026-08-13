@@ -28,6 +28,10 @@ local PowerData = {
         label = L["RAGE"],
         key = Enum.PowerType.Rage,
     },
+    { 
+        label = L["SWEEPING_STRIKES"], 
+        key = "SWEEPING_STRIKES" 
+    },
     {
         label = L["WHIRLWIND"],
         key = "WHIRLWIND",

@@ -127,6 +127,8 @@ function addonTable:GetResourceColor(resource)
         color = { r = 1, g = 0.5, b = 0 }
     elseif resource == "TIP_OF_THE_SPEAR" then
         color = { r = 0.6, g = 0.8, b = 0.2 }
+    elseif resource == "SWEEPING_STRIKES" then
+        color = { r = 0.78, g = 0.61, b = 0.43 } -- warrior tan
     elseif resource == "WHIRLWIND" then
         color = { r = 0.2, b = 0.8, g = 0.2 }
     elseif resource == "ICICLES" then
