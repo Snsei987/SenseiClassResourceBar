@@ -50,6 +50,7 @@ local baseLocale = {
     ["UNHOLY_RUNE"] = "부정 룬",
     ["COMBO_POINTS"] = "연계 점수",
     ["OVERCHARGED_COMBO_POINTS"] = "과충전 연계 점수",
+    ["FERAL_FINISHER_COMBO_POINTS"] = "야성 마무리 연계 점수",
     ["SOUL_SHARDS"] = "영혼의 조각",
     ["HOLY_POWER"] = "신성한 힘",
     ["CHI"] = "기",
