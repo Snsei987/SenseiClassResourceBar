@@ -5,18 +5,150 @@ local L = addonTable.L
 
 local SecondaryResourceBarMixin = Mixin({}, addonTable.PowerBarMixin)
 
+local auraSpellIDsByResource = {
+    ["SOUL_FRAGMENTS"] = { 1225789, 1227702 }, -- Soul Fragments / Collapsing Star
+    ["MAELSTROM_WEAPON"] = { 344179 },
+    ["TIP_OF_THE_SPEAR"] = { 260286 },
+    ["ICICLES"] = { 205473 },
+}
+
+local function IsTrackedAuraSpellID(resource, spellID)
+    local spellIDs = auraSpellIDsByResource[resource]
+    if not spellIDs then
+        return false
+    end
+
+    for _, trackedSpellID in ipairs(spellIDs) do
+        if trackedSpellID == spellID then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function GetTrackedAuraDataByInstanceID(resource, auraInstanceID)
+    local spellIDs = auraSpellIDsByResource[resource]
+    if not spellIDs then
+        return nil
+    end
+
+    for _, spellID in ipairs(spellIDs) do
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+        if auraData and auraData.auraInstanceID == auraInstanceID then
+            return auraData
+        end
+    end
+
+    return nil
+end
+
+function SecondaryResourceBarMixin:RefreshTrackedAuraState(resource)
+    local spellIDs = auraSpellIDsByResource[resource]
+    if not spellIDs then
+        self._trackedAuraState = nil
+        return nil
+    end
+
+    local spellIDByAuraInstanceID = {}
+    for _, spellID in ipairs(spellIDs) do
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
+        if auraData and auraData.auraInstanceID then
+            spellIDByAuraInstanceID[auraData.auraInstanceID] = spellID
+        end
+    end
+
+    self._trackedAuraState = {
+        resource = resource,
+        spellIDByAuraInstanceID = spellIDByAuraInstanceID,
+    }
+
+    return self._trackedAuraState
+end
+
+function SecondaryResourceBarMixin:GetTrackedAuraState(resource)
+    local state = self._trackedAuraState
+    if state and state.resource == resource then
+        return state
+    end
+
+    return self:RefreshTrackedAuraState(resource)
+end
+
+function SecondaryResourceBarMixin:DoesUnitAuraUpdateTouchResource(resource, updateInfo)
+    if not auraSpellIDsByResource[resource] then
+        return false
+    end
+
+    if not updateInfo or updateInfo.isFullUpdate then
+        return true
+    end
+
+    local state = self:GetTrackedAuraState(resource)
+
+    if updateInfo.addedAuras then
+        for _, auraData in ipairs(updateInfo.addedAuras) do
+            if auraData and IsTrackedAuraSpellID(resource, auraData.spellId) then
+                return true
+            end
+        end
+    end
+
+    if updateInfo.updatedAuraInstanceIDs then
+        for _, auraInstanceID in ipairs(updateInfo.updatedAuraInstanceIDs) do
+            if state and state.spellIDByAuraInstanceID[auraInstanceID] then
+                return true
+            end
+
+            if GetTrackedAuraDataByInstanceID(resource, auraInstanceID) then
+                return true
+            end
+        end
+    end
+
+    if updateInfo.removedAuraInstanceIDs then
+        for _, auraInstanceID in ipairs(updateInfo.removedAuraInstanceIDs) do
+            if state and state.spellIDByAuraInstanceID[auraInstanceID] then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
 function SecondaryResourceBarMixin:OnLoad()
     addonTable.PowerBarMixin.OnLoad(self)
+    self.Frame:RegisterUnitEvent("UNIT_AURA", "player")
 
     -- Modules for the special cases requiring more work
     addonTable.Whirlwind:OnLoad(self)
 end
 
 function SecondaryResourceBarMixin:OnEvent(event, ...)
+    if event == "UNIT_AURA" then
+        local unit, updateInfo = ...
+        if unit == "player" then
+            local resource = self:GetResource()
+            if self:DoesUnitAuraUpdateTouchResource(resource, updateInfo) then
+                self:UpdateDisplay()
+                self:RefreshTrackedAuraState(resource)
+            end
+        end
+
+        return
+    end
+
     addonTable.PowerBarMixin.OnEvent(self, event, ...)
 
     -- Modules for the special cases requiring more work
     addonTable.Whirlwind:OnEvent(self, event, ...)
+
+    if event == "PLAYER_ENTERING_WORLD"
+        or event == "UPDATE_SHAPESHIFT_FORM"
+        or event == "PLAYER_SPECIALIZATION_CHANGED" then
+        self:RefreshTrackedAuraState(self:GetResource())
+    end
 end
 
 function SecondaryResourceBarMixin:GetResource()
