@@ -3,6 +3,8 @@ local _, addonTable = ...
 local LEM = addonTable.LEM or LibStub("LibEQOLEditMode-1.0")
 local L = addonTable.L
 
+local DEVOURER_SOUL_FRAGMENTS_SPELL_ID = 1245577 -- Soul Fragments (Devourer)
+
 local SecondaryResourceBarMixin = Mixin({}, addonTable.PowerBarMixin)
 
 function SecondaryResourceBarMixin:OnLoad()
@@ -115,9 +117,18 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
     end
 
     if resource == "SOUL_FRAGMENTS" then
-        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(1225789) or C_UnitAuras.GetPlayerAuraBySpellID(1227702) -- Soul Fragments / Collapsing Star
+        local collapsingStar = C_UnitAuras.GetPlayerAuraBySpellID(1227702) -- Collapsing Star (inside Void Metamorphosis)
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(1225789) or collapsingStar -- Soul Fragments / Collapsing Star
         local current = auraData and auraData.applications or 0
-        local max = C_SpellBook.IsSpellKnown(1247534) and 35 or 50 -- Soul Glutton
+        local inVoidMeta = C_UnitAuras.GetPlayerAuraBySpellID(1217607) ~= nil or collapsingStar ~= nil -- Void Metamorphosis
+
+        -- Inside Void Metamorphosis the Soul Fragment cap is fixed at 40 (else Soul Glutton: 35, otherwise 50)
+        local max
+        if inVoidMeta then
+            max = 40
+        else
+            max = C_SpellBook.IsSpellKnown(1247534) and 35 or 50 -- Soul Glutton
+        end
 
         -- For performance, only update the foreground when current is below 1, this happens when switching in/out of Void Metamorphosis
         if current <= 1 then
@@ -196,6 +207,80 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
     if max <= 0 then return nil, nil end
 
     return max, current
+end
+
+function SecondaryResourceBarMixin:CreateSoulFragmentsDisplay()
+    if self.SoulFragmentsDisplayContainer or self._soulFragmentsDisplayAttempted or InCombatLockdown() then return end
+    if self:GetResource() ~= "SOUL_FRAGMENTS" then return end
+
+    self._soulFragmentsDisplayAttempted = true
+
+    -- 12.1: aura data of restricted auras is not readable by addon code in combat, so Blizzard's
+    -- AuraContainer renders the stack count instead (the client reads the aura and drives the widget)
+    local formatter
+    if C_StringUtil and C_StringUtil.CreateNumericRuleFormatter then
+        local okFormatter, createdFormatter = pcall(function()
+            local formatter = C_StringUtil.CreateNumericRuleFormatter()
+            formatter:SetBreakpoints({ { threshold = 0, format = "+ %d" } })
+            return formatter
+        end)
+        if okFormatter then
+            formatter = createdFormatter
+        end
+    end
+
+    local ok, container = pcall(function()
+        local container = CreateFrame("AuraContainer", nil, self.TextFrame, "CustomAuraContainerTemplate")
+        container:SetUnit("player")
+        container:SetFrameLevel(self.TextFrame:GetFrameLevel() + 1)
+
+        -- NOTE: "HELPFUL|HARMFUL" filters this aura out (verified in game), it must be "HELPFUL"
+        container:AddAuraSlot("SoulFragments", "HELPFUL", {
+            candidateFilters = { includeSpellIDs = { [DEVOURER_SOUL_FRAGMENTS_SPELL_ID] = true } },
+            initializeFrame = function(button)
+                button:SetSize(64, 16)
+                button:SetPoint("LEFT", self.TextValue, "RIGHT", 3, 0)
+
+                local text = button:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+                text:SetPoint("LEFT")
+                text:SetJustifyH("LEFT")
+                text:SetShadowColor(0, 0, 0, 0.8)
+                text:SetShadowOffset(1, -1)
+                text:SetTextColor(0, 1, 0)
+
+                local fontPath, fontHeight, fontFlags = self.TextValue:GetFont()
+                if fontPath then
+                    text:SetFont(fontPath, fontHeight, fontFlags)
+                end
+
+                button:SetApplicationCount(text, formatter and { formatter = formatter } or {})
+            end,
+        })
+
+        return container
+    end)
+
+    if ok and container then
+        self.SoulFragmentsDisplayContainer = container
+        self:ApplyTextVisibilitySettings()
+    end
+end
+
+function SecondaryResourceBarMixin:ApplyLayout(layoutName, force)
+    addonTable.PowerBarMixin.ApplyLayout(self, layoutName, force)
+
+    self:CreateSoulFragmentsDisplay()
+end
+
+function SecondaryResourceBarMixin:ApplyTextVisibilitySettings(layoutName, data)
+    addonTable.PowerBarMixin.ApplyTextVisibilitySettings(self, layoutName, data)
+
+    -- The visibility of an aura container cannot be changed once auras are secret (combat)
+    local container = self.SoulFragmentsDisplayContainer
+    if container and not InCombatLockdown() then
+        data = data or self:GetData(layoutName)
+        container:SetShown(data ~= nil and data.showText ~= false)
+    end
 end
 
 function SecondaryResourceBarMixin:GetTagValues(resource, max, current, precision)
